@@ -24,13 +24,13 @@ export class Player {
     }
     innitPetals() {
         // Set petals to just nulls.
-        for (let i = 0, n = 5; i < n; i++) {
+        for (let i = 0, n = 10; i < n; i++) {
             this.equippedPetals.push(
                 {
                     id: i+1,
                     petal: null,
                     offset: (360 / n) * i,
-                    rarity: 1
+                    rarity: 17
                 }
             )
         }

@@ -54,7 +54,7 @@ for (let i = 0; i < player.equippedPetals.length; i++) {
 }
 player.equippedPetals.forEach((petal) => {
     let randomPetal = Math.floor(Math.random() * availablePetals.length)
-    petal.petal = new availablePetals[1].constructor(
+    petal.petal = new availablePetals[randomPetal].constructor(
         player, {
             health: 10,
             damage: 10,
