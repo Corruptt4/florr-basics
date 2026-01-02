@@ -18,3 +18,27 @@
         return `rgb(${r}, ${g}, ${b})`;
     }
 }
+export function degreesToRads(x) {
+    return x * (Math.PI / 180)
+}
+export function boxCollision(mx, my, bx, by, bl) {
+    return (mx >= bx && mx <= bx + bl && my >= by && my <= by + bl)
+}
+export function boxBoxCollision(bx1, by1, bx2, by2, bl1, bl2) {
+    return (bx1 < bx2 + bl2 &&
+            bx1 + bl1 > bx2 &&
+            by1 < by2 + bl2 &&
+            by1 + bl1 > by2);
+}
+export function abbreviate(num) {
+
+    if (num < 1000) return num
+
+    let abbreviations = [
+        "k","m","b","t","qa","qi"
+    ]
+    let index = Math.floor(Math.log10(num)/3)-1
+    let shortNum = (num / Math.pow(10, (index+1)*3))
+
+    return shortNum.toFixed(2) + abbreviations[index]
+}

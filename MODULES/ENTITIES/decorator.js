@@ -14,8 +14,8 @@ export class Decoration {
     draw() {
         ctx.beginPath()
         ctx.fillStyle = this.color;
-        ctx.strokeStyle = darkenRGB(this.color, 20)
-        ctx.lineWidth = this.size/10
+        ctx.strokeStyle = darkenRGB(this.color, 15)
+        ctx.lineWidth = this.size/5
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
         ctx.fill()
         ctx.stroke()
