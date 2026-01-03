@@ -3,7 +3,10 @@ import { Player } from "./MODULES/ENTITIES/player.js";
 import { Camera } from "./MODULES/camera.js";
 import { availablePetals } from "./MODULES/STORAGE/petals.js";
 import { PetalBox, PetalBoxPlace } from "./MODULES/UI/petalBox.js";
-import { boxBoxCollision, boxCollision } from "./SCRIPTS/functions.js";
+import { abbreviate, boxBoxCollision, boxCollision, boxCollision2 } from "./SCRIPTS/functions.js";
+import { availableMobs } from "./MODULES/STORAGE/mobs.js";
+import { QuadTree } from "./MODULES/PHYSICS/quadTree.js";
+import { Inventory, InventoryPetalBox } from "./MODULES/UI/inventory.js";
 
 export const canvas = document.getElementById("canvas"),
                           ctx = canvas.getContext("2d");
@@ -16,12 +19,14 @@ let my = 0
 let mouseHolding = false
 let mouseDraggingBox = false;
 let mouseDraggingBoxClass = null;
+let quadTree = new QuadTree()
 
 export let mapSize = 5000,
                     entities = [],
                     mobs = [],
+                    allEntities = [],
                     decors = [],
-                    frictionMultiplier = 0.94
+                    frictionMultiplier = 0.96
 
 export var rarities = [
     ["Common", "rgb(126, 239, 109)"],
@@ -34,19 +39,49 @@ export var rarities = [
     ["Super", "rgb(43, 255, 163)"],
     ["Unique", "rgb(85,84,84)"],
     ["Zenith", "rgb(255, 255, 170)"],
-    ["Cataclysmic", "rgb(170, 35, 35)"],
-    ["Eternal", "rgb(255, 255, 255)"],
-    ["Amethystic", "rgb(216, 23, 153)"],
-    ["Terrestrial", "rgb(255, 125, 0)"],
-    ["Celestial", "rgb(150, 75, 88)"],
-    ["Extraterrestial", "rgb(235, 105, 0)"],
+    ["Hellish", "rgb(170, 35, 35)"],
     ["Stellar", "rgb(0, 0, 0)"]
+//     ["Eternal", "rgb(255, 255, 255)"],
+//     ["Apotheotic", "rgb(216, 23, 153)"],
+//     ["Radiant", "rgba(204, 0, 255, 1)"],
+//     ["Prismathic", "rgba(255, 187, 199, 1)"],
+//     ["Chaos", "rgba(100, 0, 207, 1)"],
+//     ["Godly", "rgb(255, 255, 100)"]
 ]
+
+
 var petalBoxes = []
-let player = new Player(mapSize/2, mapSize/2, 25, "rgb(255, 255, 0)")
+let player = new Player(mapSize/2,mapSize/2, 25, "rgb(255, 255, 0)")
 let camera = new Camera(player)
 player.innitPetals()
 let petalBoxHolders = []
+let mobRarities = []
+let inventory = new Inventory(20, canvas.height - 80, 90, 90)
+inventory.innitPetals(rarities)
+for (let i = 0; i < rarities.length; i++) {
+    mobRarities.push([i, 1/Math.pow(3, i)])
+}
+function spawnMob() {
+    let randomRarity = Math.random()
+    let chosenRarity = 0
+    mobRarities.forEach((r) => {
+        let [rarity, chance] = r
+        if (chance >= randomRarity) {
+            chosenRarity = rarity
+        }
+    })
+    let randomMob = Math.floor(Math.random()*availableMobs.length)
+    let mob = new availableMobs[randomMob].constructor(
+        Math.random()*mapSize,
+        Math.random()*mapSize,
+        chosenRarity+1,
+        availableMobs[randomMob].health,
+        availableMobs[randomMob].damage,
+        availableMobs[randomMob].size
+    )
+    mob.rarities = rarities
+    mobs.push(mob)
+}
 for (let i = 0; i < player.equippedPetals.length; i++) {
     let petalBoxHolder = new PetalBoxPlace(player)
     petalBoxHolder.id = i+1
@@ -54,13 +89,14 @@ for (let i = 0; i < player.equippedPetals.length; i++) {
 }
 player.equippedPetals.forEach((petal) => {
     let randomPetal = Math.floor(Math.random() * availablePetals.length)
-    petal.petal = new availablePetals[randomPetal].constructor(
+    let newPetal = new availablePetals[randomPetal].constructor(
         player, {
             health: 10,
             damage: 10,
             size: 10
         }
     )
+    petal.petal = newPetal
     petal.petal.rarity = petal.rarity
     petal.petal.innit()
     let petalBox = new PetalBox(player)
@@ -70,8 +106,8 @@ player.equippedPetals.forEach((petal) => {
     let neededBox = petalBoxHolders.find((box) => box.id == petal.id)
     neededBox.box = petalBox
     petalBox.boxOn = neededBox
-    if (!entities.includes(petal.petal)) {
-        entities.push(petal.petal)
+    if (!entities.includes(newPetal)) {
+        entities.push(newPetal)
     }
 })
 entities.push(player)
@@ -98,11 +134,30 @@ document.addEventListener("mousemove", (e) => {
             canvas.style.cursor = "pointer"
             box.box.hovered = true
         }
+        if (boxCollision2(mx, my, inventory.x, inventory.y, inventory.width, inventory.height) && !inventory.open) {
+            canvas.style.cursor = "pointer"
+        }
+        if (inventory.open && boxCollision(mx, my, inventory.exitBox.position.x, inventory.exitBox.position.y, inventory.exitBox.size)) {
+            canvas.style.cursor = "pointer"
+        }
+        if (inventory.open && boxCollision2(mx, my, inventory.petalFilter.position.x, inventory.petalFilter.position.y, inventory.petalFilter.width, inventory.petalFilter.height)) {
+            canvas.style.cursor = "pointer"
+        }
     })
 })
 document.addEventListener("mousedown", (e) => {
     if (e.button == 0) {
         mouseHolding = true
+        if (boxCollision2(mx, my, inventory.x, inventory.y, inventory.width, inventory.height) && !inventory.open) {
+            inventory.open = true
+        }
+        if (inventory.open && boxCollision(mx, my, inventory.exitBox.position.x, inventory.exitBox.position.y, inventory.exitBox.size)) {
+            inventory.open = false
+        }
+        
+        if (inventory.open && boxCollision2(mx, my, inventory.petalFilter.position.x, inventory.petalFilter.position.y, inventory.petalFilter.width, inventory.petalFilter.height)) {
+            inventory.petalFilter.setFilter()
+        }
     }
 })
 document.addEventListener("mouseup", (e) => {
@@ -110,21 +165,79 @@ document.addEventListener("mouseup", (e) => {
         mouseHolding = false
     }
 })
+setInterval(() => {
+    spawnMob()
+}, 200)
+setInterval(() => {
+
+   allEntities = mobs.concat(player).concat(entities)
+
+    quadTree.reset()
+    allEntities.forEach((e) => {
+        if (e.type == "petal" && e.dead) return;
+        quadTree.insert(e)
+    })
+    quadTree.update()
+    
+    quadTree.collisions.forEach((collision) => {
+        let collider1 = collision[0]
+        let collider2 = collision[1]
+
+        let angle = Math.atan2(collider2.y - collider1.y, collider2.x - collider1.x)
+        if (collider1.type !== "petal" && collider2.type !== "petal") {
+            collider2.velocity.x += (0.02 / collider2.size) * Math.cos(angle)
+            collider2.velocity.y += (0.02 / collider2.size) * Math.sin(angle)
+            
+            collider1.velocity.x -= (0.02 / collider1.size) * Math.cos(angle)
+            collider1.velocity.y -= (0.02 / collider1.size) * Math.sin(angle)
+        }
+        if ((collider1.type == "petal" && collider2.type == "mob") && (collider1.type == "petal" && collider2.type == "mob")) {
+            if (collider1.type == "petal" && !collider1.dead) {
+                collider1.stats.health -= collider2.damage
+            }
+            if (collider1.type == "mob") {
+                collider1.health -= collider2.stats.damage
+            }
+            if (collider2.type == "petal" && !collider2.dead) {
+                collider2.stats.health -= collider1.damage
+            }
+            if (collider2.type == "mob") {
+                collider2.health -= collider1.stats.damage
+            }
+        }
+    })
+}, 1000/15)
 
 setInterval(() => {
     camera.moveTo()
     entities.forEach((entity) => {
         entity.update()
+        if (entity.type == "petal") {
+            if (entity.stats.health <= 0)  {
+                entity.dead = true
+            }
+        }
+    })
+    mobs.forEach((mob) => {
+        mob.update(player)
+        if (mob.health <= 0) {
+            mobs.splice(mobs.indexOf(mob), 1)
+         }
     })
     if (mouseDraggingBox && mouseHolding) {
         mouseDraggingBoxClass.x += (mx - mouseDraggingBoxClass.x) * 0.3;
         mouseDraggingBoxClass.y += (my - mouseDraggingBoxClass.y) * 0.3;
     }
+    inventory.update()
    t += 0.025
-   let rVal = Math.abs(Math.sin(t)*255)
-   let gVal = Math.abs(Math.sin(t + 2*Math.PI/3)*255)
-   let bVal = Math.abs(Math.sin(t + 4*Math.PI/3)*255)
-    rarities[16][1] = `rgb(${rVal}, ${gVal}, ${bVal})`
+   let catarValue = Math.abs(Math.sin(t)*50+130)
+   let strVal = Math.abs(Math.sin(t)*255)
+   let stgVal = Math.abs(Math.sin(t + 2*Math.PI/3)*255)
+   let stbVal = Math.abs(Math.sin(t + 4*Math.PI/3)*255)
+   let stellarRarity = rarities.find((r) => r[0].toLocaleLowerCase() === "stellar")
+   let cataRarity = rarities.find((r) => r[0].toLocaleLowerCase() === "hellish")
+    stellarRarity[1] = `rgb(${strVal}, ${stgVal}, ${stbVal})`
+    cataRarity[1] = `rgb(${catarValue}, 0, 0)`
 }, 1000/60)
 
 function render() {
@@ -137,7 +250,10 @@ function render() {
     decors.forEach((decor) => {
         decor.draw()
     })
-
+    mobs.forEach((mob) => {
+        mob.draw()
+        mob.drawRarity()
+    })
     player.draw()
     ctx.restore()
     petalBoxHolders.forEach((pBox) => {
@@ -145,6 +261,9 @@ function render() {
         pBox.x = canvas.width / 2 + (pBox.boxSize+15)*petalBoxHolders.length/2-((pBox.boxSize+15)*pBox.id)
         pBox.draw()
     })
+    inventory.x = 20
+    inventory.y = canvas.height - inventory.height - 25
+    inventory.draw()
     
     if (mouseHolding) {
         for (let holder of petalBoxHolders) {

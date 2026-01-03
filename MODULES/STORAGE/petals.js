@@ -1,6 +1,7 @@
 import { Petal } from "../ENTITIES/petal.js";
 import { ctx, rarities } from "../../main.js";
 import { darkenRGB } from "../../SCRIPTS/functions.js";
+import { availableMobs } from "./mobs.js";
 
 /**
  * STATS:
@@ -23,31 +24,37 @@ class Basic extends Petal {
         this.stats.armor = 0
     }
 }
-class Bacteria extends Petal {
+class BeetleEgg extends Petal {
     constructor(host, stats) {
         super(host, stats)
-        this.name = "Bacteria"
-        this.altName = "Bacteria"
-        this.stats.size = 18
-        this.maxReload = 87
-        this.stats.health = 16
-        this.stats.damage = 18
-        this.stats.armor = 7
-        this.description = "Infectious... It has a shell, stronger with rarity."
-        this.color = "rgb(82, 255, 82)"
+        this.name = "Beetle Egg"
+        this.altName = "Egg"
+        this.size = 18
+        this.maxReload = 150
+        this.stats.health = 150
+        this.stats.damage = 0
+        this.sizeMulti = 1.3
+        this.lockedAngle = true
+        this.isSummoner = true
+        this.summoner = {
+            type: 1,
+            timer: 60,
+            scalesWithRarity: true,
+            summonRarity: this.rarity-1
+        }
+        this.description = "Now comes with a Beetle summon!"
+        this.color = "rgb(254,240,185)"
     }
     
-    drawOnBox(box) {
-        let size = 23
+    drawOnBox(box, size) {
         let boxSize = box.boxSize
         ctx.save()
         ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
-        ctx.rotate(Math.PI/4)
         ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.roundRect(-size/2, - size, size, size*2, size/1.5);
+        ctx.ellipse(0, 0, (size*this.sizeMulti)/1.4, (size*this.sizeMulti), 0, 0, Math.PI * 2)
         ctx.fill()
         ctx.stroke()
         ctx.closePath();
@@ -69,14 +76,14 @@ class Bacteria extends Petal {
             ctx.globalAlpha = 0.5
             let rarityName = rarities[this.rarity-1][0]
             ctx.fillStyle = rarities[this.rarity-1][1]
-            ctx.arc(this.x, this.y, this.stats.size*1.6, 0, Math.PI * 2)
+            ctx.arc(this.x, this.y, this.size*1.6, 0, Math.PI * 2)
             ctx.fill()
             ctx.globalAlpha = 1
             ctx.lineWidth = 2
             ctx.font = "20px Arial"
             ctx.textAlign = "center"
-            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.stats.size*1.5)
-            ctx.fillText(rarityName, this.x, this.y-20/3 - this.stats.size*1.5)
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
             ctx.closePath()
         }
         ctx.save()
@@ -86,7 +93,88 @@ class Bacteria extends Petal {
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.roundRect(-this.stats.size/2, -this.stats.size, this.stats.size, this.stats.size*2, this.stats.size/1.5)
+        ctx.ellipse(0, 0, this.size/1.4, this.size, 0, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+        
+        if (this.showRarity) {
+            ctx.fillStyle = "white"
+            ctx.strokeStyle = "black"
+            ctx.lineWidth = 3
+            ctx.font = "10px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(this.id, this.x, this.y+10/3)
+            ctx.fillText(this.id, this.x, this.y+10/3)
+        }
+        ctx.closePath();
+    }
+}
+class Bacteria extends Petal {
+    constructor(host, stats) {
+        super(host, stats)
+        this.name = "Bacteria"
+        this.altName = "Bacteria"
+        this.size = 18
+        this.maxReload = 87
+        this.stats.health = 16
+        this.stats.damage = 18
+        this.stats.armor = 7
+        this.sizeMulti = 1.2
+        this.description = "Infectious... It has a shell, stronger with rarity."
+        this.color = "rgb(82, 255, 82)"
+    }
+    
+    drawOnBox(box, size) {
+        let boxSize = box.boxSize
+        ctx.save()
+        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.rotate(Math.PI/4)
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 4
+        ctx.roundRect(-(size*this.sizeMulti)/2, - (size*this.sizeMulti), (size*this.sizeMulti), (size*this.sizeMulti)*2, (size*this.sizeMulti)/1.5);
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath();
+        ctx.restore()
+        ctx.beginPath();
+        ctx.lineWidth = 4
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.font = "18px Arial"
+        ctx.lineJoin = "round"
+        ctx.textAlign = "center"
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.closePath()
+    }
+    draw() {
+        if (this.showRarity) {
+            ctx.beginPath()
+            ctx.globalAlpha = 0.5
+            let rarityName = rarities[this.rarity-1][0]
+            ctx.fillStyle = rarities[this.rarity-1][1]
+            ctx.arc(this.x, this.y, this.size*1.6, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.globalAlpha = 1
+            ctx.lineWidth = 2
+            ctx.font = "20px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.closePath()
+        }
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 4
+        ctx.roundRect(-this.size/2, -this.size, this.size, this.size*2, this.size/1.5)
         ctx.fill()
         ctx.stroke()
         ctx.closePath()
@@ -109,28 +197,29 @@ class Heavy extends Petal {
         super(host, stats)
         this.name = "Heavy"
         this.altName = "Heavy"
-        this.stats.size = 18
+        this.size = 18
         this.maxReload = 360
         this.stats.health = 45
         this.stats.damage = 12
+        this.sizeMulti = 1.2
         this.stats.armor = 0
         this.description = "This petal is pretty heavy, don't get in its way."
         this.color = "rgb(55, 55, 55)"
     }
-    drawOnBox(box) {
+    drawOnBox(box, size) {
         let boxSize = box.boxSize
         ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, 20 * (boxSize/85), 0, Math.PI * 2);
+        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, (size*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2);
         ctx.fill()
         ctx.stroke()
         ctx.closePath();
 
         ctx.beginPath();
         ctx.fillStyle = "rgba(255, 255, 255, 0.3)"
-        ctx.arc(box.x + boxSize/2 - 5, box.y + boxSize/2 - 10 - 5, 10 * (boxSize/85), 0, Math.PI * 2)
+        ctx.arc(box.x + boxSize/2 - 5, box.y + boxSize/2 - 10 - 5, ((size/2)*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2)
         ctx.fill()
         ctx.closePath();
         
@@ -149,14 +238,14 @@ class Heavy extends Petal {
             ctx.globalAlpha = 0.5
             let rarityName = rarities[this.rarity-1][0]
             ctx.fillStyle = rarities[this.rarity-1][1]
-            ctx.arc(this.x, this.y, this.stats.size*1.6, 0, Math.PI * 2)
+            ctx.arc(this.x, this.y, this.size*1.6, 0, Math.PI * 2)
             ctx.fill()
             ctx.globalAlpha = 1
             ctx.lineWidth = 2
             ctx.font = "20px Arial"
             ctx.textAlign = "center"
-            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.stats.size*1.5)
-            ctx.fillText(rarityName, this.x, this.y-20/3 - this.stats.size*1.5)
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
             ctx.closePath()
         }
         ctx.save()
@@ -166,13 +255,13 @@ class Heavy extends Petal {
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.arc(0, 0, this.stats.size, 0, Math.PI * 2);
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
         ctx.fill()
         ctx.stroke()
         ctx.closePath()
         ctx.beginPath()
         ctx.fillStyle = `rgba(255, 255, 255, 0.3)`
-        ctx.arc(-this.stats.size/4, -this.stats.size/4, this.stats.size/2, 0, Math.PI * 2);
+        ctx.arc(-this.size/4, -this.size/4, this.size/2, 0, Math.PI * 2);
         ctx.fill()
         ctx.closePath()
         ctx.restore()
@@ -203,5 +292,10 @@ export var availablePetals = [
         health: 15,
         damage: 17,
         armor: 7
+    }),
+    new BeetleEgg(null, {
+        health: 100,
+        damage: 1,
+        armor: 0
     })
 ]

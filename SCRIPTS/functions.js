@@ -24,6 +24,9 @@ export function degreesToRads(x) {
 export function boxCollision(mx, my, bx, by, bl) {
     return (mx >= bx && mx <= bx + bl && my >= by && my <= by + bl)
 }
+export function boxCollision2(mx, my, bx, by, bw, bh) {
+    return (mx >= bx && mx <= bx + bw && my >= by && my <= by + bh)
+}
 export function boxBoxCollision(bx1, by1, bx2, by2, bl1, bl2) {
     return (bx1 < bx2 + bl2 &&
             bx1 + bl1 > bx2 &&
@@ -32,7 +35,7 @@ export function boxBoxCollision(bx1, by1, bx2, by2, bl1, bl2) {
 }
 export function abbreviate(num) {
 
-    if (num < 1000) return num
+    if (num < 1000) return num.toFixed(0)
 
     let abbreviations = [
         "k","m","b","t","qa","qi"

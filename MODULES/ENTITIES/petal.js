@@ -5,8 +5,7 @@ export class Petal {
     constructor(host, stats = {
         health: 10,
         damage: 10,
-        armor: 0,
-        size: 8
+        armor: 0
     }) {
         this.x = 0;
         this.y = 0;
@@ -17,6 +16,8 @@ export class Petal {
         this.rarity = 1;
         this.dead = true;
         this.reload = 0;
+        this.maxHealth = 0;
+        this.size = 10;
         this.maxReload = 60;
         this.description = "A basic petal, not too strong or too weak."
         this.orbitoffset = 0
@@ -25,7 +26,17 @@ export class Petal {
         this.angle = 0
         this.spin = -0.05 * Math.random() * (0.05 + 0.05)
         this.id = null;
+        this.summons = []
+        this.isSummoner = this.stats.summons
+        this.lockedAngle = false
         this.showRarity = false;
+        this.type = "petal"
+        this.summoner = {
+            type: 1,
+            timer: 1,
+            scalesWithRarity: false,
+            summonRarity: 1,
+        }
         /* 
         This is default stats.
         Stats:
@@ -39,17 +50,19 @@ export class Petal {
             y: 0
         }
     }
+    summon() {
+        
+    }
     reloadPetal() {
-        if (this.dead) {
-            if (this.reload < this.maxReload) {
-                this.reload++
-            }
-            if (this.reload >= this.maxReload) {
-                this.x = this.host.x
-                this.y = this.host.y
-                this.dead = false
-                this.reload = 0
-            }
+        if (this.reload < this.maxReload && this.dead) {
+            this.reload++
+        }
+        if (this.reload >= this.maxReload && this.dead) {
+            this.reload = 0
+            this.x = this.host.x
+            this.y = this.host.y
+            this.stats.health = this.maxHealth
+            this.dead = false
         }
     }
     dist(x2, x1, y2, y1) {
@@ -59,21 +72,30 @@ export class Petal {
         return Math.sqrt(dx*dx+dy*dy)
     }
     innit() {
-        let exponential = 1.17
-        let mainExponent = 2.75
+        if (this.isSummoner) {
+            this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2 : this.rarity-2
+            this.summoner.timer *= Math.pow(1.4, this.summoner.summonRarity)
+        }
+        let exponential = 1.3
+        let mainExponent = 2.3
         this.x = this.host.x
         this.y = this.host.y
         this.stats.health *= Math.pow(mainExponent, this.rarity-1) * Math.pow(exponential, this.rarity-1)
-        this.stats.damage *= Math.pow(mainExponent, this.rarity-1) * Math.pow(exponential, this.rarity-1)
+        this.maxHealth = this.stats.health
+        this.stats.damage *= Math.pow(mainExponent+0.4, this.rarity-1) * Math.pow(exponential, this.rarity-1)
         this.stats.armor *= Math.pow(mainExponent, this.rarity-1) * Math.pow(exponential, this.rarity-1)
-
         
         this.stats.health = Math.round(this.stats.health)
         this.stats.damage = Math.round(this.stats.damage)
         this.stats.armor = Math.round(this.stats.armor)
     }
     update() {
-        this.angle += this.spin
+        if (this.isSummoner) this.summon();
+        if (this.lockedAngle) {
+            this.angle = 0
+        } else {
+            this.angle += this.spin
+        }
         this.targetX = this.host.x + this.host.petalOrbitDistance 
         * Math.cos(this.host.globalAngle + 
         degreesToRads((360 / this.host.equippedPetals.length) * (this.id)))
@@ -98,14 +120,15 @@ export class Petal {
             ctx.globalAlpha = 0.5
             let rarityName = rarities[this.rarity-1][0]
             ctx.fillStyle = rarities[this.rarity-1][1]
-            ctx.arc(this.x, this.y, this.stats.size*2, 0, Math.PI * 2)
+            ctx.strokeStyle = "black"
+            ctx.arc(this.x, this.y, this.size*2, 0, Math.PI * 2)
             ctx.fill()
             ctx.globalAlpha = 1
             ctx.lineWidth = 2
             ctx.font = "20px Arial"
             ctx.textAlign = "center"
-            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.stats.size*1.5)
-            ctx.fillText(rarityName, this.x, this.y-20/3 - this.stats.size*1.5)
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
             ctx.closePath()
         }
         // This is a placeholder petal drawing.
@@ -113,7 +136,7 @@ export class Petal {
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.arc(this.x, this.y, this.stats.size, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill()
         ctx.stroke()
         
@@ -128,13 +151,13 @@ export class Petal {
         }
         ctx.closePath();
     }
-    drawOnBox(box) {
+    drawOnBox(box, size) {
         let boxSize = box.boxSize
         ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, 15 * (boxSize/85), 0, Math.PI * 2);
+        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, size * (boxSize/85), 0, Math.PI * 2);
         ctx.fill()
         ctx.stroke()
         ctx.closePath();

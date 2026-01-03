@@ -1,4 +1,4 @@
-import { ctx, frictionMultiplier, rarities } from "../../main.js";
+import { ctx, frictionMultiplier, mapSize, rarities } from "../../main.js";
 import { darkenRGB } from "../../SCRIPTS/functions.js";
 
 export class Player {
@@ -17,6 +17,7 @@ export class Player {
         this.keyDown = [];
         this.equippedPetals = []
         this.speed = 0.3
+        this.type = "player"
         this.velocity = {
             x: 0,
             y: 0
@@ -24,13 +25,13 @@ export class Player {
     }
     innitPetals() {
         // Set petals to just nulls.
-        for (let i = 0, n = 10; i < n; i++) {
+        for (let i = 0, n = 5; i < n; i++) {
             this.equippedPetals.push(
                 {
                     id: i+1,
                     petal: null,
                     offset: (360 / n) * i,
-                    rarity: 17
+                    rarity: rarities.length-1
                 }
             )
         }
@@ -58,7 +59,18 @@ export class Player {
         ctx.closePath();
     }
     update() {
-
+        if (this.x - this.size < 0) {
+            this.velocity.x += 1
+        }
+        if (this.x + this.size > mapSize) {
+            this.velocity.x -= 1
+        }
+        if (this.y - this.size < 0) {
+            this.velocity.y += 1
+        }
+        if (this.y + this.size > mapSize) {
+            this.velocity.y -= 1
+        }
         this.equippedPetals.forEach((p) => {
             p.petal.reloadPetal()
         })

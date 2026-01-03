@@ -1,5 +1,6 @@
 import { ctx, rarities } from "../../main.js";
 import { abbreviate, darkenRGB } from "../../SCRIPTS/functions.js";
+import { availableMobs } from "../STORAGE/mobs.js";
 
 export class PetalBoxPlace {
     constructor(player) {
@@ -28,7 +29,7 @@ export class PetalBoxPlace {
                 this.box.y += (this.y - this.box.y) * 0.3;
             }
             this.box.draw()
-            this.box.petal[0].drawOnBox(this.box)
+            this.box.petal[0].drawOnBox(this.box, 17)
         }
     }
 }
@@ -71,6 +72,7 @@ export class PetalBox {
             ctx.globalAlpha = 0.7
             ctx.fillStyle = "rgba(0, 0, 0, 0.8)"
             ctx.strokeStyle = "rgba(0, 0, 0, 0.8"
+            ctx.lineJoin = "round"
             ctx.roundRect(x, y, tabWidth, tabHeight, tabWidth/15)
             ctx.fill()
             ctx.stroke()
@@ -91,8 +93,8 @@ export class PetalBox {
             ctx.fillStyle = "white"
             ctx.strokeStyle = "black"
             ctx.textAlign = "right"
-            ctx.strokeText(this.petal[0].maxReload/60 + "s", x+tabWidth/1.05, y+35)
-            ctx.fillText(this.petal[0].maxReload/60 + "s", x+tabWidth/1.05, y+35)
+            ctx.strokeText((this.petal[0].maxReload/60).toFixed(2) + (this.petal[0].isSummoner ? " + " + (this.petal[0].summoner.timer/60).toFixed(2) : "") + "s",  x+tabWidth/1.05, y+35)
+            ctx.fillText((this.petal[0].maxReload/60).toFixed(2) + (this.petal[0].isSummoner ? " + " + (this.petal[0].summoner.timer/60).toFixed(2) : "") + "s",  x+tabWidth/1.05, y+35)
             ctx.font = "20px Arial"
             ctx.fillStyle = "lime"
             ctx.strokeStyle = "black"
@@ -101,8 +103,8 @@ export class PetalBox {
             ctx.fillText("Health: ", x+20, y+tabHeight/1.25)
             let healthExtraSpacing = ctx.measureText("Health: ")
             ctx.fillStyle = "white"
-            ctx.strokeText(abbreviate(this.petal[0].stats.health), x+20+healthExtraSpacing.width , y+tabHeight/1.25)
-            ctx.fillText(abbreviate(this.petal[0].stats.health), x+20+healthExtraSpacing.width, y+tabHeight/1.25)
+            ctx.strokeText(abbreviate(this.petal[0].maxHealth), x+20+healthExtraSpacing.width , y+tabHeight/1.25)
+            ctx.fillText(abbreviate(this.petal[0].maxHealth), x+20+healthExtraSpacing.width, y+tabHeight/1.25)
             ctx.font = "20px Arial"
             ctx.fillStyle = "red"
             ctx.strokeStyle = "black"
@@ -121,6 +123,52 @@ export class PetalBox {
             ctx.lineWidth = 5
             ctx.strokeText(this.petal[0].description, x+20, y+tabHeight/2, tabWidth-20)
             ctx.fillText(this.petal[0].description, x+20, y+tabHeight/2, tabWidth-20)
+
+            
+            if (this.petal[0].isSummoner) {   
+                ctx.font = "15px Arial"
+                ctx.fillStyle = "cyan"
+                ctx.strokeStyle = "black"
+                ctx.strokeText("SUMMONS: ", x+20, y+tabHeight/1.45)
+                ctx.fillText("SUMMONS: ", x+20, y+tabHeight/1.45)
+                let summonsExtraSpacing = ctx.measureText("SUMMONS: ")
+                ctx.fillStyle = rarities[this.petal[0].summoner.summonRarity][1]
+                ctx.strokeStyle = darkenRGB(rarities[this.petal[0].summoner.summonRarity][1])
+                ctx.strokeText(rarities[this.petal[0].summoner.summonRarity][0], x+20+summonsExtraSpacing.width , y+tabHeight/1.45)
+                ctx.fillText(rarities[this.petal[0].summoner.summonRarity][0], x+20+summonsExtraSpacing.width, y+tabHeight/1.45)
+                let summonSP1 = ctx.measureText(rarities[this.petal[0].summoner.summonRarity][0])
+
+                ctx.fillStyle = "white"
+                ctx.strokeStyle = "black"
+                ctx.strokeText(availableMobs[this.petal[0].summoner.type].name, x+25+summonsExtraSpacing.width + summonSP1.width , y+tabHeight/1.45)
+                ctx.fillText(availableMobs[this.petal[0].summoner.type].name, x+25+summonsExtraSpacing.width + summonSP1.width, y+tabHeight/1.45)
+                
+                let summonSP = ctx.measureText(rarities[this.petal[0].summoner.summonRarity][0] + " " + availableMobs[this.petal[0].summoner.type].name)
+                ctx.fillStyle = "lime"
+                ctx.strokeText(
+                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).hp)}`, 
+                    x+25+summonsExtraSpacing.width + summonSP.width, 
+                    y+tabHeight/1.45
+                )
+                ctx.fillText(
+                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).hp)}`, 
+                    x+25+summonsExtraSpacing.width + summonSP.width,
+                    y+tabHeight/1.45
+                )
+                
+                let summonSP2 = ctx.measureText(abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).hp))
+                ctx.fillStyle = "lime"
+                ctx.strokeText(
+                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).dmg)})`, 
+                    x+65+summonsExtraSpacing.width + summonSP2.width + summonSP.width, 
+                    y+tabHeight/1.45
+                )
+                ctx.fillText(
+                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).dmg)})`, 
+                    x+65+summonsExtraSpacing.width + summonSP2.width + summonSP.width,
+                    y+tabHeight/1.45
+                )
+            }
             
             if (this.petal[0].stats.armor > 0) {
                 ctx.font = "20px Arial"
