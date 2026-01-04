@@ -21,12 +21,12 @@ let mouseDraggingBox = false;
 let mouseDraggingBoxClass = null;
 let quadTree = new QuadTree()
 
-export let mapSize = 5000,
+export let mapSize = 1500,
                     entities = [],
                     mobs = [],
                     allEntities = [],
                     decors = [],
-                    frictionMultiplier = 0.96
+                    frictionMultiplier = 0.94
 
 export var rarities = [
     ["Common", "rgb(126, 239, 109)"],
@@ -59,7 +59,7 @@ let mobRarities = []
 let inventory = new Inventory(20, canvas.height - 80, 90, 90)
 inventory.innitPetals(rarities)
 for (let i = 0; i < rarities.length; i++) {
-    mobRarities.push([i, 1/Math.pow(3, i)])
+    mobRarities.push([i, 1/Math.pow(1.6, i)])
 }
 function spawnMob() {
     let randomRarity = Math.random()
@@ -70,7 +70,7 @@ function spawnMob() {
             chosenRarity = rarity
         }
     })
-    let randomMob = Math.floor(Math.random()*availableMobs.length)
+    let randomMob = Math.floor(Math.random()*1)
     let mob = new availableMobs[randomMob].constructor(
         Math.random()*mapSize,
         Math.random()*mapSize,
@@ -79,9 +79,23 @@ function spawnMob() {
         availableMobs[randomMob].damage,
         availableMobs[randomMob].size
     )
+    mob.innitMob()
     mob.rarities = rarities
     mobs.push(mob)
 }
+function spawnTestMob() {
+     let mob = new availableMobs[0].constructor(
+        mapSize/2 + 250,
+        mapSize/2 + 250,
+        9,
+        availableMobs[0].health,
+        availableMobs[0].damage,
+        availableMobs[0].size
+    )
+    mob.rarities = rarities
+    mobs.push(mob)
+}
+spawnTestMob()
 for (let i = 0; i < player.equippedPetals.length; i++) {
     let petalBoxHolder = new PetalBoxPlace(player)
     petalBoxHolder.id = i+1
@@ -89,7 +103,7 @@ for (let i = 0; i < player.equippedPetals.length; i++) {
 }
 player.equippedPetals.forEach((petal) => {
     let randomPetal = Math.floor(Math.random() * availablePetals.length)
-    let newPetal = new availablePetals[randomPetal].constructor(
+    let newPetal = new availablePetals[4].constructor(
         player, {
             health: 10,
             damage: 10,
@@ -166,10 +180,11 @@ document.addEventListener("mouseup", (e) => {
     }
 })
 setInterval(() => {
-    spawnMob()
+    if (mobs.length < 80) {
+        //spawnMob()
+    }
 }, 200)
 setInterval(() => {
-
    allEntities = mobs.concat(player).concat(entities)
 
     quadTree.reset()
@@ -179,32 +194,50 @@ setInterval(() => {
     })
     quadTree.update()
     
-    quadTree.collisions.forEach((collision) => {
-        let collider1 = collision[0]
-        let collider2 = collision[1]
+    quadTree.entityBoundaries.forEach((b) => {
+        if (b.collisions.length == 0) return;
 
-        let angle = Math.atan2(collider2.y - collider1.y, collider2.x - collider1.x)
-        if (collider1.type !== "petal" && collider2.type !== "petal") {
-            collider2.velocity.x += (0.02 / collider2.size) * Math.cos(angle)
-            collider2.velocity.y += (0.02 / collider2.size) * Math.sin(angle)
-            
-            collider1.velocity.x -= (0.02 / collider1.size) * Math.cos(angle)
-            collider1.velocity.y -= (0.02 / collider1.size) * Math.sin(angle)
-        }
-        if ((collider1.type == "petal" && collider2.type == "mob") && (collider1.type == "petal" && collider2.type == "mob")) {
-            if (collider1.type == "petal" && !collider1.dead) {
-                collider1.stats.health -= collider2.damage
+        b.collisions.forEach((collision) => {
+            let collider1 = collision[0]
+            let collider2 = collision[1]
+
+            let angle = Math.atan2(collider2.y - collider1.y, collider2.x - collider1.x)
+            if (collider1.type !== "petal" && collider2.type !== "petal") {
+                if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
+                if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
+
+                collider2.velocity.x += (6 / collider2.size) * Math.cos(angle)
+                collider2.velocity.y += (6 / collider2.size) * Math.sin(angle)
+                
+                collider1.velocity.x -= (6 / collider1.size) * Math.cos(angle)
+                collider1.velocity.y -= (6 / collider1.size) * Math.sin(angle)
+
+                if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
+                    collider1.health -= collider2.damage
+                    collider2.health -= collider1.damage
+                }
             }
-            if (collider1.type == "mob") {
-                collider1.health -= collider2.stats.damage
+            if ((collider1.type == "petal" && collider2.type == "mob") && (collider1.type == "petal" && collider2.type == "mob")) {
+                if (collider1.type == "petal" && !collider1.dead) {
+                    collider1.stats.health -= Math.max(0, collider2.damage-collider1.stats.armor)
+                }
+                if (collider1.type == "mob") {
+                    collider1.health -= collider2.stats.damage
+                    if (collider2.poison.poison > 0) {
+                        collider1.poisonTake(collider2.poison.poison, collider2.poison.tick)
+                    }
+                }
+                if (collider2.type == "petal" && !collider2.dead) {
+                    collider2.stats.health -= Math.max(0, collider2.damage-collider1.stats.armor)
+                }
+                if (collider2.type == "mob") {
+                    collider2.health -= collider1.stats.damage
+                    if (collider1.poison.poison > 0) {
+                        collider2.poisonTake(collider1.poison.poison, collider1.poison.tick)
+                    }
+                }
             }
-            if (collider2.type == "petal" && !collider2.dead) {
-                collider2.stats.health -= collider1.damage
-            }
-            if (collider2.type == "mob") {
-                collider2.health -= collider1.stats.damage
-            }
-        }
+        })
     })
 }, 1000/15)
 
@@ -220,8 +253,21 @@ setInterval(() => {
     })
     mobs.forEach((mob) => {
         mob.update(player)
+        if (mob.pet) {
+            mob.givenTargets = mobs.filter((givenMob) => !givenMob.pet)
+        }
         if (mob.health <= 0) {
+            for (let otherMob in mobs) {
+                if (otherMob !== mob) {
+                    if (otherMob.target == mob) {
+                        otherMob.target = null
+                    } 
+                }
+            }
             mobs.splice(mobs.indexOf(mob), 1)
+            if (mob.pet) {
+                mob.hostPetal.summons.splice(mob.hostPetal.summons.indexOf(mob), 1)
+            }
          }
     })
     if (mouseDraggingBox && mouseHolding) {
@@ -253,6 +299,7 @@ function render() {
     mobs.forEach((mob) => {
         mob.draw()
         mob.drawRarity()
+        mob.drawDetectionSize()
     })
     player.draw()
     ctx.restore()
@@ -288,6 +335,18 @@ function render() {
                 if (!sourceHolder) break;
                 targetHolder.box.petal[0].dead = true
                 mouseDraggingBoxClass.petal[0].dead = true
+                if (targetHolder.box.petal[0].summons.length > 0) {
+                    targetHolder.box.petal[0].summons.forEach((summon) => {
+                        summon.health = 0
+                    })
+                    targetHolder.box.petal[0].summons = []
+                }
+                if (mouseDraggingBoxClass.petal[0].summons.length > 0) {
+                    mouseDraggingBoxClass.petal[0].summons.forEach((summon) => {
+                        summon.health = 0
+                    })
+                    mouseDraggingBoxClass.petal[0].summons = []
+                }
 
                 const targetBox = targetHolder.box;
                 const oldHolder = mouseDraggingBoxClass.boxOn

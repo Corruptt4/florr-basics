@@ -1,4 +1,4 @@
-import { ctx, frictionMultiplier, mapSize } from "../../main.js";
+import { ctx, entities, frictionMultiplier, mapSize, mobs } from "../../main.js";
 import { darkenRGB } from "../../SCRIPTS/functions.js";
 
 export class Mob {
@@ -9,10 +9,11 @@ export class Mob {
         this.rarities = null;
         this.rarityName = null;
         this.rarityColor = null;
+        this.originalSize = size
         this.size = size * Math.pow(1.30, rarity-1)
         this.startingHP = health
         this.startingDMG = damage
-        this.speed = 0.3
+        this.speed = 0.2
         this.health = this.startingHP * Math.pow(3.26, rarity-1) * Math.pow(1.25, rarity-1);
         this.maxHealth = this.startingHP * Math.pow(3.26, rarity-1) * Math.pow(1.25, rarity-1);
         this.damage = this.startingDMG * Math.pow(2.55, rarity-1) * Math.pow(1.24, rarity-1);
@@ -21,12 +22,21 @@ export class Mob {
         this.name = "Baby Ant" // PLACEHOLDER
         this.t = 0;
         this.chasesPlayers = false;
+        this.poisonTick = 0;
+        this.poisonToTake = 0;
+        this.poisonTicks = 0;
         this.moving = true
         this.target = null
         this.turnSpeed = 0.08;
+        this.pet = false
+        this.hostPetal = null;
+        this.givenTargets = []
+        this.oldAngle = 0;
+        this.oldHealth = this.maxHealth
         this.detectionDistance = this.size*2*5
         this.maxTimer = 180
         this.timer = this.maxTimer
+        this.detecDistPet = 0;
         this.velocity = {
             x: 0,
             y: 0
@@ -34,7 +44,17 @@ export class Mob {
         this.aggressive = false
         this.color = "rgb(85, 85, 85)"
     }
+    innitMob() {
+        this.angle = Math.PI * 2 * Math.random() - Math.PI
+        if (this.pet) {
+            this.size = this.originalSize * Math.pow(1.12, this.rarity-1)
+        }
+    }
     update(player) {
+        if (this.poisonTick > 0) {
+            this.poisonTick--
+            this.health -= this.poisonToTake/this.poisonTicks
+        }
         if (this.x - this.size < 0) {
             this.velocity.x += 1
         }
@@ -48,29 +68,73 @@ export class Mob {
             this.velocity.y -= 1
         }
 
-        let dx = player.x-this.x
-        let dy = player.y-this.y
-        let dist = dx*dx+dy*dy
-        let r = this.detectionDistance*this.detectionDistance
-        if (dist <= r) {
-            this.target = player
-        }
-        if (dist > r) {
-            this.target = null;
-        }
-
-        this.t += 0.08 * (1+this.aggressive)
-        if (this.chasesPlayers && this.target) {
-            this.aggressive = true
+        if (!this.pet) {
             let dx = player.x-this.x
             let dy = player.y-this.y
-            let angle = Math.atan2(dy, dx) % (Math.PI * 2)
-            this.angle += (angle - this.angle) * this.turnSpeed
-            this.angle %= Math.PI * 2
+            let dist = dx*dx+dy*dy
+            let r = this.detectionDistance*this.detectionDistance
+            if (dist <= r) {
+                this.target = player
+            }
+            if (dist > r) {
+                this.target = null;
+            }
+            
+            if (this.chasesPlayers && this.target && !this.pet) {
+                this.aggressive = true
+                let dx = this.x - player.x
+                let dy = this.y - player.y
+                let angle = Math.atan2(dy, dx)
+                let diff = ((angle-this.angle) % (Math.PI*2)) - Math.PI
+                this.angle += (diff) * this.turnSpeed
 
-            this.velocity.x += this.speed * Math.cos(this.angle)
-            this.velocity.y += this.speed * Math.sin(this.angle)
+                this.velocity.x -= this.speed * Math.cos(this.angle)
+                this.velocity.y -= this.speed * Math.sin(this.angle)
+            }
         }
+        if (this.pet) {
+            this.chasesPlayers = false
+            let ddx = this.x-player.x
+            let ddy = this.y-player.y
+            let dist = ddx*ddx+ddy*ddy
+            let r = 400**2
+            let detection = (this.detectionDistance*this.detectionDistance)*2
+            this.detecDistPet = detection
+            this.givenTargets.forEach((t) => {
+                let ex = t.x - this.x
+                let ey = t.y - this.y
+                let edist = ex*ex+ey*ey
+                if (edist <= detection && !this.target) {
+                    this.target = t
+                    this.aggressive = true
+                }
+                if (edist > detection) {
+                    this.target = null
+                    this.aggressive = false
+                }
+            })
+            if (this.target) {
+                let tx = this.x - this.target.x
+                let ty = this.y - this.target.y
+                let angle = Math.atan2(ty, tx)
+                let diff = ((angle-this.angle) % (Math.PI*2)) - Math.PI
+                this.angle += (diff) * this.turnSpeed
+                this.velocity.x += this.speed * Math.cos(this.angle)
+                this.velocity.y += this.speed * Math.sin(this.angle)
+                if (this.target.health <= 0) {
+                    this.target = null
+                }
+            }
+            if (dist > r) {
+                let angle = Math.atan2(ddy, ddx)
+                let diff = ((angle-this.angle) % (Math.PI*2)) - Math.PI
+                this.angle += (diff) * this.turnSpeed
+                this.velocity.x += this.speed * Math.cos(this.angle)
+                this.velocity.y += this.speed * Math.sin(this.angle)
+            }
+        }
+        this.t += 0.1 * (1+this.aggressive)
+        
         if (!this.chasesPlayers || !this.target) {
             this.timer--
             if (this.timer <= 160) {
@@ -78,7 +142,7 @@ export class Mob {
             }
             if (this.timer <= 0) {
                 this.timer = this.maxTimer
-                let randomAngle = Math.PI * 2 * Math.random()
+                let randomAngle = Math.PI * 2 * Math.random() - Math.PI
                 this.angle = randomAngle
                 this.moving = true
             }
@@ -87,7 +151,6 @@ export class Mob {
                 this.velocity.y += this.speed * Math.sin(this.angle)
             }
         }
-
         this.x += this.velocity.x
         this.y += this.velocity.y
         this.velocity.x *= frictionMultiplier
@@ -149,10 +212,23 @@ export class Mob {
         ctx.closePath()
         ctx.restore()
     }
+    drawDetectionSize() {
+        ctx.beginPath()
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"
+        ctx.arc(this.x, this.y, Math.sqrt(this.detecDistPet), 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.closePath()
+    }
+    poisonTake(poison, time) {
+        this.poisonTick = time
+        this.poisonTicks = time
+        this.poisonToTake = poison
+    }
     drawRarity() {
         if (this.health < 0) {
             this.health = 0
         }
+        this.oldHealth +=(this.health - this.oldHealth) * 0.2
         this.rarityName = this.rarities[this.rarity-1][0];
         this.rarityColor = this.rarities[this.rarity-1][1];
         
@@ -179,6 +255,13 @@ export class Mob {
         ctx.textAlign = "left"
         ctx.strokeText(this.name, -healthWidth/2, this.size+35)
         ctx.fillText(this.name, -healthWidth/2, this.size+35)
+        ctx.closePath()
+
+
+        ctx.beginPath()
+        ctx.fillStyle = "red"
+        ctx.roundRect(-healthWidth/2, this.size + 40, healthWidth*(this.oldHealth/this.maxHealth), 5, 5)
+        ctx.fill()
         ctx.closePath()
 
         ctx.beginPath()

@@ -45,6 +45,8 @@ export class PetalBox {
         this.boxOn = null;
         this.hovered = false;
         this.followMouse = false
+        this.targetPercentage = 0;
+        this.percentage = 0;
         this.petal = []
     }
     /**
@@ -53,12 +55,30 @@ export class PetalBox {
      * [petal, id, rarity]
      */
     draw() {
+        this.targetPercentage = this.petal[0].stats.health/this.petal[0].maxHealth
+        if (this.targetPercentage < 0) {
+            this.targetPercentage = 0
+        }
+        this.percentage += (this.targetPercentage-this.percentage)*0.1
+        
         ctx.beginPath()
-        ctx.fillStyle = rarities[this.petal[0].rarity-1][1]
-        ctx.strokeStyle = darkenRGB(rarities[this.petal[0].rarity-1][1], 20)
+        ctx.fillStyle = darkenRGB(rarities[this.petal[0].rarity-1][1], 20)
         ctx.lineWidth = 8
         ctx.roundRect(this.x, this.y, this.boxSize, this.boxSize, this.boxSize/10)
         ctx.fill()
+        ctx.closePath()
+
+        ctx.beginPath()
+        ctx.fillStyle = rarities[this.petal[0].rarity-1][1]
+        ctx.roundRect(this.x, this.y, this.boxSize, this.boxSize*this.percentage, this.boxSize/10)
+        ctx.fill()
+        ctx.closePath()
+
+        ctx.beginPath()
+        ctx.fillStyle = darkenRGB(rarities[this.petal[0].rarity-1][1], 20)
+        ctx.strokeStyle = darkenRGB(rarities[this.petal[0].rarity-1][1], 20)
+        ctx.lineWidth = 8
+        ctx.roundRect(this.x, this.y, this.boxSize, this.boxSize, this.boxSize/10)
         ctx.stroke()
         ctx.closePath()
         if (this.hovered) {
@@ -105,6 +125,18 @@ export class PetalBox {
             ctx.fillStyle = "white"
             ctx.strokeText(abbreviate(this.petal[0].maxHealth), x+20+healthExtraSpacing.width , y+tabHeight/1.25)
             ctx.fillText(abbreviate(this.petal[0].maxHealth), x+20+healthExtraSpacing.width, y+tabHeight/1.25)
+            if (this.petal[0].poison.poison > 0) {
+                ctx.font = "20px Arial"
+                ctx.fillStyle = "rgba(127, 0, 177, 1)"
+                ctx.strokeStyle = "black"
+                ctx.textAlign = "left"
+                ctx.strokeText("Poison: ", x+20, y+tabHeight/1.45)
+                ctx.fillText("Poison: ", x+20, y+tabHeight/1.45)
+                let damageExtraSpacing = ctx.measureText("Poison: ")
+                ctx.fillStyle = "white"
+                ctx.strokeText(`${(abbreviate(this.petal[0].poison.poison / (this.petal[0].poison.tick / 60)))}/s (duration: ${this.petal[0].poison.tick/60}s)`, x+20+damageExtraSpacing.width , y+tabHeight/1.45)
+                ctx.fillText(`${(abbreviate(this.petal[0].poison.poison / (this.petal[0].poison.tick / 60)))}/s (duration: ${this.petal[0].poison.tick/60}s)`, x+20+damageExtraSpacing.width, y +tabHeight/1.45)
+            }
             ctx.font = "20px Arial"
             ctx.fillStyle = "red"
             ctx.strokeStyle = "black"

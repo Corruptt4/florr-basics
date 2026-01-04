@@ -16,7 +16,7 @@ export class Player {
         this.showPetalRarity = false;
         this.keyDown = [];
         this.equippedPetals = []
-        this.speed = 0.3
+        this.speed = 0.2
         this.type = "player"
         this.velocity = {
             x: 0,
@@ -25,13 +25,13 @@ export class Player {
     }
     innitPetals() {
         // Set petals to just nulls.
-        for (let i = 0, n = 5; i < n; i++) {
+        for (let i = 0, n = 1; i < n; i++) {
             this.equippedPetals.push(
                 {
                     id: i+1,
                     petal: null,
                     offset: (360 / n) * i,
-                    rarity: rarities.length-1
+                    rarity: 10
                 }
             )
         }

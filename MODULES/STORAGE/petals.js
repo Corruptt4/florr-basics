@@ -24,6 +24,85 @@ class Basic extends Petal {
         this.stats.armor = 0
     }
 }
+class Iris extends Petal {
+    constructor(host, stats) {
+        super(host, stats)
+        this.name = "Iris"
+        this.altName = "Iris"
+        this.size = 8
+        this.maxReload = 100
+        this.stats.health = 10
+        this.stats.damage = 7
+        this.poison = {
+            poison: 100,
+            tick: 180
+        }
+        this.sizeMulti = 0.6
+        this.stats.armor = 0
+        this.description = "Poisonous. Takes some time to do its effect."
+        this.color = "rgba(150, 0, 196, 1)"
+    }
+    drawOnBox(box, size) {
+        let boxSize = box.boxSize
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 4
+        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, (size*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2);
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath();
+        
+        ctx.lineWidth = 4
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.font = "18px Arial"
+        ctx.lineJoin = "round"
+        ctx.textAlign = "center"
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+    }
+    draw() {
+        if (this.showRarity) {
+            ctx.beginPath()
+            ctx.globalAlpha = 0.5
+            let rarityName = rarities[this.rarity-1][0]
+            ctx.fillStyle = rarities[this.rarity-1][1]
+            ctx.arc(this.x, this.y, this.size*1.6, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.globalAlpha = 1
+            ctx.lineWidth = 2
+            ctx.font = "20px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.closePath()
+        }
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 4
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+        
+        if (this.showRarity) {
+            ctx.fillStyle = "white"
+            ctx.strokeStyle = "black"
+            ctx.lineWidth = 3
+            ctx.font = "10px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(this.id, this.x, this.y+10/3)
+            ctx.fillText(this.id, this.x, this.y+10/3)
+        }
+        ctx.closePath();
+    }
+}
 class BeetleEgg extends Petal {
     constructor(host, stats) {
         super(host, stats)
@@ -39,6 +118,7 @@ class BeetleEgg extends Petal {
         this.summoner = {
             type: 1,
             timer: 60,
+            killsPetal: true,
             scalesWithRarity: true,
             summonRarity: this.rarity-1
         }
@@ -287,6 +367,11 @@ export var availablePetals = [
     new Basic(null, {
         health: 10,
         damage: 10
+    }),
+    new Iris(null, {
+        health: 15,
+        damage: 17,
+        armor: 7
     }),
     new Bacteria(null, {
         health: 15,

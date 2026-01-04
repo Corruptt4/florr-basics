@@ -1,5 +1,7 @@
-import { ctx, frictionMultiplier, rarities } from "../../main.js";
+import { ctx, frictionMultiplier, mobs, rarities } from "../../main.js";
 import { darkenRGB, degreesToRads } from "../../SCRIPTS/functions.js";
+import { availableMobs } from "../STORAGE/mobs.js";
+import { Mob } from "./mob.js";
 
 export class Petal {
     constructor(host, stats = {
@@ -14,7 +16,7 @@ export class Petal {
         this.host = host;
         this.stats = stats;
         this.rarity = 1;
-        this.dead = true;
+        this.dead = false;
         this.reload = 0;
         this.maxHealth = 0;
         this.size = 10;
@@ -23,17 +25,25 @@ export class Petal {
         this.orbitoffset = 0
         this.name = "Basic"
         this.altName = "Basic"
+        this.poison = {
+            poison: 0,
+            tick: 0
+        }
         this.angle = 0
         this.spin = -0.05 * Math.random() * (0.05 + 0.05)
         this.id = null;
         this.summons = []
-        this.isSummoner = this.stats.summons
+        this.pushX = 0
+        this.pushY = 0
+        this.isSummoner = false
         this.lockedAngle = false
         this.showRarity = false;
         this.type = "petal"
+        this.maxSummonTimer = 0;
         this.summoner = {
             type: 1,
             timer: 1,
+            killsPetal: true,
             scalesWithRarity: false,
             summonRarity: 1,
         }
@@ -51,7 +61,30 @@ export class Petal {
         }
     }
     summon() {
-        
+        if (this.summoner.timer > 0 && this.summons.length == 0 && !this.dead) {
+            this.summoner.timer--
+        }
+        if (this.summoner.timer <= 0) {
+            this.summoner.timer = this.maxSummonTimer
+            if (this.summoner.killsPetal) {
+                this.dead = true
+            }
+            let summon = new availableMobs[this.summoner.type].constructor(
+                this.x,
+                this.y,
+                this.summoner.summonRarity+1,
+                availableMobs[this.summoner.type].health,
+                availableMobs[this.summoner.type].damage,
+                availableMobs[this.summoner.type].size,
+            )
+            summon.rarities = rarities
+            summon.hostPetal = this
+            summon.color = this.host.color
+            summon.pet = true
+            summon.innitMob()
+            this.summons.push(summon)
+            mobs.push(summon)
+        }
     }
     reloadPetal() {
         if (this.reload < this.maxReload && this.dead) {
@@ -76,6 +109,7 @@ export class Petal {
             this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2 : this.rarity-2
             this.summoner.timer *= Math.pow(1.4, this.summoner.summonRarity)
         }
+        this.maxSummonTimer = this.summoner.timer
         let exponential = 1.3
         let mainExponent = 2.3
         this.x = this.host.x
@@ -84,10 +118,12 @@ export class Petal {
         this.maxHealth = this.stats.health
         this.stats.damage *= Math.pow(mainExponent+0.4, this.rarity-1) * Math.pow(exponential, this.rarity-1)
         this.stats.armor *= Math.pow(mainExponent, this.rarity-1) * Math.pow(exponential, this.rarity-1)
+        this.poison.poison *= Math.pow(mainExponent, this.rarity-1) * Math.pow(exponential, this.rarity-1)
         
         this.stats.health = Math.round(this.stats.health)
         this.stats.damage = Math.round(this.stats.damage)
         this.stats.armor = Math.round(this.stats.armor)
+        this.poison.poison = Math.round(this.poison.poison)
     }
     update() {
         if (this.isSummoner) this.summon();
@@ -111,10 +147,15 @@ export class Petal {
 
         this.x += this.velocity.x
         this.y += this.velocity.y
+        this.pushX *= frictionMultiplier
+        this.pushY *= frictionMultiplier
         this.velocity.y *= frictionMultiplier
         this.velocity.x *= frictionMultiplier
     }
     draw() {
+        if (this.stats.health < 0) {
+            this.stats.health = 0
+        }
         if (this.showRarity) {
             ctx.beginPath()
             ctx.globalAlpha = 0.5

@@ -70,7 +70,7 @@ export class Inventory {
                 filter
             }
         }
-        this.open = open;
+        this.open = false;
         this.color = "rgb(0, 188, 188)"
         this.scalingFactor = 0.4
         this.petalToCollect = []
@@ -96,7 +96,6 @@ export class Inventory {
 
             })
         }
-        console.log(this.shownPetals)
     }
     draw() {
         ctx.beginPath()
@@ -167,6 +166,5 @@ export class Inventory {
             }
         }
         this.rarities = rarities
-        console.log(rarities)
     }
 }

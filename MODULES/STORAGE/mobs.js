@@ -100,6 +100,6 @@ class Beetle extends Mob {
 
 
 export let availableMobs = [
-    new BabyAnt(0, 0, 1, 85, 10, 15),
-    new Beetle(0, 0, 1, 250, 30, 35)
+    new BabyAnt(0, 0, 1, 85, 3, 15),
+    new Beetle(0, 0, 1, 250, 6, 35)
 ]
