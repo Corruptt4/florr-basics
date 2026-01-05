@@ -1,5 +1,5 @@
 # Information!
-- This project and its basics: mobs, petals, loadout, summons, armor, and sandstorm behaviour is made by TrickyArrasGames
+- This project and its basics: mobs, petals, loadout, summons, armor, and sandstorm behaviour is made by TrickyArrasGames (Corruptt4 on Github)
 
 ### It has Loadout and drag-and-drop feature
 ### Inventory (W.I.P)
