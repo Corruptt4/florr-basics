@@ -14,9 +14,9 @@ export class Mob {
         this.startingHP = health
         this.startingDMG = damage
         this.speed = 0.2
-        this.health = this.startingHP * Math.pow(3.26, rarity-1) * Math.pow(1.25, rarity-1);
-        this.maxHealth = this.startingHP * Math.pow(3.26, rarity-1) * Math.pow(1.25, rarity-1);
-        this.damage = this.startingDMG * Math.pow(2.55, rarity-1) * Math.pow(1.24, rarity-1);
+        this.health = this.startingHP * Math.pow(3.56, rarity-1) * Math.pow(1.25, rarity-1);
+        this.maxHealth = this.startingHP * Math.pow(3.56, rarity-1) * Math.pow(1.25, rarity-1);
+        this.damage = this.startingDMG * Math.pow(2.55, rarity-1) * Math.pow(1.2, rarity-1);
         this.angle = 0
         this.type = "mob"
         this.name = "Baby Ant" // PLACEHOLDER
@@ -30,10 +30,11 @@ export class Mob {
         this.turnSpeed = 0.08;
         this.pet = false
         this.hostPetal = null;
-        this.givenTargets = []
+        this.givenTargets = [];
+        this.potentialEnemies = [];
         this.oldAngle = 0;
         this.oldHealth = this.maxHealth
-        this.detectionDistance = this.size*2*5
+        this.detectionDistance = this.size*2*10
         this.maxTimer = 180
         this.timer = this.maxTimer
         this.detecDistPet = 0;
@@ -47,7 +48,7 @@ export class Mob {
     innitMob() {
         this.angle = Math.PI * 2 * Math.random() - Math.PI
         if (this.pet) {
-            this.size = this.originalSize * Math.pow(1.12, this.rarity-1)
+            this.size = this.originalSize * Math.pow(1.14, this.rarity-1)
         }
     }
     update(player) {
@@ -88,8 +89,8 @@ export class Mob {
                 let diff = ((angle-this.angle) % (Math.PI*2)) - Math.PI
                 this.angle += (diff) * this.turnSpeed
 
-                this.velocity.x -= this.speed * Math.cos(this.angle)
-                this.velocity.y -= this.speed * Math.sin(this.angle)
+                this.velocity.x += this.speed * Math.cos(this.angle)
+                this.velocity.y += this.speed * Math.sin(this.angle)
             }
         }
         if (this.pet) {
@@ -98,21 +99,20 @@ export class Mob {
             let ddy = this.y-player.y
             let dist = ddx*ddx+ddy*ddy
             let r = 400**2
-            let detection = (this.detectionDistance*this.detectionDistance)*2
+            let detection = (this.detectionDistance*this.detectionDistance)
             this.detecDistPet = detection
             this.givenTargets.forEach((t) => {
                 let ex = t.x - this.x
                 let ey = t.y - this.y
                 let edist = ex*ex+ey*ey
-                if (edist <= detection && !this.target) {
-                    this.target = t
-                    this.aggressive = true
-                }
-                if (edist > detection) {
-                    this.target = null
-                    this.aggressive = false
+                if (edist <= detection && this.target == null) {
+                    this.potentialEnemies.push([edist, t])
                 }
             })
+            if (this.potentialEnemies.length > 0) {
+                this.potentialEnemies.sort((a, b) => a[0] -b[0])
+                this.target = this.potentialEnemies[0][1]
+            }
             if (this.target) {
                 let tx = this.x - this.target.x
                 let ty = this.y - this.target.y
@@ -157,8 +157,8 @@ export class Mob {
         this.velocity.y *= frictionMultiplier
     }
     getSpecificStats(rarity) {
-        this.specificHP = this.startingHP * Math.pow(3.26, rarity) * Math.pow(1.25, rarity);
-        this.specificDMG = this.startingDMG * Math.pow(2.55, rarity) * Math.pow(1.24, rarity);
+        this.specificHP = this.startingHP * Math.pow(3.56, rarity) * Math.pow(1.25, rarity);
+        this.specificDMG = this.startingDMG * Math.pow(2.55, rarity) * Math.pow(1.2, rarity);
         return {
             hp: this.specificHP,
             dmg: this.specificDMG
@@ -169,10 +169,10 @@ export class Mob {
         ctx.translate(this.x, this.y)
         ctx.beginPath()
         ctx.rotate(this.angle+(Math.sin(this.t) * (Math.PI / 40)))
-        ctx.moveTo(this.size/2, this.size/1.5)
-        ctx.quadraticCurveTo(this.size*1.3, this.size/1.8, this.size*1.3, this.size/4)
-        ctx.quadraticCurveTo(this.size/2, this.size/1.8, this.size*1.3, this.size/4)
-        ctx.lineWidth = this.size/10
+        ctx.moveTo(this.size/2, this.size/1.7)
+        ctx.lineTo(this.size*1.35, this.size/2.5)
+        ctx.lineTo(this.size/2, this.size/1.7)
+        ctx.lineWidth = this.size/4
         ctx.lineJoin = "round"
         ctx.strokeStyle = "rgb(25, 25, 25)"
         ctx.fillStyle = "rgb(25, 25, 25)"
@@ -185,13 +185,13 @@ export class Mob {
         ctx.translate(this.x, this.y)
         ctx.beginPath()
         ctx.rotate(this.angle-((Math.PI / 40)*Math.sin(this.t)))
-        ctx.lineWidth = this.size/10
+        ctx.lineWidth = this.size/4
         ctx.lineJoin = "round"
         ctx.strokeStyle = "rgb(25, 25, 25)"
         ctx.fillStyle = "rgb(25, 25, 25)"
-        ctx.moveTo(this.size/2, -this.size/1.5)
-        ctx.quadraticCurveTo(this.size*1.3, -this.size/1.8, this.size*1.3, -this.size/4)
-        ctx.quadraticCurveTo(this.size/2, -this.size/1.8, this.size*1.3, -this.size/4)
+        ctx.moveTo(this.size/2, -this.size/1.7)
+        ctx.lineTo(this.size*1.35, -this.size/2.5)
+        ctx.lineTo(this.size/2, -this.size/1.7)
         
         ctx.stroke()
         ctx.fill()
@@ -228,7 +228,7 @@ export class Mob {
         if (this.health < 0) {
             this.health = 0
         }
-        this.oldHealth +=(this.health - this.oldHealth) * 0.2
+        this.oldHealth +=(this.health - this.oldHealth) * 0.1
         this.rarityName = this.rarities[this.rarity-1][0];
         this.rarityColor = this.rarities[this.rarity-1][1];
         
