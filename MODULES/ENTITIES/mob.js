@@ -27,6 +27,7 @@ export class Mob {
         this.poisonTicks = 0;
         this.moving = true
         this.target = null
+        this.mass = 1 * Math.pow(1.2, rarity-1)
         this.turnSpeed = 0.08;
         this.pet = false
         this.hostPetal = null;
@@ -52,6 +53,7 @@ export class Mob {
         }
     }
     update(player) {
+        this.potentialEnemies = []
         if (this.poisonTick > 0) {
             this.poisonTick--
             this.health -= this.poisonToTake/this.poisonTicks
@@ -137,7 +139,7 @@ export class Mob {
         
         if (!this.chasesPlayers || !this.target) {
             this.timer--
-            if (this.timer <= 160) {
+            if (this.timer <= 100) {
                 this.moving = false
             }
             if (this.timer <= 0) {

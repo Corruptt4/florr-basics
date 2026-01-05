@@ -21,7 +21,7 @@ let mouseDraggingBox = false;
 let mouseDraggingBoxClass = null;
 let quadTree = new QuadTree()
 
-export let mapSize = 1500,
+export let mapSize = 4000,
                     entities = [],
                     mobs = [],
                     allEntities = [],
@@ -40,7 +40,8 @@ export var rarities = [
     ["Unique", "rgb(85,84,84)"],
     ["Zenith", "rgb(255, 255, 170)"],
     ["Hellish", "rgb(170, 35, 35)"],
-    ["Stellar", "rgb(0, 0, 0)"]
+    ["Stellar", "rgb(0, 0, 0)"],
+    ["Radiant", "rgb(0, 0, 0)"]
 //     ["Eternal", "rgb(255, 255, 255)"],
 //     ["Apotheotic", "rgb(216, 23, 153)"],
 //     ["Radiant", "rgba(204, 0, 255, 1)"],
@@ -58,7 +59,7 @@ let petalBoxHolders = []
 let mobRarities = []
 let inventory = new Inventory(20, canvas.height - 80, 90, 90)
 inventory.innitPetals(rarities)
-for (let i = 0; i < rarities.length; i++) {
+for (let i = 0; i < 8; i++) {
     mobRarities.push([i, 1/Math.pow(1.6, i)])
 }
 function spawnMob() {
@@ -70,7 +71,7 @@ function spawnMob() {
             chosenRarity = rarity
         }
     })
-    let randomMob = Math.floor(Math.random()*1)
+    let randomMob = Math.floor(Math.random()*availableMobs.length)
     let mob = new availableMobs[randomMob].constructor(
         Math.random()*mapSize,
         Math.random()*mapSize,
@@ -95,7 +96,7 @@ function spawnTestMob() {
     mob.rarities = rarities
     mobs.push(mob)
 }
-spawnTestMob()
+//spawnTestMob()
 for (let i = 0; i < player.equippedPetals.length; i++) {
     let petalBoxHolder = new PetalBoxPlace(player)
     petalBoxHolder.id = i+1
@@ -180,8 +181,8 @@ document.addEventListener("mouseup", (e) => {
     }
 })
 setInterval(() => {
-    if (mobs.length < 80) {
-        //spawnMob()
+    if (mobs.length < 50) {
+        spawnMob()
     }
 }, 200)
 setInterval(() => {
@@ -196,7 +197,6 @@ setInterval(() => {
     
     quadTree.entityBoundaries.forEach((b) => {
         if (b.collisions.length == 0) return;
-
         b.collisions.forEach((collision) => {
             let collider1 = collision[0]
             let collider2 = collision[1]
@@ -206,31 +206,31 @@ setInterval(() => {
                 if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
                 if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
 
-                collider2.velocity.x += (6 / collider2.size) * Math.cos(angle)
-                collider2.velocity.y += (6 / collider2.size) * Math.sin(angle)
+                collider2.velocity.x += Math.min((6 / collider2.mass), 0.35) * Math.cos(angle)
+                collider2.velocity.y += Math.min((6 / collider2.mass), 0.35) * Math.sin(angle)
                 
-                collider1.velocity.x -= (6 / collider1.size) * Math.cos(angle)
-                collider1.velocity.y -= (6 / collider1.size) * Math.sin(angle)
+                collider1.velocity.x -= Math.min((6 / collider1.mass), 0.35) * Math.cos(angle)
+                collider1.velocity.y -= Math.min((6 / collider1.mass), 0.35) * Math.sin(angle)
 
                 if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
                     collider1.health -= collider2.damage
                     collider2.health -= collider1.damage
                 }
             }
-            if ((collider1.type == "petal" && collider2.type == "mob") && (collider1.type == "petal" && collider2.type == "mob")) {
-                if (collider1.type == "petal" && !collider1.dead) {
+            if (collider1.type == "petal" && collider2.type == "mob") {
+                if (collider1.type == "petal" && !collider1.dead && !collider2.pet) {
                     collider1.stats.health -= Math.max(0, collider2.damage-collider1.stats.armor)
                 }
-                if (collider1.type == "mob") {
+                if (collider1.type == "mob" && !collider1.pet) {
                     collider1.health -= collider2.stats.damage
                     if (collider2.poison.poison > 0) {
                         collider1.poisonTake(collider2.poison.poison, collider2.poison.tick)
                     }
                 }
-                if (collider2.type == "petal" && !collider2.dead) {
+                if (collider2.type == "petal" && !collider2.dead && !collider1.pet) {
                     collider2.stats.health -= Math.max(0, collider2.damage-collider1.stats.armor)
                 }
-                if (collider2.type == "mob") {
+                if (collider2.type == "mob" && !collider2.pet) {
                     collider2.health -= collider1.stats.damage
                     if (collider1.poison.poison > 0) {
                         collider2.poisonTake(collider1.poison.poison, collider1.poison.tick)
@@ -275,15 +275,20 @@ setInterval(() => {
         mouseDraggingBoxClass.y += (my - mouseDraggingBoxClass.y) * 0.3;
     }
     inventory.update()
-   t += 0.025
-   let catarValue = Math.abs(Math.sin(t)*50+130)
-   let strVal = Math.abs(Math.sin(t)*255)
-   let stgVal = Math.abs(Math.sin(t + 2*Math.PI/3)*255)
-   let stbVal = Math.abs(Math.sin(t + 4*Math.PI/3)*255)
-   let stellarRarity = rarities.find((r) => r[0].toLocaleLowerCase() === "stellar")
-   let cataRarity = rarities.find((r) => r[0].toLocaleLowerCase() === "hellish")
+    t += 0.025
+    let catarValue = Math.abs(Math.sin(t)*50+150)
+    let strVal = Math.abs(Math.sin(t)*255)
+    let stgVal = Math.abs(Math.sin(t + 2*Math.PI/3)*255)
+    let stbVal = Math.abs(Math.sin(t + 4*Math.PI/3)*255)
+    let stellarRarity = rarities.find((r) => r[0].toLocaleLowerCase() === "stellar")
+    let radiantRarity = rarities.find((r) => r[0].toLocaleLowerCase() === "radiant")
+    let cataRarity = rarities.find((r) => r[0].toLocaleLowerCase() === "hellish")
+    let rRad = Math.floor(127.5 * (Math.sin(t) + 1));
+    let gRad = Math.floor(127.5 * (Math.sin(t + (2 * Math.PI / 3)) + 1));
+    let bRad = Math.floor(127.5 * (Math.sin(t + (4 * Math.PI / 3)) + 1));
     stellarRarity[1] = `rgb(${strVal}, ${stgVal}, ${stbVal})`
     cataRarity[1] = `rgb(${catarValue}, 0, 0)`
+    radiantRarity[1] = `rgb(${rRad}, ${gRad}, ${bRad})`
 }, 1000/60)
 
 function render() {
@@ -299,7 +304,6 @@ function render() {
     mobs.forEach((mob) => {
         mob.draw()
         mob.drawRarity()
-        mob.drawDetectionSize()
     })
     player.draw()
     ctx.restore()
