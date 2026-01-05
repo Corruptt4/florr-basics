@@ -7,7 +7,7 @@
 # Important! (Must read to understand the code and files!)
 - THIS IS MADE IN CanvasRenderingContext2D! Mobs, petals, visuals.
 
-## Folders and files and what they keep
+### Folders and files and what they keep
 - main.js - everything that makes the game function and run.
 - MODULES - all modules needed for the game to work
 
@@ -31,4 +31,4 @@
 
 #### CAMERA.JS - The camera for the player.
 
-### main.js has a loop that runs in 60hz to update all states, rendering works up to your device's FPS/refresh rare/Hz.
+# main.js has a loop that runs in 60hz to update all states, rendering works up to your device's FPS/refresh rare/Hz.
