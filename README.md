@@ -1,8 +1,8 @@
 # Information!
 - This project and its basics: mobs, petals, loadout, summons, armor, and sandstorm behaviour is made by TrickyArrasGames
 
-## It has Loadout and drag-and-drop feature
-## Inventory (W.I.P)
+### It has Loadout and drag-and-drop feature
+### Inventory (W.I.P)
 
 # Important! (Must read to understand the code and files!)
 - THIS IS MADE IN CanvasRenderingContext2D! Mobs, petals, visuals.
