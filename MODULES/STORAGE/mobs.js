@@ -18,6 +18,7 @@ class Sandstorm extends Mob {
         this.rarities = rarities
         this.sandstormMovement = true;
         this.shape = 6
+        this.actualSpeed = 0.3
         this.isSandstorm = true;
         this.color = "rgb(212,199,167)"
     }

@@ -65,6 +65,9 @@ export class Player {
         ctx.closePath();
     }
     update() {
+        this.equippedPetals.forEach((p) => {
+            p.petal.id = p.id
+        })
         if (this.x - this.size < 0) {
             this.velocity.x += 1
         }

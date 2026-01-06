@@ -48,8 +48,8 @@ export class Inventory {
         this.height = height; 
         this.originalWidth = width;
         this.originalHeight = height;
-        this.tabWidth = 300
-        this.tabHeight = 450
+        this.tabWidth = 400
+        this.tabHeight = 550
         this.petalRarityFilter = "common"
         this.shownPetals = []
         this.row = 0
@@ -142,9 +142,9 @@ export class Inventory {
             ctx.fillText(this.rarities[(this.petalFilter.filterRarity) == 0 ? this.petalFilter.filterRarity : this.petalFilter.filterRarity-1][0], this.petalFilter.position.x + this.petalFilter.width/2, this.petalFilter.position.y + textSize/3 + this.petalFilter.height/2)
             ctx.closePath()
             this.shownPetals.forEach((petal, index) => {
-                let setRow = index%3
-                let col = Math.floor(index/3)
-                let slot = new InventoryPetalBox(this.x+20+(90*setRow), this.y+120+(90*col), petal.rarity, this.petalFilter.filterRarity)
+                let setRow = index%4
+                let col = Math.floor(index/4)
+                let slot = new InventoryPetalBox(this.x+20+(93.5*setRow), this.y+120+(93.5*col), petal.rarity, this.petalFilter.filterRarity)
                 slot.rarities = this.rarities
                 slot.petal = petal.petal
                 slot.amount = petal.amount

@@ -80,6 +80,7 @@ export class Mob {
         this.potentialEnemies = []
         if (this.poisonTick > 0) {
             this.poisonTick--
+            this.damageTick = 6
             this.health -= this.poisonToTake/this.poisonTicks
         }
         if (this.x - this.size < 0) {
@@ -140,6 +141,7 @@ export class Mob {
                 this.target = this.potentialEnemies[0][1]
             }
             if (this.target) {
+                this.aggressive = true
                 let tx = this.x - this.target.x
                 let ty = this.y - this.target.y
                 let angle = Math.atan2(ty, tx)
@@ -149,6 +151,7 @@ export class Mob {
                 this.velocity.y += this.speed * Math.sin(this.angle)
                 if (this.target.health <= 0) {
                     this.target = null
+                    this.aggressive = false
                 }
             }
             if (dist > r) {
@@ -162,7 +165,7 @@ export class Mob {
                 this.goingToPlayer = false
             }
         }
-        this.t += 0.1 * (1+this.aggressive)
+        this.t += 0.15 * (1+this.aggressive)
 
         if (this.sandstormMovement && !this.goingToPlayer) {
             this.moving = true

@@ -104,7 +104,7 @@ for (let i = 0; i < player.equippedPetals.length; i++) {
     petalBoxHolders.push(petalBoxHolder)
 }
 player.equippedPetals.forEach((petal) => {
-    let randomPetal = 4 + Math.floor(Math.random()*3)//Math.floor(Math.random() * availablePetals.length)
+    let randomPetal = Math.floor(Math.random() * availablePetals.length)
     let newPetal = new availablePetals[randomPetal].constructor(
         player, {
             health: 10,
@@ -370,15 +370,14 @@ function render() {
                 }
 
                 targetHolder.box = mouseDraggingBoxClass;
-                specificPetalSlot.rarity = targetPetal.rarity
-                specificPetalSlot.petal = targetPetal
-                mouseDraggingBoxClass.petal[0].id = specificPetalSlot.id
+                mouseDraggingBoxClass.boxOn = targetHolder;
                 sourceHolder.box = targetBox;
 
-                mouseDraggingBoxClass.boxOn = targetHolder;
-                specificPetalSlot2.rarity = draggedPetal.rarity
-                specificPetalSlot2.petal = draggedPetal
-                targetBox.petal[0].id = specificPetalSlot2.id
+                [specificPetalSlot.petal, specificPetalSlot2.petal] = [specificPetalSlot2.petal, specificPetalSlot.petal];
+                [specificPetalSlot.rarity, specificPetalSlot2.rarity] = [specificPetalSlot2.rarity, specificPetalSlot.rarity];
+
+                specificPetalSlot.petal.id = specificPetalSlot.id;
+                specificPetalSlot2.petal.id = specificPetalSlot2.id;
                 if (targetBox) targetBox.boxOn = sourceHolder;
 
                 mouseDraggingBoxClass.followMouse = false;

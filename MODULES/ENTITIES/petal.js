@@ -48,7 +48,8 @@ export class Petal {
             scalesWithRarity: false,
             summonRarity: 1,
             capacity: 1,
-            lowerRarity: 0
+            lowerRarity: 0,
+            scalesPetal: false,
         }
         /* 
         This is default stats.

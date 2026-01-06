@@ -124,7 +124,8 @@ class BeetleEgg extends Petal {
             killsPetal: true,
             scalesWithRarity: true,
             summonRarity: this.rarity-1,
-            lowerRarity: 0
+            lowerRarity: 0,
+            scalesPetal: true,
         }
         this.description = "Now comes with a Beetle summon!"
         this.color = "rgb(254,240,185)"
@@ -215,6 +216,7 @@ class DryStick extends Petal {
             scalesWithRarity: true,
             summonRarity: this.rarity-2,
             capacity: 5,
+            scalesPetal: false,
             lowerRarity: 1
         }
         this.description = "It lost its moisture, but what if you spin this one in sand?"
@@ -368,6 +370,7 @@ class Stick extends Petal {
             scalesWithRarity: true,
             summonRarity: this.rarity-1,
             capacity: 2,
+            scalesPetal: false,
             lowerRarity: 0
         }
         this.description = "What if you spin this in sand... Nothing, right?"
@@ -670,13 +673,13 @@ class Heavy extends Petal {
 }
 
 export var availablePetals = [
-    new Heavy(null, {
-        health: 45,
-        damage: 12
-    }),
     new Basic(null, {
         health: 10,
         damage: 10
+    }),
+    new Heavy(null, {
+        health: 45,
+        damage: 12
     }),
     new Iris(null, {
         health: 15,
