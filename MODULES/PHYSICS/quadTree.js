@@ -11,6 +11,7 @@ export class Rect {
         this.detected = []
     }
     collisionCheck() {
+        this.collisions = []
         this.detected.forEach((e) => {
             let dx = e.x - this.selfEntity.x
             let dy = e.y - this.selfEntity.y
@@ -54,14 +55,13 @@ export class QuadTree {
         })
     }
     update() {
-        this.points.forEach((p) => {
-            this.entityBoundaries.forEach((b) => {
+        this.entityBoundaries.forEach((b) => {
+           this.points.forEach((p) => {
                 if (p != b.selfEntity) {
                     if (b.overlap(p)) {
                         b.detected.push(p)
                     }
                 }
-
                 this.collisions.push(...b.collisionCheck())
             })
         })
@@ -75,9 +75,10 @@ export class QuadTree {
     reset() {
         this.entityBoundaries.forEach((b) => {
             b.detected = []
+            b.collisions = []
         })
         this.points = []
-        this.entityBoundaries = []
         this.collisions = []
+        this.entityBoundaries = []
     }
 }

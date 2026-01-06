@@ -16,7 +16,7 @@ export class Petal {
         this.host = host;
         this.stats = stats;
         this.rarity = 1;
-        this.dead = false;
+        this.dead = true;
         this.reload = 0;
         this.maxHealth = 0;
         this.size = 10;
@@ -43,9 +43,12 @@ export class Petal {
         this.summoner = {
             type: 1,
             timer: 1,
+            timer2: 1,
             killsPetal: true,
             scalesWithRarity: false,
             summonRarity: 1,
+            capacity: 1,
+            lowerRarity: 0
         }
         /* 
         This is default stats.
@@ -61,7 +64,7 @@ export class Petal {
         }
     }
     summon() {
-        if (this.summoner.timer > 0 && this.summons.length == 0 && !this.dead) {
+        if (this.summoner.timer > 0 && (this.summoner.capacity > 1 ? this.summons.length < this.summoner.capacity : this.summons.length == 0) && !this.dead) {
             this.summoner.timer--
         }
         if (this.summoner.timer <= 0) {
@@ -106,8 +109,12 @@ export class Petal {
     }
     innit() {
         if (this.isSummoner) {
-            this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2 : this.rarity-2
+            this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2-this.summoner.lowerRarity : this.rarity-2-this.summoner.lowerRarity
             this.summoner.timer *= Math.pow(1.4, this.summoner.summonRarity)
+            this.summoner.timer2 = this.summoner.timer
+            if (this.rarity == rarities.length) {
+                this.summoner.summonRarity = this.rarity-1
+            }
         }
         this.maxSummonTimer = this.summoner.timer
         let exponential = 1.3

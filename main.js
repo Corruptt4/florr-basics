@@ -19,6 +19,7 @@ let my = 0
 let mouseHolding = false
 let mouseDraggingBox = false;
 let mouseDraggingBoxClass = null;
+let dropHandled = false
 let quadTree = new QuadTree()
 
 export let mapSize = 4000,
@@ -59,7 +60,7 @@ let petalBoxHolders = []
 let mobRarities = []
 let inventory = new Inventory(20, canvas.height - 80, 90, 90)
 inventory.innitPetals(rarities)
-for (let i = 0; i < 8; i++) {
+for (let i = 0; i < 9; i++) {
     mobRarities.push([i, 1/Math.pow(1.6, i)])
 }
 function spawnMob() {
@@ -103,8 +104,8 @@ for (let i = 0; i < player.equippedPetals.length; i++) {
     petalBoxHolders.push(petalBoxHolder)
 }
 player.equippedPetals.forEach((petal) => {
-    let randomPetal = Math.floor(Math.random() * availablePetals.length)
-    let newPetal = new availablePetals[4].constructor(
+    let randomPetal = 4 + Math.floor(Math.random()*3)//Math.floor(Math.random() * availablePetals.length)
+    let newPetal = new availablePetals[randomPetal].constructor(
         player, {
             health: 10,
             damage: 10,
@@ -206,15 +207,17 @@ setInterval(() => {
                 if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
                 if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
 
-                collider2.velocity.x += Math.min((6 / collider2.mass), 0.35) * Math.cos(angle)
-                collider2.velocity.y += Math.min((6 / collider2.mass), 0.35) * Math.sin(angle)
+                collider2.push.x += 1 * Math.cos(angle)
+                collider2.push.y += 1 * Math.sin(angle)
                 
-                collider1.velocity.x -= Math.min((6 / collider1.mass), 0.35) * Math.cos(angle)
-                collider1.velocity.y -= Math.min((6 / collider1.mass), 0.35) * Math.sin(angle)
+                collider1.push.x -= 1 * Math.cos(angle)
+                collider1.push.y -= 1 * Math.sin(angle)
 
                 if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
                     collider1.health -= collider2.damage
                     collider2.health -= collider1.damage
+                    collider2.damageTick = 6
+                    collider1.damageTick = 6
                 }
             }
             if (collider1.type == "petal" && collider2.type == "mob") {
@@ -289,6 +292,9 @@ setInterval(() => {
     stellarRarity[1] = `rgb(${strVal}, ${stgVal}, ${stbVal})`
     cataRarity[1] = `rgb(${catarValue}, 0, 0)`
     radiantRarity[1] = `rgb(${rRad}, ${gRad}, ${bRad})`
+    if (mouseHolding && !mouseDraggingBox) {
+        dropHandled = false;
+    }
 }, 1000/60)
 
 function render() {
@@ -336,6 +342,17 @@ function render() {
 
             if (boxCollision(mx, my, targetHolder.x, targetHolder.y, targetHolder.boxSize)) {
                 const sourceHolder = mouseDraggingBoxClass.boxOn;
+                const targetHolderId = targetHolder.id;
+                const sourceHolderId = sourceHolder.id;
+
+                const draggedBox = mouseDraggingBoxClass;
+                const targetBox  = targetHolder.box;
+
+                const draggedPetal = draggedBox.petal[0];
+                const targetPetal  = targetBox.petal[0];
+
+                const specificPetalSlot = player.equippedPetals.find(p => p.id === sourceHolderId);
+                const specificPetalSlot2 = player.equippedPetals.find(p => p.id === targetHolderId);
                 if (!sourceHolder) break;
                 targetHolder.box.petal[0].dead = true
                 mouseDraggingBoxClass.petal[0].dead = true
@@ -352,15 +369,16 @@ function render() {
                     mouseDraggingBoxClass.petal[0].summons = []
                 }
 
-                const targetBox = targetHolder.box;
-                const oldHolder = mouseDraggingBoxClass.boxOn
-
                 targetHolder.box = mouseDraggingBoxClass;
-                mouseDraggingBoxClass.petal[0].id = targetHolder.id
+                specificPetalSlot.rarity = targetPetal.rarity
+                specificPetalSlot.petal = targetPetal
+                mouseDraggingBoxClass.petal[0].id = specificPetalSlot.id
                 sourceHolder.box = targetBox;
 
                 mouseDraggingBoxClass.boxOn = targetHolder;
-                targetBox.petal[0].id = oldHolder.id
+                specificPetalSlot2.rarity = draggedPetal.rarity
+                specificPetalSlot2.petal = draggedPetal
+                targetBox.petal[0].id = specificPetalSlot2.id
                 if (targetBox) targetBox.boxOn = sourceHolder;
 
                 mouseDraggingBoxClass.followMouse = false;

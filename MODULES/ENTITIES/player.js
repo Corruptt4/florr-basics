@@ -16,9 +16,14 @@ export class Player {
         this.showPetalRarity = false;
         this.keyDown = [];
         this.mass = 10
+        this.damageTick = 0
         this.equippedPetals = []
         this.speed = 0.2
         this.type = "player"
+        this.push = {
+            x: 0,
+            y: 0
+        }
         this.velocity = {
             x: 0,
             y: 0
@@ -133,9 +138,12 @@ export class Player {
             this.showPetalRarity = false
         }
 
+        this.x += this.push.x / this.mass
+        this.y += this.push.y / this.mass 
         this.x += this.velocity.x
         this.y += this.velocity.y
-
+        this.push.x *= frictionMultiplier
+        this.push.y *= frictionMultiplier
         this.velocity.x *= frictionMultiplier
         this.velocity.y *= frictionMultiplier
     }

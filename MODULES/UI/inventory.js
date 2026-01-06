@@ -65,10 +65,7 @@ export class Inventory {
             width: 100,
             height: 40,
             filterRarity: 1,
-            color: "rgb(200, 200, 200)",
-            setRarity() {
-                filter
-            }
+            color: "rgb(200, 200, 200)"
         }
         this.open = false;
         this.color = "rgb(0, 188, 188)"
@@ -82,7 +79,7 @@ export class Inventory {
             }
             this.petalFilter.filterRarity += 1
         }
-        this.shownPetals = this.petals.filter((petal) => this.rarities.indexOf(petal.rarity) == this.petalFilter.filterRarity-1)
+        this.shownPetals = this.petals.filter((petal) => (this.rarities.indexOf(petal.rarity) == this.petalFilter.filterRarity-1) && petal.amount > 0)
         if (this.open) {
             this.width += (this.tabWidth - this.width) * this.scalingFactor
             this.height += (this.tabHeight - this.height) * this.scalingFactor
@@ -160,7 +157,7 @@ export class Inventory {
             for (let k = 0; k <= rarities.length; k++) {
                 this.petals.push({
                     petal: availablePetals[i],
-                    amount: 10,
+                    amount: Math.random() < 0.5 ? 0 : 10,
                     rarity: rarities[k]
                 })
             }

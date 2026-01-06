@@ -1,6 +1,6 @@
 import { Mob } from "../ENTITIES/mob.js";
 import { ctx, rarities } from "../../main.js";
-import { darkenRGB } from "../../SCRIPTS/functions.js";
+import { darkenRGB, degreesToRads } from "../../SCRIPTS/functions.js";
 
 // x, y, rarity, health, damage, size
 
@@ -11,12 +11,49 @@ class BabyAnt extends Mob {
     }
 }
 
+class Sandstorm extends Mob {
+    constructor(x, y, rarity, health, damage, size) {
+        super(x, y, rarity, health, damage, size)
+        this.name = "Sandstorm"
+        this.rarities = rarities
+        this.sandstormMovement = true;
+        this.shape = 6
+        this.isSandstorm = true;
+        this.color = "rgb(212,199,167)"
+    }
+    draw() {
+        for (let i = 0; i < 3; i++) {
+            ctx.save();
+            ctx.translate(this.x, this.y)
+            let size = this.size / [1, 1.4, 2.5][i]
+            ctx.beginPath();
+            ctx.rotate(0.6*[1,1.2,1.4][i]*this.t*[-1,1,-1][i])
+            ctx.fillStyle = darkenRGB(this.color, 0 + (20*i))
+            ctx.strokeStyle = darkenRGB(this.color, 0 + (20*i))
+            ctx.lineWidth = size / 3 / [1, 1.4, 2.5][i]
+            ctx.lineJoin = "round"
+            ctx.moveTo(size * Math.cos(0), size*Math.sin(0))
+            for (let i = 0; i < this.shape+1.2; i++) {
+                ctx.lineTo(
+                    size * Math.cos(degreesToRads((360 / this.shape)*i)),
+                    size * Math.sin(degreesToRads((360 / this.shape)*i))
+                )
+            }
+            ctx.fill()
+            ctx.stroke()
+            ctx.closePath();
+        ctx.restore();
+        }
+    }
+}
+
 class Beetle extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
         this.chasesPlayers = true
         this.name = "Beetle"
         this.rarities = rarities
+        this.chasesMobs = true
         this.color = "rgb(138,90,170)"
     }
     draw() {
@@ -101,5 +138,6 @@ class Beetle extends Mob {
 
 export let availableMobs = [
     new BabyAnt(0, 0, 1, 85, 3, 15),
-    new Beetle(0, 0, 1, 250, 6, 35)
+    new Beetle(0, 0, 1, 250, 6, 35),
+    new Sandstorm(0, 0, 1, 350, 8, 40)
 ]
