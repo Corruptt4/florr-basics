@@ -504,6 +504,160 @@ class Stick extends Petal {
         ctx.closePath();
     }
 }
+class MagicStick extends Petal {
+    constructor(host, stats) {
+        super(host, stats)
+        this.name = "Magic Stick"
+        this.altName = "Stick"
+        this.size = 12
+        this.maxReload = 90
+        this.stats.health = 400
+        this.stats.damage = 0.1
+        this.sizeMulti = 0.8
+        this.lockedAngle = false
+        this.isSummoner = true
+        this.summoner = {
+            type: 2,
+            timer: 10,
+            timer2: 10,
+            killsPetal: false,
+            scalesWithRarity: true,
+            summonRarity: this.rarity-1,
+            capacity: 20,
+            scalesPetal: false,
+            lowerRarity: 1
+        }
+        this.description = "Summons the forces of the wind, through magic."
+        this.color = "rgb(0, 143, 238)"
+    }
+    
+    drawOnBox(box, size) {
+        let boxSize = box.boxSize
+        ctx.save()
+        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.beginPath();
+        ctx.lineJoin = "round"
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 8
+        ctx.moveTo(-size/2 * this.sizeMulti, size * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(-size/2 * this.sizeMulti, size * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(0, 0-size * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(0, 0-size * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(size*1.2 * this.sizeMulti, -size/1 * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(size*1.2 * this.sizeMulti, -size/1 * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 4
+        ctx.moveTo(-size/2 * this.sizeMulti, size * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(-size/2 * this.sizeMulti, size * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(0, 0-size * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(0, 0-size * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(size*1.2 * this.sizeMulti, -size/1 * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(size*1.2 * this.sizeMulti, -size/1 * this.sizeMulti)
+        ctx.lineTo(0, 0)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath();
+        ctx.restore()
+        ctx.beginPath();
+        ctx.lineWidth = 4
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.font = "18px Arial"
+        ctx.lineJoin = "round"
+        ctx.textAlign = "center"
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.closePath()
+    }
+    draw() {
+        if (this.showRarity) {
+            ctx.beginPath()
+            ctx.globalAlpha = 0.5
+            let rarityName = rarities[this.rarity-1][0]
+            ctx.fillStyle = rarities[this.rarity-1][1]
+            ctx.arc(this.x, this.y, this.size*1.6, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.globalAlpha = 1
+            ctx.lineWidth = 2
+            ctx.font = "20px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.closePath()
+        }
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 8
+        ctx.lineJoin = "round"
+        ctx.moveTo(-this.size/2, this.size)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(-this.size/2, this.size)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(0, 0-this.size)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(this.size*1.2, -this.size/1)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(this.size*1.2, -this.size/1)
+        ctx.lineTo(0, 0)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 4
+        ctx.lineJoin = "round"
+        ctx.moveTo(-this.size/2, this.size)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(-this.size/2, this.size)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(0, 0-this.size)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(this.size*1.2, -this.size/1)
+        ctx.lineTo(0, 0)
+        ctx.lineTo(this.size*1.2, -this.size/1)
+        ctx.lineTo(0, 0)
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+        
+        if (this.showRarity) {
+            ctx.fillStyle = "white"
+            ctx.strokeStyle = "black"
+            ctx.lineWidth = 3
+            ctx.font = "10px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(this.id, this.x, this.y+10/3)
+            ctx.fillText(this.id, this.x, this.y+10/3)
+        }
+        ctx.closePath();
+    }
+}
 class Bacteria extends Petal {
     constructor(host, stats) {
         super(host, stats)
@@ -702,6 +856,11 @@ export var availablePetals = [
         armor: 0
     }),
     new DryStick(null, {
+        health: 100,
+        damage: 1,
+        armor: 0
+    }),
+    new MagicStick(null, {
         health: 100,
         damage: 1,
         armor: 0

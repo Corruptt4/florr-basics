@@ -226,6 +226,7 @@ setInterval(() => {
                 }
                 if (collider1.type == "mob" && !collider1.pet) {
                     collider1.health -= collider2.stats.damage
+                    collider1.damageTick = 6
                     if (collider2.poison.poison > 0) {
                         collider1.poisonTake(collider2.poison.poison, collider2.poison.tick)
                     }
@@ -235,6 +236,7 @@ setInterval(() => {
                 }
                 if (collider2.type == "mob" && !collider2.pet) {
                     collider2.health -= collider1.stats.damage
+                    collider2.damageTick = 6
                     if (collider1.poison.poison > 0) {
                         collider2.poisonTake(collider1.poison.poison, collider1.poison.tick)
                     }
