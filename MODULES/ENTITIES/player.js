@@ -15,7 +15,8 @@ export class Player {
         this.attacking = false;
         this.showPetalRarity = false;
         this.keyDown = [];
-        this.mass = 10
+        this.mass = 10;
+        this.petalsOrbiting = []
         this.damageTick = 0
         this.equippedPetals = []
         this.speed = 0.2
@@ -41,17 +42,18 @@ export class Player {
                 }
             )
         }
+        this.equippedPetals.forEach((p) => {
+            if (!this.petalsOrbiting.includes(p) && p.type != "PlaceholderPetal") {
+                this.petalsOrbiting.push([p.id, p.petal])
+            }
+        })
     }
     draw() {
         // Just draw the petals if they're NOT null.
         this.equippedPetals.forEach((petal) => {
-            if (petal.petal != null) {
+            if (petal.petal != null && petal.petal.type != "PlaceholderPetal") {
                 if (!petal.petal.dead) petal.petal.draw();
                 petal.petal.showRarity = this.showPetalRarity
-            }
-            if (petal.petal.id == null) {
-                petal.petal.id = petal.id
-                petal.petal.orbitoffset = petal.offset
             }
         })
 
@@ -65,8 +67,14 @@ export class Player {
         ctx.closePath();
     }
     update() {
+        this.petalsOrbiting = []
         this.equippedPetals.forEach((p) => {
-            p.petal.id = p.id
+            if (p.petal != null && p.petal.type != "PlaceholderPetal") {
+                this.petalsOrbiting.push(p.petal)
+            }
+        })
+        this.petalsOrbiting.forEach((p, index) => {
+            p.id = index
         })
         if (this.x - this.size < 0) {
             this.velocity.x += 1
@@ -80,8 +88,9 @@ export class Player {
         if (this.y + this.size > mapSize) {
             this.velocity.y -= 1
         }
-        this.equippedPetals.forEach((p) => {
-            p.petal.reloadPetal()
+        this.petalsOrbiting.forEach((p) => {
+            p.reloadPetal()
+            if (p.isSummoner) p.summon();
         })
 
         /** Key codes */

@@ -86,8 +86,6 @@ export class PetalBox {
             let tabHeight = 250
             let x = this.x - this.boxSize/2-tabWidth/3.3
             let y = this.y - tabHeight -  20
-            let textX = this.x-tabWidth/2.5
-            let textY = this.y - tabHeight
             ctx.beginPath()
             ctx.globalAlpha = 0.7
             ctx.fillStyle = "rgba(0, 0, 0, 0.8)"

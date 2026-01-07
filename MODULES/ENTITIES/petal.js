@@ -3,6 +3,14 @@ import { darkenRGB, degreesToRads } from "../../SCRIPTS/functions.js";
 import { availableMobs } from "../STORAGE/mobs.js";
 import { Mob } from "./mob.js";
 
+// Just for slots with no petals, it won't be taken into account in rendering, updating, or in player.petalsOrbiting. Just to not break something
+export class PlaceholderPetal {
+    constructor() {
+        this.type = "PlaceholderPetal"
+        this.name = "Placeholder"
+    }
+}
+
 export class Petal {
     constructor(host, stats = {
         health: 10,
@@ -15,7 +23,7 @@ export class Petal {
         this.targetY = 0;
         this.host = host;
         this.stats = stats;
-        this.rarity = 1;
+        this.rarity = 0;
         this.dead = true;
         this.reload = 0;
         this.maxHealth = 0;
@@ -134,7 +142,6 @@ export class Petal {
         this.poison.poison = Math.round(this.poison.poison)
     }
     update() {
-        if (this.isSummoner) this.summon();
         if (this.lockedAngle) {
             this.angle = 0
         } else {
@@ -142,11 +149,11 @@ export class Petal {
         }
         this.targetX = this.host.x + this.host.petalOrbitDistance 
         * Math.cos(this.host.globalAngle + 
-        degreesToRads((360 / this.host.equippedPetals.length) * (this.id)))
+        degreesToRads((360 / this.host.petalsOrbiting.length) * (this.id)))
         
         this.targetY = this.host.y + this.host.petalOrbitDistance 
         * Math.sin(this.host.globalAngle + 
-        degreesToRads((360 / this.host.equippedPetals.length) * (this.id)))
+        degreesToRads((360 / this.host.petalsOrbiting.length) * (this.id)))
         
         let angle = Math.atan2(this.targetY - this.y, this.targetX - this.x)
         

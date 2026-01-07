@@ -1,6 +1,7 @@
-import { ctx, canvas } from "../../main.js";
+import { ctx, canvas, rarities } from "../../main.js";
 import { abbreviate, darkenRGB } from "../../SCRIPTS/functions.js";
 import { availablePetals } from "../STORAGE/petals.js";
+
 
 export class InventoryPetalBox {
     constructor(x, y, set, rarity) {
@@ -70,7 +71,7 @@ export class Inventory {
         this.open = false;
         this.color = "rgb(0, 188, 188)"
         this.scalingFactor = 0.4
-        this.petalToCollect = []
+        this.petalsToParse = []
     }
     update() {
         this.petalFilter.setFilter = () => {
@@ -88,9 +89,16 @@ export class Inventory {
             this.width += (this.originalWidth - this.width) *  this.scalingFactor
             this.height += (this.originalHeight - this.height) *  this.scalingFactor
         }
-        if (this.petalToCollect.length > 0) {
-            this.petalToCollect.forEach((p) => {
+        if (this.petalsToParse.length > 0) {
+            this.petalsToParse.forEach((p) => {
+                console.log(p)
+                let petalRarity = p.rarity
+                let petalName = p.name
 
+                let typeOfPetal = this.petals.filter((petal) => petalName === petal.petal.name)
+                let r = typeOfPetal.filter((petal) => this.rarities[petalRarity-1] == petal.rarity)
+                r[0].amount++
+                this.petalsToParse.splice(this.petalsToParse.indexOf(p), 1)
             })
         }
     }

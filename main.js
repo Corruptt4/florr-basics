@@ -7,6 +7,7 @@ import { abbreviate, boxBoxCollision, boxCollision, boxCollision2 } from "./SCRI
 import { availableMobs } from "./MODULES/STORAGE/mobs.js";
 import { QuadTree } from "./MODULES/PHYSICS/quadTree.js";
 import { Inventory, InventoryPetalBox } from "./MODULES/UI/inventory.js";
+import { Petal, PlaceholderPetal } from "./MODULES/ENTITIES/petal.js";
 
 export const canvas = document.getElementById("canvas"),
                           ctx = canvas.getContext("2d");
@@ -145,6 +146,7 @@ document.addEventListener("mousemove", (e) => {
     my = e.clientY
     canvas.style.cursor = "default"
     petalBoxHolders.forEach((box) => {
+        if (box.box == null) return;
         box.box.hovered = false
         if (boxCollision(mx, my, box.x, box.y, box.boxSize) && !mouseDraggingBox) {
             canvas.style.cursor = "pointer"
@@ -275,7 +277,7 @@ setInterval(() => {
             }
          }
     })
-    if (mouseDraggingBox && mouseHolding) {
+    if (mouseDraggingBox && mouseHolding && mouseDraggingBoxClass != null) {
         mouseDraggingBoxClass.x += (mx - mouseDraggingBoxClass.x) * 0.3;
         mouseDraggingBoxClass.y += (my - mouseDraggingBoxClass.y) * 0.3;
     }
@@ -326,7 +328,7 @@ function render() {
     
     if (mouseHolding) {
         for (let holder of petalBoxHolders) {
-            if (boxCollision(mx, my, holder.x, holder.y, holder.boxSize) && !mouseDraggingBox) {
+            if (boxCollision(mx, my, holder.x, holder.y, holder.boxSize) && !mouseDraggingBox && holder.box != null) {
                 holder.draggingBox = true;
                 mouseDraggingBox = true;
                 holder.box.followMouse = true;
@@ -341,6 +343,14 @@ function render() {
         let swapping = false
         for (let targetHolder of petalBoxHolders) {
             if (targetHolder.box === mouseDraggingBoxClass) continue;
+            if (targetHolder.box == null) {
+                mouseDraggingBoxClass.boxOn.box = targetHolder.box
+                targetHolder.box = mouseDraggingBoxClass
+                mouseDraggingBoxClass.followMouse = false;
+                mouseDraggingBox = false;
+                swapping = true;
+                break;
+            }
 
             if (boxCollision(mx, my, targetHolder.x, targetHolder.y, targetHolder.boxSize)) {
                 const sourceHolder = mouseDraggingBoxClass.boxOn;
@@ -392,10 +402,33 @@ function render() {
             } 
         }
         if (!swapping) {
-            mouseDraggingBox = false
+            console.log(mouseDraggingBoxClass)
+            if (!boxCollision(
+                mx, 
+                my, 
+                mouseDraggingBoxClass.boxOn.x, 
+                mouseDraggingBoxClass.boxOn.y, 
+                mouseDraggingBoxClass.boxOn.boxSize
+            )) {
+                mouseDraggingBox = false
+                mouseDraggingBoxClass.followMouse = false;
+                mouseDraggingBoxClass.boxOn.draggingBox = false;
+                let petal = mouseDraggingBoxClass.petal
+                petal.dead = true
+                let slot = player.equippedPetals.find(slot => slot.id === mouseDraggingBoxClass.boxOn.id)
+                let selfBox = petalBoxHolders[petalBoxHolders.indexOf(mouseDraggingBoxClass.boxOn)]
+                console.log(slot)
+                slot.petal = new PlaceholderPetal()
+                mouseDraggingBox = false
+                inventory.petalsToParse.push(petal[0])
+                console.log(inventory.petalsToParse)
+                selfBox.box = null
+            } else {
+                mouseDraggingBox = false
                 mouseDraggingBoxClass.followMouse = false;
                 mouseDraggingBoxClass.boxOn.draggingBox = false
                 mouseDraggingBoxClass = null
+            }
         }
     }
     requestAnimationFrame(render)

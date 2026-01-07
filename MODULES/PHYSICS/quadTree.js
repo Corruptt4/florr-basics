@@ -55,19 +55,20 @@ export class QuadTree {
         })
     }
     update() {
+        this.collisions = []
         this.entityBoundaries.forEach((b) => {
            this.points.forEach((p) => {
                 if (p != b.selfEntity) {
                     if (b.overlap(p)) {
                         b.detected.push(p)
                     }
+                    this.collisions.push(...b.collisionCheck(p, b))
                 }
-                this.collisions.push(...b.collisionCheck())
             })
         })
     }
     insert(point) {
-        let en = point.size*2 + 75
+        let en = point.size*2 + 50
         let entityBoundary = new Rect(point.x - en/2, point.y - en/2, en, en, point)
         this.entityBoundaries.push(entityBoundary)
         this.points.push(point)
@@ -78,7 +79,6 @@ export class QuadTree {
             b.collisions = []
         })
         this.points = []
-        this.collisions = []
         this.entityBoundaries = []
     }
 }
