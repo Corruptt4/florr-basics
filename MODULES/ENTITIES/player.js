@@ -88,10 +88,12 @@ export class Player {
         if (this.y + this.size > mapSize) {
             this.velocity.y -= 1
         }
-        this.petalsOrbiting.forEach((p) => {
-            p.reloadPetal()
-            if (p.isSummoner) p.summon();
-        })
+        if (this.petalsOrbiting.length > 0) {
+            this.petalsOrbiting.forEach((p) => {
+                p.reloadPetal()
+                if (p.isSummoner) p.summon();
+            })
+        }
 
         /** Key codes */
         // right 39, 68

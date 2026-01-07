@@ -15,6 +15,7 @@ export class InventoryPetalBox {
         this.petal = null;
     }
     draw() {
+        this.petal.rarity = this.rarity
         ctx.beginPath()
         ctx.fillStyle = this.rarities[this.rarity-1][1]
         ctx.strokeStyle = darkenRGB(this.rarities[this.rarity-1][1], 20)
@@ -55,6 +56,7 @@ export class Inventory {
         this.shownPetals = []
         this.row = 0
         this.col = 0
+        this.visibleSlots = []
         this.petals = [];
         this.exitBox = {
             position: {x: this.x, y: this.y},
@@ -103,6 +105,7 @@ export class Inventory {
         }
     }
     draw() {
+        this.visibleSlots = []
         ctx.beginPath()
         ctx.fillStyle = this.color
         ctx.strokeStyle = darkenRGB(this.color, 20)
@@ -157,6 +160,7 @@ export class Inventory {
                 slot.petal = petal.petal
                 slot.amount = petal.amount
                 slot.draw()
+                this.visibleSlots.push(slot)
             })
         }
     }

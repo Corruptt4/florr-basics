@@ -2,12 +2,35 @@ import { ctx, rarities } from "../../main.js";
 import { abbreviate, darkenRGB } from "../../SCRIPTS/functions.js";
 import { availableMobs } from "../STORAGE/mobs.js";
 
+export class EmptySlot {
+    constructor(box) {
+        this.x = box.x
+        this.y = box.y
+        this.boxSize = 85
+        this.isEmpty = true
+        this.boxOn = box;
+        this.draggable = false
+    }
+    draw() {
+        this.x = this.boxOn.x
+        this.y = this.boxOn.y
+
+        ctx.beginPath()
+        ctx.fillStyle = "rgba(0, 0, 0, 0.4)"
+        ctx.roundRect(this.x, this.y, this.boxSize, this.boxSize, this.boxSize/10)
+        ctx.fill()
+        ctx.closePath()
+    }
+}
+
 export class PetalBoxPlace {
     constructor(player) {
         this.x = 0;
         this.y = 0
         this.player = player
         this.id = 0;
+        this.draggable = true
+        this.isEmpty = false;
         this.boxSize = 85;
         this.draggingBox = false
         this.box = null
@@ -23,7 +46,7 @@ export class PetalBoxPlace {
         ctx.stroke()
         ctx.globalAlpha = 1
         ctx.closePath()
-        if (this.box != null) {
+        if (this.box != null && this.box.petal) {
             if (!this.draggingBox) {
                 this.box.x += (this.x - this.box.x) * 0.3;
                 this.box.y += (this.y - this.box.y) * 0.3;
@@ -43,10 +66,13 @@ export class PetalBox {
         this.rarity = 0
         this.boxSize = 85;
         this.boxOn = null;
+        this.draggable = true
         this.hovered = false;
         this.followMouse = false
+        this.comesFromInventory = false;
         this.targetPercentage = 0;
         this.percentage = 0;
+        this.rarities = []
         this.petal = []
     }
     /**
@@ -55,28 +81,28 @@ export class PetalBox {
      * [petal, id, rarity]
      */
     draw() {
-        this.targetPercentage = this.petal[0].stats.health/this.petal[0].maxHealth
+        this.targetPercentage = this.comesFromInventory ? 1 : this.petal[0].stats.health/this.petal[0].maxHealth
         if (this.targetPercentage < 0) {
             this.targetPercentage = 0
         }
         this.percentage += (this.targetPercentage-this.percentage)*0.1
         
         ctx.beginPath()
-        ctx.fillStyle = darkenRGB(rarities[this.petal[0].rarity-1][1], 20)
+        ctx.fillStyle = darkenRGB(this.rarities[this.petal[0].rarity-1][1], 20)
         ctx.lineWidth = 8
         ctx.roundRect(this.x, this.y, this.boxSize, this.boxSize, this.boxSize/10)
         ctx.fill()
         ctx.closePath()
 
         ctx.beginPath()
-        ctx.fillStyle = rarities[this.petal[0].rarity-1][1]
+        ctx.fillStyle = this.rarities[this.petal[0].rarity-1][1]
         ctx.roundRect(this.x, this.y, this.boxSize, this.boxSize*this.percentage, this.boxSize/10)
         ctx.fill()
         ctx.closePath()
 
         ctx.beginPath()
-        ctx.fillStyle = darkenRGB(rarities[this.petal[0].rarity-1][1], 20)
-        ctx.strokeStyle = darkenRGB(rarities[this.petal[0].rarity-1][1], 20)
+        ctx.fillStyle = darkenRGB(this.rarities[this.petal[0].rarity-1][1], 20)
+        ctx.strokeStyle = darkenRGB(this.rarities[this.petal[0].rarity-1][1], 20)
         ctx.lineWidth = 8
         ctx.roundRect(this.x, this.y, this.boxSize, this.boxSize, this.boxSize/10)
         ctx.stroke()
@@ -103,10 +129,10 @@ export class PetalBox {
             ctx.strokeText(this.petal[0].name, x+20, y+50)
             ctx.fillText(this.petal[0].name, x+20, y+50)
             ctx.font = "20px Arial"
-            ctx.fillStyle = rarities[this.petal[0].rarity-1][1]
-            ctx.strokeStyle = darkenRGB(rarities[this.petal[0].rarity-1][1])
-            ctx.strokeText(rarities[this.petal[0].rarity-1][0], x+20, y+75)
-            ctx.fillText(rarities[this.petal[0].rarity-1][0], x+20, y+75)
+            ctx.fillStyle = this.rarities[this.petal[0].rarity-1][1]
+            ctx.strokeStyle = darkenRGB(this.rarities[this.petal[0].rarity-1][1])
+            ctx.strokeText(this.rarities[this.petal[0].rarity-1][0], x+20, y+75)
+            ctx.fillText(this.rarities[this.petal[0].rarity-1][0], x+20, y+75)
             ctx.font = "20px Arial"
             ctx.fillStyle = "white"
             ctx.strokeStyle = "black"
@@ -162,39 +188,39 @@ export class PetalBox {
                 ctx.strokeText(`SUMMONS: ${this.petal[0].summoner.capacity > 1 ? this.petal[0].summoner.capacity + "x" : ""}`, x+20, y+tabHeight/1.45)
                 ctx.fillText(`SUMMONS: ${this.petal[0].summoner.capacity > 1 ? this.petal[0].summoner.capacity + "x" : ""}`, x+20, y+tabHeight/1.45)
                 let summonsExtraSpacing = ctx.measureText(`SUMMONS: ${this.petal[0].summoner.capacity > 1 ? this.petal[0].summoner.capacity + "x" : ""}`)
-                ctx.fillStyle = rarities[this.petal[0].summoner.summonRarity][1]
-                ctx.strokeStyle = darkenRGB(rarities[this.petal[0].summoner.summonRarity][1])
-                ctx.strokeText(rarities[this.petal[0].summoner.summonRarity][0], x+20 + (this.petal[0].summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width , y+tabHeight/1.45)
-                ctx.fillText(rarities[this.petal[0].summoner.summonRarity][0], x+20 + (this.petal[0].summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width, y+tabHeight/1.45)
-                let summonSP1 = ctx.measureText(rarities[this.petal[0].summoner.summonRarity][0])
+                ctx.fillStyle = this.rarities[this.petal[0].summoner.summonRarity][1]
+                ctx.strokeStyle = darkenRGB(this.rarities[this.petal[0].summoner.summonRarity][1])
+                ctx.strokeText(this.rarities[this.petal[0].summoner.summonRarity][0], x+20 + (this.petal[0].summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width , y+tabHeight/1.45)
+                ctx.fillText(this.rarities[this.petal[0].summoner.summonRarity][0], x+20 + (this.petal[0].summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width, y+tabHeight/1.45)
+                let summonSP1 = ctx.measureText(this.rarities[this.petal[0].summoner.summonRarity][0])
 
                 ctx.fillStyle = "white"
                 ctx.strokeStyle = "black"
                 ctx.strokeText(availableMobs[this.petal[0].summoner.type].name, x+25 + (this.petal[0].summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width + summonSP1.width , y+tabHeight/1.45)
                 ctx.fillText(availableMobs[this.petal[0].summoner.type].name, x+25 + (this.petal[0].summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width + summonSP1.width, y+tabHeight/1.45)
                 
-                let summonSP = ctx.measureText(rarities[this.petal[0].summoner.summonRarity][0] + " " + availableMobs[this.petal[0].summoner.type].name)
+                let summonSP = ctx.measureText(this.rarities[this.petal[0].summoner.summonRarity][0] + " " + availableMobs[this.petal[0].summoner.type].name)
                 ctx.fillStyle = "lime"
                 ctx.strokeText(
-                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).hp)}`, 
+                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).hp)}`, 
                     x+25+ (this.petal[0].summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width + summonSP.width, 
                     y+tabHeight/1.45
                 )
                 ctx.fillText(
-                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).hp)}`, 
+                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).hp)}`, 
                     x+ (this.petal[0].summoner.capacity > 1 ? 5 : 0)+25+summonsExtraSpacing.width + summonSP.width,
                     y+tabHeight/1.45
                 )
                 
-                let summonSP2 = ctx.measureText(abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).hp))
+                let summonSP2 = ctx.measureText(abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).hp))
                 ctx.fillStyle = "lime"
                 ctx.strokeText(
-                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).dmg)})`, 
+                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).dmg)})`, 
                     x+(this.petal[0].summoner.capacity > 1 ? 5 : 0)+65+summonsExtraSpacing.width + summonSP2.width + summonSP.width, 
                     y+tabHeight/1.45
                 )
                 ctx.fillText(
-                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, rarities).dmg)})`, 
+                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).dmg)})`, 
                     x+(this.petal[0].summoner.capacity > 1 ? 5 : 0)+65+summonsExtraSpacing.width + summonSP2.width + summonSP.width,
                     y+tabHeight/1.45
                 )
