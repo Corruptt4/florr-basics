@@ -52,6 +52,7 @@ export class Player {
         // Just draw the petals if they're NOT null.
         this.equippedPetals.forEach((petal) => {
             if (petal.petal != null && petal.petal.type != "PlaceholderPetal") {
+                petal.petal.host = this
                 if (!petal.petal.dead) petal.petal.draw();
                 petal.petal.showRarity = this.showPetalRarity
             }
@@ -90,6 +91,7 @@ export class Player {
         }
         if (this.petalsOrbiting.length > 0) {
             this.petalsOrbiting.forEach((p) => {
+                p.host = this
                 p.reloadPetal()
                 if (p.isSummoner) p.summon();
             })

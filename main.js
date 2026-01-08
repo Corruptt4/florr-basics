@@ -449,8 +449,25 @@ function render() {
                 swapping = true
                 break;
             } 
+            
+            if (!swapping && mouseDraggingBoxClass.comesFromInventory &&
+                boxCollision(mx, my, targetHolder.x, targetHolder.y, targetHolder.boxSize) &&
+                targetHolder.box instanceof EmptySlot
+            ) {
+                targetHolder.box = null
+                targetHolder.box = mouseDraggingBoxClass
+                mouseDraggingBoxClass.boxOn = targetHolder
+                mouseDraggingBoxClass.rarities = rarities
+                mouseDraggingBoxClass.boxOn.draggingBox = false
+                mouseDraggingBox = false
+                let slot = player.equippedPetals.find((slot) => slot.id == targetHolder.id)
+                slot.rarity = mouseDraggingBoxClass.petal[0].rarity
+                slot.petal = mouseDraggingBoxClass.petal[0]
+                slot.petal.host = player
+                slot.petal.innit()
+                break;
+            }
         }
-        if (!swapping && mouseDraggingBoxClass.comesFromInventory) {}
         if (!swapping && !mouseDraggingBoxClass.comesFromInventory) {
             console.log(mouseDraggingBoxClass)
             if (!boxCollision(
