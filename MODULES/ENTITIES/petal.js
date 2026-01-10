@@ -121,9 +121,6 @@ export class Petal {
             this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2-this.summoner.lowerRarity : this.rarity-2-this.summoner.lowerRarity
             this.summoner.timer *= Math.pow(1.4, this.summoner.summonRarity)
             this.summoner.timer2 = this.summoner.timer
-            if (this.rarity == rarities.length) {
-                this.summoner.summonRarity = this.rarity-1
-            }
         }
         this.maxSummonTimer = this.summoner.timer
         let exponential = 1.3

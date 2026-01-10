@@ -170,7 +170,8 @@ export class Inventory {
                 this.petals.push({
                     petal: availablePetals[i],
                     amount: Math.random() < 0.5 ? 0 : 10,
-                    rarity: rarities[k]
+                    rarity: rarities[k],
+                    actualRarity: k
                 })
             }
         }

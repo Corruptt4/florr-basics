@@ -106,7 +106,7 @@ for (let i = 0; i < player.equippedPetals.length; i++) {
     petalBoxHolders.push(petalBoxHolder)
 }
 player.equippedPetals.forEach((petal) => {
-    let randomPetal = Math.floor(Math.random() * availablePetals.length)
+    let randomPetal = 0
     let newPetal = new availablePetals[randomPetal].constructor(
         player, {
             health: 10,
@@ -190,17 +190,28 @@ document.addEventListener("mousedown", (e) => {
         if (inventory.open) {
             for (let invSlot of inventory.visibleSlots) {
                 if (boxCollision(mx, my, invSlot.x, invSlot.y, invSlot.boxSize)) {
-                    let editSlot = inventory.petals.find((petal) => invSlot.petal == petal.petal)
-                    editSlot.amount--
+                    let editSlot = inventory.petals.filter((petal) => invSlot.petal == petal.petal)
+                    editSlot = editSlot.filter((petal) => (invSlot.petal.rarity-1) == petal.actualRarity)
+                    editSlot = editSlot[0]
+                    console.log(editSlot)
+                    const clonedPetal = structuredClone(invSlot.petal);
+                    Object.setPrototypeOf(
+                        clonedPetal,
+                        Object.getPrototypeOf(invSlot.petal)
+                    );
+
+                    clonedPetal.host = player;
+                    clonedPetal.innit();
                     let slotToDrag = new PetalBox(player)
-                    slotToDrag.petal.push(invSlot.petal)
+                    slotToDrag.petal = [clonedPetal];
                     inventoryPetalToSlot.push(slotToDrag)
                     mouseDraggingBox = true
                     slotToDrag.rarities = rarities
                     slotToDrag.draggingBox = true
                     slotToDrag.comesFromInventory = true
                     mouseDraggingBoxClass = slotToDrag
-                    console.log(slotToDrag)
+                    editSlot.amount -= 1
+                    break;
                 }
             }
         }
@@ -359,7 +370,7 @@ function render() {
     ctx.restore()
     petalBoxHolders.forEach((pBox) => {
         pBox.y = canvas.height / 1.12
-        pBox.x = canvas.width / 2 + (pBox.boxSize+15)*petalBoxHolders.length/2-((pBox.boxSize+15)*pBox.id)
+        pBox.x = canvas.width / 2 - (pBox.boxSize+15)*petalBoxHolders.length/2+((pBox.boxSize+15)*pBox.id)
         pBox.draw()
     })
     inventoryPetalToSlot.forEach((slot) => {
@@ -371,7 +382,6 @@ function render() {
     inventory.draw()
     if (!mouseHolding && mouseDraggingBox) {
         let swapping = false
-        let inventoryHandled = false
         for (let targetHolder of petalBoxHolders) {
             if (targetHolder.box === mouseDraggingBoxClass) continue;
             if (
@@ -450,23 +460,41 @@ function render() {
                 break;
             } 
             
-            if (!swapping && mouseDraggingBoxClass.comesFromInventory &&
+            if (
+                !swapping &&
+                mouseDraggingBoxClass.comesFromInventory &&
                 boxCollision(mx, my, targetHolder.x, targetHolder.y, targetHolder.boxSize) &&
                 targetHolder.box instanceof EmptySlot
             ) {
-                targetHolder.box = null
-                targetHolder.box = mouseDraggingBoxClass
-                mouseDraggingBoxClass.boxOn = targetHolder
-                mouseDraggingBoxClass.rarities = rarities
-                mouseDraggingBoxClass.boxOn.draggingBox = false
-                mouseDraggingBox = false
-                let slot = player.equippedPetals.find((slot) => slot.id == targetHolder.id)
-                slot.rarity = mouseDraggingBoxClass.petal[0].rarity
-                slot.petal = mouseDraggingBoxClass.petal[0]
-                slot.petal.host = player
-                slot.petal.innit()
+                targetHolder.box = mouseDraggingBoxClass;
+                mouseDraggingBoxClass.boxOn = targetHolder;
+                mouseDraggingBoxClass.rarities = rarities;
+
+                const slot = player.equippedPetals.find(
+                    slot => slot.id === targetHolder.id
+                );
+
+                const petal = mouseDraggingBoxClass.petal[0];
+
+                slot.petal = petal;
+                slot.rarity = petal.rarity;
+                petal.id = slot.id; 
+                petal.host = player;
+                inventoryPetalToSlot.splice(
+                    inventoryPetalToSlot.indexOf(mouseDraggingBoxClass),
+                    1
+                );
+                entities.push(petal)
+
+                mouseDraggingBoxClass.followMouse = false;
+                mouseDraggingBoxClass.comesFromInventory = false;
+                targetHolder.draggingBox = false;
+                mouseDraggingBox = false;
+
+                swapping = true;
                 break;
             }
+
         }
         if (!swapping && !mouseDraggingBoxClass.comesFromInventory) {
             console.log(mouseDraggingBoxClass)
@@ -480,14 +508,20 @@ function render() {
                 mouseDraggingBox = false
                 mouseDraggingBoxClass.followMouse = false;
                 mouseDraggingBoxClass.boxOn.draggingBox = false;
-                let petal = mouseDraggingBoxClass.petal
+                let petal = mouseDraggingBoxClass.petal[0]
                 petal.dead = true
+                petal.summons.forEach((summon) => {
+                    summon.health = 0
+                })
+                petal.summons = []
                 let slot = player.equippedPetals.find(slot => slot.id === mouseDraggingBoxClass.boxOn.id)
                 let selfBox = petalBoxHolders[petalBoxHolders.indexOf(mouseDraggingBoxClass.boxOn)]
                 console.log(slot)
                 slot.petal = new PlaceholderPetal()
                 mouseDraggingBox = false
-                inventory.petalsToParse.push(petal[0])
+                inventory.petalsToParse.push(petal)
+                entities.splice(entities.indexOf(petal), 1)
+                player.petalsOrbiting.splice(player.petalsOrbiting.indexOf(petal), 1)
                 console.log(inventory.petalsToParse)
                 selfBox.box = new EmptySlot(selfBox)
             } else {
