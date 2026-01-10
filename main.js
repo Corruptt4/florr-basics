@@ -169,8 +169,10 @@ document.addEventListener("mousemove", (e) => {
 
     if (inventory.open) {
         inventory.visibleSlots.forEach((slot) => {
+            slot.hovered = false
             if (boxCollision(mx, my, slot.x, slot.y, slot.boxSize)) {
                 canvas.style.cursor = "pointer"
+                slot.hovered = true
             }
         })
     }
@@ -370,7 +372,7 @@ function render() {
     ctx.restore()
     petalBoxHolders.forEach((pBox) => {
         pBox.y = canvas.height / 1.12
-        pBox.x = canvas.width / 2 - (pBox.boxSize+15)*petalBoxHolders.length/2+((pBox.boxSize+15)*pBox.id)
+        pBox.x = canvas.width / 2 - (pBox.boxSize+15)*(petalBoxHolders.length+1)/2+((pBox.boxSize+15)*pBox.id)
         pBox.draw()
     })
     inventoryPetalToSlot.forEach((slot) => {

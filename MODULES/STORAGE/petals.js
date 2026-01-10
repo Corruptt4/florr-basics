@@ -353,7 +353,7 @@ class DryStick extends Petal {
 class Stick extends Petal {
     constructor(host, stats) {
         super(host, stats)
-        this.name = "Stick"
+        this.name = "Mysterious Stick"
         this.altName = "Stick"
         this.size = 12
         this.maxReload = 90

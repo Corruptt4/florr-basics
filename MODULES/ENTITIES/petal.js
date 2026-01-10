@@ -118,7 +118,7 @@ export class Petal {
     }
     innit() {
         if (this.isSummoner) {
-            this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2-this.summoner.lowerRarity : this.rarity-2-this.summoner.lowerRarity
+            this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2 : this.rarity-2-this.summoner.lowerRarity
             this.summoner.timer *= Math.pow(1.4, this.summoner.summonRarity)
             this.summoner.timer2 = this.summoner.timer
         }
@@ -146,11 +146,11 @@ export class Petal {
         }
         this.targetX = this.host.x + this.host.petalOrbitDistance 
         * Math.cos(this.host.globalAngle + 
-        degreesToRads((360 / this.host.petalsOrbiting.length) * (this.id)))
+        degreesToRads((360 / this.host.petalsOrbiting.length) * (this.id-1)))
         
         this.targetY = this.host.y + this.host.petalOrbitDistance 
         * Math.sin(this.host.globalAngle + 
-        degreesToRads((360 / this.host.petalsOrbiting.length) * (this.id)))
+        degreesToRads((360 / this.host.petalsOrbiting.length) * (this.id-1)))
         
         let angle = Math.atan2(this.targetY - this.y, this.targetX - this.x)
         
@@ -176,6 +176,10 @@ export class Petal {
             ctx.strokeStyle = "black"
             ctx.arc(this.x, this.y, this.size*2, 0, Math.PI * 2)
             ctx.fill()
+            ctx.closePath()
+            ctx.beginPath()
+            ctx.fillStyle = rarities[this.rarity-1][1]
+            ctx.strokeStyle = "black"
             ctx.globalAlpha = 1
             ctx.lineWidth = 2
             ctx.font = "20px Arial"

@@ -75,7 +75,7 @@ export class Player {
             }
         })
         this.petalsOrbiting.forEach((p, index) => {
-            p.id = index
+            p.id = index+1
         })
         if (this.x - this.size < 0) {
             this.velocity.x += 1
