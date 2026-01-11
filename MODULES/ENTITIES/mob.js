@@ -30,7 +30,7 @@ export class Mob {
         this.poisonTicks = 0;
         this.moving = true
         this.target = null
-        this.mass = 1 * Math.pow(1.1, rarity-1)
+        this.mass = 10 * Math.pow(1.2, rarity-1)
         this.turnSpeed = 0.08;
         this.pet = false
         this.hostPetal = null;

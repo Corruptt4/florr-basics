@@ -62,7 +62,7 @@ let petalBoxHolders = []
 let mobRarities = []
 let inventory = new Inventory(20, canvas.height - 80, 90, 90)
 inventory.innitPetals(rarities)
-for (let i = 0; i < 9; i++) {
+for (let i = 0; i < 11; i++) {
     mobRarities.push([i, 1/Math.pow(1.6, i)])
 }
 function spawnMob() {
@@ -169,10 +169,8 @@ document.addEventListener("mousemove", (e) => {
 
     if (inventory.open) {
         inventory.visibleSlots.forEach((slot) => {
-            slot.hovered = false
             if (boxCollision(mx, my, slot.x, slot.y, slot.boxSize)) {
                 canvas.style.cursor = "pointer"
-                slot.hovered = true
             }
         })
     }
@@ -194,6 +192,7 @@ document.addEventListener("mousedown", (e) => {
                 if (boxCollision(mx, my, invSlot.x, invSlot.y, invSlot.boxSize)) {
                     let editSlot = inventory.petals.filter((petal) => invSlot.petal == petal.petal)
                     editSlot = editSlot.filter((petal) => (invSlot.petal.rarity-1) == petal.actualRarity)
+                    console.log(invSlot.petal.rarity)
                     editSlot = editSlot[0]
                     console.log(editSlot)
                     const clonedPetal = structuredClone(invSlot.petal);
@@ -262,11 +261,11 @@ setInterval(() => {
                 if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
                 if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
 
-                collider2.push.x += 1 * Math.cos(angle)
-                collider2.push.y += 1 * Math.sin(angle)
+                collider2.push.x += 10*(collider1.mass/collider2.mass) * Math.cos(angle)
+                collider2.push.y += 10*(collider1.mass/collider2.mass) * Math.sin(angle)
                 
-                collider1.push.x -= 1 * Math.cos(angle)
-                collider1.push.y -= 1 * Math.sin(angle)
+                collider1.push.x -= 10*(collider2.mass/collider1.mass) * Math.cos(angle)
+                collider1.push.y -= 10*(collider2.mass/collider1.mass) * Math.sin(angle)
 
                 if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
                     collider1.health -= collider2.damage
@@ -372,7 +371,7 @@ function render() {
     ctx.restore()
     petalBoxHolders.forEach((pBox) => {
         pBox.y = canvas.height / 1.12
-        pBox.x = canvas.width / 2 - (pBox.boxSize+15)*(petalBoxHolders.length+1)/2+((pBox.boxSize+15)*pBox.id)
+        pBox.x = canvas.width / 2 - (pBox.boxSize+15)*petalBoxHolders.length/2+((pBox.boxSize+15)*pBox.id)
         pBox.draw()
     })
     inventoryPetalToSlot.forEach((slot) => {
@@ -499,7 +498,6 @@ function render() {
 
         }
         if (!swapping && !mouseDraggingBoxClass.comesFromInventory) {
-            console.log(mouseDraggingBoxClass)
             if (!boxCollision(
                 mx, 
                 my, 
@@ -518,13 +516,11 @@ function render() {
                 petal.summons = []
                 let slot = player.equippedPetals.find(slot => slot.id === mouseDraggingBoxClass.boxOn.id)
                 let selfBox = petalBoxHolders[petalBoxHolders.indexOf(mouseDraggingBoxClass.boxOn)]
-                console.log(slot)
                 slot.petal = new PlaceholderPetal()
                 mouseDraggingBox = false
                 inventory.petalsToParse.push(petal)
                 entities.splice(entities.indexOf(petal), 1)
                 player.petalsOrbiting.splice(player.petalsOrbiting.indexOf(petal), 1)
-                console.log(inventory.petalsToParse)
                 selfBox.box = new EmptySlot(selfBox)
             } else {
                 mouseDraggingBox = false

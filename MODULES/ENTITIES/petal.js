@@ -60,11 +60,12 @@ export class Petal {
             scalesPetal: false,
         }
         /* 
-        This is default stats.
+        This are default stats.
         Stats:
-        HEALTH: 10
-        DAMAGE: 10
-        SIZE: 8
+        HEALTH: 6
+        DAMAGE: 6
+        SIZE: 10,
+        RELOAD: 60 (ticks)
         */
         this.color = "rgb(255, 255, 255)"
         this.velocity = {
@@ -214,7 +215,7 @@ export class Petal {
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, size * (boxSize/85), 0, Math.PI * 2);
+        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, size * (boxSize/boxSize), 0, Math.PI * 2);
         ctx.fill()
         ctx.stroke()
         ctx.closePath();

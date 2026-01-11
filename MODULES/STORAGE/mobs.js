@@ -11,6 +11,106 @@ class BabyAnt extends Mob {
     }
 }
 
+class SoldierAnt extends Mob {
+    constructor(x, y, rarity, health, damage, size) {
+        super(x, y, rarity, health, damage, size)
+        this.name = "Soldier Ant",
+        this.rarities = rarities
+        this.speed = 0.18
+        this.chasesPlayers = true
+        this.color = "rgb(80, 80, 80)"
+    }
+    draw() {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.beginPath()
+        ctx.rotate(this.angle+(Math.sin(this.t) * (Math.PI / 40)))
+        ctx.moveTo(this.size/2, this.size/1.7)
+        ctx.lineTo(this.size*1.35, this.size/2.5)
+        ctx.lineTo(this.size/2, this.size/1.7)
+        ctx.lineWidth = this.size/4
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = "rgb(25, 25, 25)"
+        ctx.fillStyle = "rgb(25, 25, 25)"
+        ctx.stroke()
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.beginPath()
+        ctx.rotate(this.angle-((Math.PI / 40)*Math.sin(this.t)))
+        ctx.lineWidth = this.size/4
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = "rgb(25, 25, 25)"
+        ctx.fillStyle = "rgb(25, 25, 25)"
+        ctx.moveTo(this.size/2, -this.size/1.7)
+        ctx.lineTo(this.size*1.35, -this.size/2.5)
+        ctx.lineTo(this.size/2, -this.size/1.7)
+        
+        ctx.stroke()
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.lineWidth = this.size/4
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = darkenRGB(this.color, 20)
+        ctx.arc(-this.size, 0, this.size/1.3, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.beginPath()
+        ctx.rotate(this.angle+(Math.sin(this.t) * (Math.PI / 40)))
+        ctx.ellipse(-this.size, -this.size/1.7, this.size/1.3, this.size/2.5, degreesToRads(10), 0, Math.PI*2)
+        ctx.lineWidth = this.size/4
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"
+        ctx.fillStyle = "rgba(255, 255, 255, 0.5)"
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+        
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.beginPath()
+        ctx.rotate(this.angle-(Math.sin(this.t) * (Math.PI / 40)))
+        ctx.ellipse(-this.size, this.size/1.7, this.size/1.3, this.size/2.5, -degreesToRads(10), 0, Math.PI*2)
+        ctx.lineWidth = this.size/4
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"
+        ctx.fillStyle = "rgba(255, 255, 255, 0.5)"
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.lineWidth = this.size/4
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = darkenRGB(this.color, 20)
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+    }
+}
+
+
 class Sandstorm extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
@@ -18,7 +118,7 @@ class Sandstorm extends Mob {
         this.rarities = rarities
         this.sandstormMovement = true;
         this.shape = 6
-        this.actualSpeed = 0.3
+        this.actualSpeed = 0.25
         this.isSandstorm = true;
         this.color = "rgb(212,199,167)"
     }
@@ -140,5 +240,6 @@ class Beetle extends Mob {
 export let availableMobs = [
     new BabyAnt(0, 0, 1, 85, 3, 15),
     new Beetle(0, 0, 1, 250, 6, 35),
-    new Sandstorm(0, 0, 1, 350, 8, 40)
+    new Sandstorm(0, 0, 1, 350, 8, 40),
+    new SoldierAnt(0, 0, 1, 180, 3, 18)
 ]

@@ -1,18 +1,20 @@
-import { ctx, canvas, rarities } from "../../main.js";
+import { ctx, canvas } from "../../main.js";
 import { abbreviate, darkenRGB } from "../../SCRIPTS/functions.js";
+import { availableMobs } from "../STORAGE/mobs.js";
 import { availablePetals } from "../STORAGE/petals.js";
 
 
 export class InventoryPetalBox {
-    constructor(x, y, set, rarity) {
+    constructor(x, y, set, rarity, rarities) {
         this.x = x;
         this.y = y;
         this.set = set;
         this.rarity = rarity;
-        this.rarities = null;
-        this.amount = 0
         this.hovered = false
+        this.amount = 0
         this.boxSize = 80
+        this.innited = true
+        this.rarities = rarities
         this.petal = null;
     }
     draw() {
@@ -39,139 +41,7 @@ export class InventoryPetalBox {
         ctx.fillText("x" + abbreviate(this.amount), 0, 0)
         ctx.closePath()
         ctx.restore()
-
-        if (this.hovered) {
-            let tabWidth = 600
-            let tabHeight = 250
-            let x = this.x - this.boxSize/2-tabWidth/3.3
-            let y = this.y - tabHeight -  20
-            ctx.beginPath()
-            ctx.globalAlpha = 0.7
-            ctx.fillStyle = "rgba(0, 0, 0, 0.8)"
-            ctx.strokeStyle = "rgba(0, 0, 0, 0.8"
-            ctx.lineJoin = "round"
-            ctx.roundRect(x, y, tabWidth, tabHeight, tabWidth/15)
-            ctx.fill()
-            ctx.stroke()
-            ctx.globalAlpha = 1
-            ctx.font = "45px Arial"
-            ctx.fillStyle = "white"
-            ctx.strokeStyle = "black"
-            ctx.textAlign = "left"
-            ctx.lineWidth = 5
-            ctx.strokeText(this.petal.name, x+20, y+50)
-            ctx.fillText(this.petal.name, x+20, y+50)
-            ctx.font = "20px Arial"
-            ctx.fillStyle = this.rarities[this.petal.rarity-1][1]
-            ctx.strokeStyle = darkenRGB(this.rarities[this.petal.rarity-1][1])
-            ctx.strokeText(this.rarities[this.petal.rarity-1][0], x+20, y+75)
-            ctx.fillText(this.rarities[this.petal.rarity-1][0], x+20, y+75)
-            ctx.font = "20px Arial"
-            ctx.fillStyle = "white"
-            ctx.strokeStyle = "black"
-            ctx.textAlign = "right"
-            ctx.strokeText((this.petal.maxReload/60).toFixed(2) + "s" + (this.petal.isSummoner ? " + " + (this.petal.summoner.timer2/60).toFixed(2) + "s": ""),  x+tabWidth/1.05, y+35)
-            ctx.fillText((this.petal.maxReload/60).toFixed(2) + "s" + (this.petal.isSummoner ? " + " + (this.petal.summoner.timer2/60).toFixed(2) + "s" : ""),  x+tabWidth/1.05, y+35)
-            ctx.font = "20px Arial"
-            ctx.fillStyle = "lime"
-            ctx.strokeStyle = "black"
-            ctx.textAlign = "left"
-            ctx.strokeText("Health: ", x+20, y+tabHeight/1.25)
-            ctx.fillText("Health: ", x+20, y+tabHeight/1.25)
-            let healthExtraSpacing = ctx.measureText("Health: ")
-            ctx.fillStyle = "white"
-            ctx.strokeText(abbreviate(this.petal.maxHealth), x+20+healthExtraSpacing.width , y+tabHeight/1.25)
-            ctx.fillText(abbreviate(this.petal.maxHealth), x+20+healthExtraSpacing.width, y+tabHeight/1.25)
-            if (this.petal.poison.poison > 0) {
-                ctx.font = "20px Arial"
-                ctx.fillStyle = "rgba(127, 0, 177, 1)"
-                ctx.strokeStyle = "black"
-                ctx.textAlign = "left"
-                ctx.strokeText("Poison: ", x+20, y+tabHeight/1.45)
-                ctx.fillText("Poison: ", x+20, y+tabHeight/1.45)
-                let damageExtraSpacing = ctx.measureText("Poison: ")
-                ctx.fillStyle = "white"
-                ctx.strokeText(`${(abbreviate(this.petal.poison.poison / (this.petal.poison.tick / 60)))}/s (duration: ${this.petal.poison.tick/60}s)`, x+20+damageExtraSpacing.width , y+tabHeight/1.45)
-                ctx.fillText(`${(abbreviate(this.petal.poison.poison / (this.petal.poison.tick / 60)))}/s (duration: ${this.petal.poison.tick/60}s)`, x+20+damageExtraSpacing.width, y +tabHeight/1.45)
-            }
-            ctx.font = "20px Arial"
-            ctx.fillStyle = "red"
-            ctx.strokeStyle = "black"
-            ctx.textAlign = "left"
-            ctx.strokeText("Damage: ", x+20, y+tabHeight/1.10)
-            ctx.fillText("Damage: ", x+20, y+tabHeight/1.10)
-            let damageExtraSpacing = ctx.measureText("Damage: ")
-            ctx.fillStyle = "white"
-            ctx.strokeText(abbreviate(this.petal.stats.damage), x+20+damageExtraSpacing.width , y+tabHeight/1.10)
-            ctx.fillText(abbreviate(this.petal.stats.damage), x+20+damageExtraSpacing.width, y +tabHeight/1.10)
-            
-            ctx.font = "15px Arial"
-            ctx.fillStyle = "white"
-            ctx.strokeStyle = "black"
-            ctx.textAlign = "left"
-            ctx.lineWidth = 5
-            ctx.strokeText(this.petal.description, x+20, y+tabHeight/2, tabWidth-20)
-            ctx.fillText(this.petal.description, x+20, y+tabHeight/2, tabWidth-20)
-
-            
-            if (this.petal.isSummoner) {   
-                ctx.font = "15px Arial"
-                ctx.fillStyle = "cyan"
-                ctx.strokeStyle = "black"
-                ctx.strokeText(`SUMMONS: ${this.petal.summoner.capacity > 1 ? this.petal.summoner.capacity + "x" : ""}`, x+20, y+tabHeight/1.45)
-                ctx.fillText(`SUMMONS: ${this.petal.summoner.capacity > 1 ? this.petal.summoner.capacity + "x" : ""}`, x+20, y+tabHeight/1.45)
-                let summonsExtraSpacing = ctx.measureText(`SUMMONS: ${this.petal.summoner.capacity > 1 ? this.petal.summoner.capacity + "x" : ""}`)
-                ctx.fillStyle = this.rarities[this.petal.summoner.summonRarity][1]
-                ctx.strokeStyle = darkenRGB(this.rarities[this.petal.summoner.summonRarity][1])
-                ctx.strokeText(this.rarities[this.petal.summoner.summonRarity][0], x+20 + (this.petal.summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width , y+tabHeight/1.45)
-                ctx.fillText(this.rarities[this.petal.summoner.summonRarity][0], x+20 + (this.petal.summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width, y+tabHeight/1.45)
-                let summonSP1 = ctx.measureText(this.rarities[this.petal.summoner.summonRarity][0])
-
-                ctx.fillStyle = "white"
-                ctx.strokeStyle = "black"
-                ctx.strokeText(availableMobs[this.petal.summoner.type].name, x+25 + (this.petal.summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width + summonSP1.width , y+tabHeight/1.45)
-                ctx.fillText(availableMobs[this.petal.summoner.type].name, x+25 + (this.petal.summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width + summonSP1.width, y+tabHeight/1.45)
-                
-                let summonSP = ctx.measureText(this.rarities[this.petal.summoner.summonRarity][0] + " " + availableMobs[this.petal.summoner.type].name)
-                ctx.fillStyle = "lime"
-                ctx.strokeText(
-                    `(HP: ${abbreviate(availableMobs[this.petal.summoner.type].getSpecificStats(this.petal.summoner.summonRarity, this.rarities).hp)}`, 
-                    x+25+ (this.petal.summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width + summonSP.width, 
-                    y+tabHeight/1.45
-                )
-                ctx.fillText(
-                    `(HP: ${abbreviate(availableMobs[this.petal.summoner.type].getSpecificStats(this.petal.summoner.summonRarity, this.rarities).hp)}`, 
-                    x+ (this.petal.summoner.capacity > 1 ? 5 : 0)+25+summonsExtraSpacing.width + summonSP.width,
-                    y+tabHeight/1.45
-                )
-                
-                let summonSP2 = ctx.measureText(abbreviate(availableMobs[this.petal.summoner.type].getSpecificStats(this.petal.summoner.summonRarity, this.rarities).hp))
-                ctx.fillStyle = "lime"
-                ctx.strokeText(
-                    `DMG: ${abbreviate(availableMobs[this.petal.summoner.type].getSpecificStats(this.petal.summoner.summonRarity, this.rarities).dmg)})`, 
-                    x+(this.petal.summoner.capacity > 1 ? 5 : 0)+65+summonsExtraSpacing.width + summonSP2.width + summonSP.width, 
-                    y+tabHeight/1.45
-                )
-                ctx.fillText(
-                    `DMG: ${abbreviate(availableMobs[this.petal.summoner.type].getSpecificStats(this.petal.summoner.summonRarity, this.rarities).dmg)})`, 
-                    x+(this.petal.summoner.capacity > 1 ? 5 : 0)+65+summonsExtraSpacing.width + summonSP2.width + summonSP.width,
-                    y+tabHeight/1.45
-                )
-            }
-            
-            if (this.petal.stats.armor > 0) {
-                ctx.font = "20px Arial"
-                ctx.fillStyle = "grey"
-                ctx.strokeStyle = "black"
-                ctx.textAlign = "right"
-                ctx.strokeText("Armor", x+tabWidth/1.05, y+tabHeight/1.10)
-                ctx.fillText("Armor", x+tabWidth/1.05, y+tabHeight/1.10)
-                let armorExtraSpacing = ctx.measureText("Armor")
-                ctx.strokeText(abbreviate(this.petal.stats.armor), x+tabWidth/1.07-armorExtraSpacing.width , y+tabHeight/1.10)
-                ctx.fillText(abbreviate(this.petal.stats.armor), x+tabWidth/1.07-armorExtraSpacing.width, y +tabHeight/1.10)
-            }
-            ctx.closePath()
-        }
+    
     }
 }
 
@@ -217,6 +87,7 @@ export class Inventory {
             this.petalFilter.filterRarity += 1
         }
         this.shownPetals = this.petals.filter((petal) => (this.rarities.indexOf(petal.rarity) == this.petalFilter.filterRarity-1) && petal.amount > 0)
+       
         if (this.open) {
             this.width += (this.tabWidth - this.width) * this.scalingFactor
             this.height += (this.tabHeight - this.height) * this.scalingFactor
@@ -227,7 +98,6 @@ export class Inventory {
         }
         if (this.petalsToParse.length > 0) {
             this.petalsToParse.forEach((p) => {
-                console.log(p)
                 let petalRarity = p.rarity
                 let petalName = p.name
 
@@ -289,12 +159,13 @@ export class Inventory {
             this.shownPetals.forEach((petal, index) => {
                 let setRow = index%4
                 let col = Math.floor(index/4)
-                let slot = new InventoryPetalBox(this.x+20+(93.5*setRow), this.y+120+(93.5*col), petal.rarity, this.petalFilter.filterRarity)
-                slot.rarities = this.rarities
+                let slot = new InventoryPetalBox(this.x+20+(93.5*setRow), this.y+120+(93.5*col), petal.rarity, this.petalFilter.filterRarity, this.rarities)
                 slot.petal = petal.petal
                 slot.amount = petal.amount
-                slot.draw()
                 this.visibleSlots.push(slot)
+            })
+            this.visibleSlots.forEach((s) => {
+                s.draw()
             })
         }
     }

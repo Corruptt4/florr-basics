@@ -62,7 +62,7 @@ export class QuadTree {
                     if (b.overlap(p)) {
                         b.detected.push(p)
                     }
-                    this.collisions.push(...b.collisionCheck(p, b))
+                    this.collisions.push(...b.collisionCheck())
                 }
             })
         })
