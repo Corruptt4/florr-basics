@@ -156,7 +156,7 @@ class Rock extends Mob {
         this.rarities = rarities
         this.shape = 15 + Math.floor(Math.random() * 10)
         this.speed = 0
-        this.mass = 20
+        this.mass = 25 * Math.pow(1.2, rarity-1)
         this.variationSides = true;
         this.color = "rgb(110, 110, 110)"
     }
