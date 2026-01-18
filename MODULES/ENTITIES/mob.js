@@ -53,6 +53,7 @@ export class Mob {
         this.stormMaxTimer = 30
         this.damageTick = 0;
         this.detecDistPet = 0;
+        this.varieties = []
         this.velocity = {
             x: 0,
             y: 0
@@ -65,6 +66,9 @@ export class Mob {
         this.color = "rgb(85, 85, 85)"
     }
     innitMob() {
+        for (let i = 0; i < this.shape; i++) {
+            this.varieties.push(1 - 0.15+Math.random()*0.3)
+        }
         this.angle = Math.PI * 2 * Math.random() - Math.PI
         if (this.pet) {
             this.size = this.originalSize * Math.pow(1.25, this.rarity-1)
@@ -182,7 +186,7 @@ export class Mob {
             this.angle += (0.1 * Math.sin(this.t))
         }
         
-        if ((!this.chasesPlayers || this.target == null) && !this.sandstormMovement) {
+        if ((!this.chasesPlayers || this.target == null) && !this.sandstormMovement && this.speed > 0) {
             this.timer--
             if (this.timer <= 100) {
                 this.moving = false

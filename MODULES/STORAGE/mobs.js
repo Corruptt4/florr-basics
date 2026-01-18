@@ -17,6 +17,7 @@ class SoldierAnt extends Mob {
         this.name = "Soldier Ant",
         this.rarities = rarities
         this.speed = 0.18
+        this.chasesMobs = true
         this.chasesPlayers = true
         this.color = "rgb(80, 80, 80)"
     }
@@ -143,8 +144,49 @@ class Sandstorm extends Mob {
             ctx.fill()
             ctx.stroke()
             ctx.closePath();
-        ctx.restore();
+            ctx.restore();
         }
+    }
+}
+
+class Rock extends Mob {
+    constructor(x, y, rarity, health, damage, size) {
+        super(x, y, rarity, health, damage, size)
+        this.name = "Rock"
+        this.rarities = rarities
+        this.shape = 15 + Math.floor(Math.random() * 10)
+        this.speed = 0
+        this.mass = 20
+        this.variationSides = true;
+        this.color = "rgb(110, 110, 110)"
+    }
+    draw() {
+        this.varieties[this.shape-1] = 1
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.fillStyle = this.color
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = darkenRGB(this.color, 20)
+        ctx.moveTo(this.size*Math.cos(0), this.size*Math.sin(0))
+        for (let i = 0; i <= this.shape; i++) {
+            ctx.lineTo(
+                this.size*Math.cos(((Math.PI * 2)/this.shape) * i),
+                this.size*this.varieties[i]*Math.sin(((Math.PI * 2)/this.shape) * i)
+            )
+        }
+        ctx.lineWidth = this.size/6
+        ctx.lineTo(this.size*Math.cos(0), this.size*Math.sin(0))
+        ctx.lineTo(
+            this.size*Math.cos(((Math.PI * 2)/this.shape) * 1), 
+            this.size*this.varieties[1]*Math.sin(((Math.PI * 2)/this.shape) * 1)
+        )
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+
+        ctx.restore()
     }
 }
 
@@ -241,5 +283,6 @@ export let availableMobs = [
     new BabyAnt(0, 0, 1, 85, 3, 15),
     new Beetle(0, 0, 1, 250, 6, 35),
     new Sandstorm(0, 0, 1, 350, 8, 40),
-    new SoldierAnt(0, 0, 1, 180, 3, 18)
+    new SoldierAnt(0, 0, 1, 180, 3, 18),
+    new Rock(0, 0, 1, 225, 3, 25)
 ]
