@@ -265,8 +265,8 @@ setInterval(() => {
                 collider2.push.x += 10*Math.max((collider1.mass/collider2.mass) * Math.log(collider2.mass), 1) * Math.cos(angle)
                 collider2.push.y += 10*Math.max((collider1.mass/collider2.mass) * Math.log(collider2.mass), 1) * Math.sin(angle)
                 
-                collider1.push.x -= 10*(collider2.mass/collider1.mass) * Math.log(collider1.mass) * Math.cos(angle)
-                collider1.push.y -= 10*(collider2.mass/collider1.mass) * Math.log(collider1.mass) * Math.sin(angle)
+                collider1.push.x -= 10*Math.max((collider2.mass/collider1.mass) * Math.log(collider1.mass), 1) * Math.cos(angle)
+                collider1.push.y -= 10*Math.max((collider2.mass/collider1.mass) * Math.log(collider1.mass), 1) * Math.sin(angle)
 
                 if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
                     collider1.health -= collider2.damage
