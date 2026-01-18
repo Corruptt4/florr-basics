@@ -29,11 +29,18 @@ export class PetalBoxPlace {
         this.y = 0
         this.player = player
         this.id = 0;
+        this.slotID = 0
         this.draggable = true
         this.isEmpty = false;
         this.boxSize = 85;
         this.draggingBox = false
         this.box = null
+    }
+    innit() {
+        this.slotID = this.id
+        if (this.slotID == 10) {
+            this.slotID = 0
+        }
     }
     draw() {
         ctx.beginPath()
@@ -46,6 +53,18 @@ export class PetalBoxPlace {
         ctx.stroke()
         ctx.globalAlpha = 1
         ctx.closePath()
+        
+
+        ctx.beginPath()
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.textAlign = "center"
+        ctx.font= "17px Arial"
+        ctx.lineWidth = 3
+        ctx.strokeText(`[${this.slotID}]`, this.x+this.boxSize/2, this.y+ this.boxSize+20)
+        ctx.fillText(`[${this.slotID}]`, this.x+this.boxSize/2, this.y+ this.boxSize+20)
+        ctx.closePath()
+
         if (this.box != null && this.box.petal) {
             if (!this.draggingBox) {
                 this.box.x += (this.x - this.box.x) * 0.3;
@@ -63,6 +82,7 @@ export class PetalBox {
         this.y = 0
         this.player = player
         this.id = 0;
+        this.slotID = 0;
         this.rarity = 0
         this.boxSize = 85;
         this.boxOn = null;

@@ -103,6 +103,7 @@ function spawnTestMob() {
 for (let i = 0; i < player.equippedPetals.length; i++) {
     let petalBoxHolder = new PetalBoxPlace(player)
     petalBoxHolder.id = i+1
+    petalBoxHolder.innit()
     petalBoxHolders.push(petalBoxHolder)
 }
 player.equippedPetals.forEach((petal) => {
@@ -261,11 +262,11 @@ setInterval(() => {
                 if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
                 if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
 
-                collider2.push.x += 10*(collider1.mass/collider2.mass) * Math.cos(angle)
-                collider2.push.y += 10*(collider1.mass/collider2.mass) * Math.sin(angle)
+                collider2.push.x += 10*Math.max((collider1.mass/collider2.mass) * Math.log(collider2.mass), 1) * Math.cos(angle)
+                collider2.push.y += 10*Math.max((collider1.mass/collider2.mass) * Math.log(collider2.mass), 1) * Math.sin(angle)
                 
-                collider1.push.x -= 10*(collider2.mass/collider1.mass) * Math.cos(angle)
-                collider1.push.y -= 10*(collider2.mass/collider1.mass) * Math.sin(angle)
+                collider1.push.x -= 10*(collider2.mass/collider1.mass) * Math.log(collider1.mass) * Math.cos(angle)
+                collider1.push.y -= 10*(collider2.mass/collider1.mass) * Math.log(collider1.mass) * Math.sin(angle)
 
                 if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
                     collider1.health -= collider2.damage
@@ -370,7 +371,7 @@ function render() {
     player.draw()
     ctx.restore()
     petalBoxHolders.forEach((pBox) => {
-        pBox.y = canvas.height / 1.12
+        pBox.y = canvas.height - pBox.boxSize - 38
         pBox.x = canvas.width / 2 - (pBox.boxSize+15)*petalBoxHolders.length/2+((pBox.boxSize+15)*pBox.id)
         pBox.draw()
     })
@@ -379,7 +380,7 @@ function render() {
         slot.petal[0].drawOnBox(slot, 18)
     })
     inventory.x = 20
-    inventory.y = canvas.height - inventory.height - 25
+    inventory.y = canvas.height - inventory.height - 37
     inventory.draw()
     if (!mouseHolding && mouseDraggingBox) {
         let swapping = false
