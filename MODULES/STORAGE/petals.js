@@ -105,6 +105,107 @@ class Iris extends Petal {
         ctx.closePath();
     }
 }
+class Rock extends Petal {
+    constructor(host, stats) {
+        super(host, stats)
+        this.name = "Rock"
+        this.altName = "Rock"
+        this.size = 12
+        this.maxReload = 180
+        this.stats.health = 25
+        this.sides = 5
+        this.stats.damage = 8
+        this.sizeMulti = 0.95
+        this.stats.armor = 0
+        this.description = "Very durable."
+        this.color = "rgb(110, 110, 110)"
+    }
+    drawOnBox(box, size) {
+        let boxSize = box.boxSize
+        ctx.save()
+        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 4
+        ctx.moveTo(size*this.sizeMulti*boxSize/85 * Math.cos(0), size*this.sizeMulti*boxSize/85 * Math.sin(0))
+        for (let i = 0; i < this.sides; i++) {
+            ctx.lineTo(
+                size*this.sizeMulti*(boxSize/85) * Math.cos(((Math.PI * 2)/this.sides)*i),
+                size*this.sizeMulti*(boxSize/85) * this.variations[i] * Math.sin(((Math.PI * 2)/this.sides)*i)
+            )
+        }
+        ctx.lineTo(size*this.sizeMulti*boxSize/85 * Math.cos(0), size*this.sizeMulti*boxSize/85 * Math.sin(0))
+        ctx.lineTo(
+            size*this.sizeMulti*(boxSize/85) * Math.cos((Math.PI * 2)/this.sides),
+            size*this.sizeMulti*(boxSize/85) * this.variations[0] * Math.sin((Math.PI * 2)/this.sides),
+        )
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath();
+        ctx.restore()
+        
+        ctx.lineWidth = 4
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.font = "18px Arial"
+        ctx.lineJoin = "round"
+        ctx.textAlign = "center"
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+    }
+    draw() {
+        if (this.showRarity) {
+            ctx.beginPath()
+            ctx.globalAlpha = 0.5
+            let rarityName = rarities[this.rarity-1][0]
+            ctx.fillStyle = rarities[this.rarity-1][1]
+            ctx.arc(this.x, this.y, this.size*1.6, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.globalAlpha = 1
+            ctx.lineWidth = 2
+            ctx.font = "20px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.closePath()
+        }
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 4
+        ctx.moveTo(this.size * Math.cos(0), this.size * Math.sin(0))
+        for (let i = 0; i < this.sides; i++) {
+            ctx.lineTo(
+                this.size * Math.cos(((Math.PI * 2)/this.sides)*i),
+                this.size * this.variations[i] * Math.sin(((Math.PI * 2)/this.sides)*i)
+            )
+        }
+        ctx.lineTo(this.size * Math.cos(0), this.size * Math.sin(0))
+        ctx.lineTo(
+            this.size * Math.cos((Math.PI * 2)/this.sides),
+            this.size * this.variations[0] * Math.sin((Math.PI * 2)/this.sides),
+        )
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+        
+        if (this.showRarity) {
+            ctx.fillStyle = "white"
+            ctx.strokeStyle = "black"
+            ctx.lineWidth = 3
+            ctx.font = "10px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(this.id, this.x, this.y+10/3)
+            ctx.fillText(this.id, this.x, this.y+10/3)
+        }
+        ctx.closePath();
+    }
+}
 class BeetleEgg extends Petal {
     constructor(host, stats) {
         super(host, stats)
@@ -958,6 +1059,11 @@ export var availablePetals = [
         armor: 0
     }),
     new AntEgg(null, {
+        health: 100,
+        damage: 1,
+        armor: 0
+    }),
+    new Rock(null, {
         health: 100,
         damage: 1,
         armor: 0

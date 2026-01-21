@@ -46,6 +46,8 @@ export class Petal {
         this.isSummoner = false
         this.lockedAngle = false
         this.showRarity = false;
+        this.sides = 0
+        this.variations = []
         this.type = "petal"
         this.maxSummonTimer = 0;
         this.summoner = {
@@ -118,6 +120,11 @@ export class Petal {
         return Math.sqrt(dx*dx+dy*dy)
     }
     innit() {
+        if (this.sides > 0) {
+            for (let i = 0; i < this.sides; i++) {
+                this.variations.push(0.8 + Math.random() * 0.4)
+            }
+        }
         if (this.isSummoner) {
             this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2 : this.rarity-2-this.summoner.lowerRarity
             this.summoner.timer *= Math.pow(1.4, this.summoner.summonRarity)
