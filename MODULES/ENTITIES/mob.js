@@ -1,5 +1,5 @@
 import { ctx, entities, frictionMultiplier, mapSize, mobs } from "../../main.js";
-import { darkenRGB } from "../../SCRIPTS/functions.js";
+import { abbreviate, darkenRGB } from "../../SCRIPTS/functions.js";
 
 export class Mob {
     constructor(x, y, rarity, health, damage, size) {
@@ -294,37 +294,49 @@ export class Mob {
         ctx.beginPath()
         ctx.fillStyle = "black"
         ctx.strokeStyle = "black"
-        ctx.lineWidth = 4
+        ctx.lineWidth = 8
         ctx.lineJoin = "round"
-        ctx.roundRect(-healthWidth/2, this.size + 40, healthWidth, 5, 5)
+        ctx.roundRect(-healthWidth/2, this.size + 40, healthWidth, 15, 15)
         ctx.stroke()
         ctx.fill()
 
         ctx.fillStyle = this.rarityColor
+        ctx.lineWidth = 4
         ctx.strokeStyle = darkenRGB(this.rarityColor, 20)
         ctx.font = "15px Arial"
         ctx.textAlign = "right"
-        ctx.strokeText(this.rarityName, healthWidth/2, this.size+60)
-        ctx.fillText(this.rarityName, healthWidth/2, this.size+60)
+        ctx.strokeText(this.rarityName, healthWidth/2, this.size+70)
+        ctx.fillText(this.rarityName, healthWidth/2, this.size+70)
         ctx.fillStyle = "white"
         ctx.strokeStyle = "black"
         ctx.textAlign = "left"
         ctx.strokeText(this.name, -healthWidth/2, this.size+35)
         ctx.fillText(this.name, -healthWidth/2, this.size+35)
+        ctx.textAlign = "center"
         ctx.closePath()
 
 
         ctx.beginPath()
         ctx.fillStyle = "red"
-        ctx.roundRect(-healthWidth/2, this.size + 40, healthWidth*(this.oldHealth/this.maxHealth), 5, 5)
+        ctx.roundRect(-healthWidth/2, this.size + 40, healthWidth*(this.oldHealth/this.maxHealth), 15, 15)
         ctx.fill()
         ctx.closePath()
 
         ctx.beginPath()
         ctx.fillStyle = "lime"
-        ctx.roundRect(-healthWidth/2, this.size + 40, healthWidth*(this.normalHP/this.maxHealth), 5, 5)
+        ctx.roundRect(-healthWidth/2, this.size + 40, healthWidth*(this.normalHP/this.maxHealth), 15, 15)
         ctx.fill()
         ctx.closePath()
+
+        ctx.beginPath()
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.textAlign = "center"
+        let actualHp = abbreviate(this.maxHealth*(this.normalHP/this.maxHealth))
+        ctx.strokeText(`${actualHp}/${abbreviate(this.maxHealth)}`, 0, this.size+53)
+        ctx.fillText(`${actualHp}/${abbreviate(this.maxHealth)}`, 0, this.size+53)
+        ctx.closePath()
+
         ctx.restore()
     }
 }
