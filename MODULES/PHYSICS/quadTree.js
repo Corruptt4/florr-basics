@@ -10,6 +10,14 @@ export class Rect {
         this.collisions = []
         this.detected = []
     }
+    contains(point) {
+        return (
+            point.x+point.size >= this.x-this.w &&
+            point.x-point.size <= this.x+this.w &&
+            point.y+point.size >= this.y-this.h &&
+            point.y-point.size <= this.y+this.h
+        )
+    }
     collisionCheck() {
         this.collisions = []
         this.detected.forEach((e) => {
@@ -40,12 +48,34 @@ export class Rect {
 }
 
 export class QuadTree {
-    constructor() {
+    constructor(boundary) {
+        this.boundary = boundary
         this.entityBoundaries = []
         this.collisions = []
+        this.ranges = []
         this.points = []
+        this.capacity = 4
+        this.split = false
+        this.splits = 0
+        this.maxSplits = 3
     }
     draw() {
+        if (!this.split) {
+            let b = this.boundary
+            ctx.beginPath()
+            ctx.fillStyle = "rgba(255, 255, 255, 0.3)"
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"
+            ctx.lineWidth = 3
+            ctx.fillRect(b.x, b.y, b.width, b.height)
+            ctx.strokeRect(b.x, b.y, b.width, b.height)
+            ctx.closePath()
+        }
+       if (this.split) {
+            if (this.nw) this.nw.draw()
+            if (this.ne) this.ne.draw()
+            if (this.sw) this.sw.draw()
+            if (this.se) this.se.draw()
+        }
         this.entityBoundaries.forEach((b) => {
             ctx.beginPath()
             ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"
@@ -55,30 +85,70 @@ export class QuadTree {
         })
     }
     update() {
-        this.collisions = []
-        this.entityBoundaries.forEach((b) => {
-           this.points.forEach((p) => {
-                if (p != b.selfEntity) {
-                    if (b.overlap(p)) {
-                        b.detected.push(p)
-                    }
-                    this.collisions.push(...b.collisionCheck())
-                }
-            })
-        })
+        
+    }
+    subdivise() {
+        this.split = true
+        this.splits++
+        let { x, y, width: w, height: h } = this.boundary
+        let hw = w / 2
+        let hh = h / 2
+
+        this.nw = new QuadTree(new Rect(x, y, hw, hh))
+        this.ne = new QuadTree(new Rect(x + hw, y, hw, hh))
+        this.sw = new QuadTree(new Rect(x, y + hh, hw, hh))
+        this.se = new QuadTree(new Rect(x + hw, y + hh, hw, hh))
+
+        this.nw.splits = this.splits
+        this.ne.splits = this.splits
+        this.sw.splits = this.splits
+        this.se.splits = this.splits
     }
     insert(point) {
-        let en = point.size*2 + 50
-        let entityBoundary = new Rect(point.x - en/2, point.y - en/2, en, en, point)
-        this.entityBoundaries.push(entityBoundary)
-        this.points.push(point)
+        if (this.boundary.contains(point)) {
+            return false
+        }
+        let oldPoints = []
+        if (this.points.length < this.capacity) {
+            this.points.push(point)
+        } else if (this.points.length >= this.capacity && this.splits < this.maxSplits && !this.split) {
+            oldPoints = this.points
+            this.subdivise()
+            if (this.nw.boundary.overlap(point)) {
+                this.nw.insert(point)
+            }
+            if (this.ne.boundary.overlap(point)) {
+                this.ne.insert(point)
+            }
+            if (this.sw.boundary.overlap(point)) {
+                this.sw.insert(point)
+            }
+            if (this.se.boundary.overlap(point)) {
+                this.se.insert(point)
+            }
+            oldPoints.forEach((p) => {
+                if (this.nw.boundary.overlap(p)) {
+                    this.nw.insert(p)
+                }
+                if (this.ne.boundary.overlap(p)) {
+                    this.ne.insert(p)
+                }
+                if (this.sw.boundary.overlap(p)) {
+                    this.sw.insert(p)
+                }
+                if (this.se.boundary.overlap(p)) {
+                    this.se.insert(p)
+                }
+            })
+        }
     }
     reset() {
-        this.entityBoundaries.forEach((b) => {
-            b.detected = []
-            b.collisions = []
-        })
+        this.nw = null
+        this.ne = null
+        this.sw = null
+        this.se = null
+        this.split = false
+        this.splits = 0
         this.points = []
-        this.entityBoundaries = []
     }
 }

@@ -5,7 +5,7 @@ import { availablePetals } from "./MODULES/STORAGE/petals.js";
 import { EmptySlot, PetalBox, PetalBoxPlace } from "./MODULES/UI/petalBox.js";
 import { abbreviate, boxBoxCollision, boxCollision, boxCollision2 } from "./SCRIPTS/functions.js";
 import { availableMobs } from "./MODULES/STORAGE/mobs.js";
-import { QuadTree } from "./MODULES/PHYSICS/quadTree.js";
+import { QuadTree, Rect } from "./MODULES/PHYSICS/quadTree.js";
 import { Inventory, InventoryPetalBox } from "./MODULES/UI/inventory.js";
 import { Petal, PlaceholderPetal } from "./MODULES/ENTITIES/petal.js";
 
@@ -21,7 +21,6 @@ let mouseHolding = false
 let mouseDraggingBox = false;
 let mouseDraggingBoxClass = null;
 let dropHandled = false
-let quadTree = new QuadTree()
 
 export let mapSize = 4000,
                     entities = [],
@@ -31,6 +30,8 @@ export let mapSize = 4000,
                     frictionMultiplier = 0.94
 let inventoryPetalToSlot = []
 
+let rect = new Rect(0, 0, mapSize, mapSize)
+let quadTree = new QuadTree(rect)
 export var rarities = [
     ["Common", "rgb(126, 239, 109)"],
     ["Unusual", "rgb(255, 230, 109)"],
@@ -237,7 +238,7 @@ document.addEventListener("mouseup", (e) => {
     }
 })
 setInterval(() => {
-    if (mobs.length < 50) {
+    if (mobs.length < 250) {
         spawnMob()
     }
 }, 200)
@@ -246,7 +247,6 @@ setInterval(() => {
 
     quadTree.reset()
     allEntities.forEach((e) => {
-        if (e.type == "petal" && e.dead) return;
         quadTree.insert(e)
     })
     quadTree.update()
@@ -279,7 +279,7 @@ setInterval(() => {
                 if (collider1.type == "petal" && !collider1.dead && !collider2.pet) {
                     collider1.stats.health -= Math.max(0, collider2.damage-collider1.stats.armor)
                 }
-                if (collider1.type == "mob" && !collider1.pet) {
+                if (collider1.type == "mob" && !collider1.pet && !collider2.dead) {
                     collider1.health -= collider2.stats.damage
                     collider1.damageTick = 6
                     if (collider2.poison.poison > 0) {
@@ -289,7 +289,7 @@ setInterval(() => {
                 if (collider2.type == "petal" && !collider2.dead && !collider1.pet) {
                     collider2.stats.health -= Math.max(0, collider2.damage-collider1.stats.armor)
                 }
-                if (collider2.type == "mob" && !collider2.pet) {
+                if (collider2.type == "mob" && !collider2.pet && !collider1.dead) {
                     collider2.health -= collider1.stats.damage
                     collider2.damageTick = 6
                     if (collider1.poison.poison > 0) {
@@ -369,6 +369,7 @@ function render() {
         mob.drawRarity()
     })
     player.draw()
+    quadTree.draw()
     ctx.restore()
     petalBoxHolders.forEach((pBox) => {
         pBox.y = canvas.height - pBox.boxSize - 38
