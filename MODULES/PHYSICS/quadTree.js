@@ -6,7 +6,7 @@ export class Rect {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.selfEntity = selfEntity
+        this.selfEntity = selfEntity || null
         this.collisions = []
         this.detected = []
     }
@@ -111,44 +111,47 @@ export class QuadTree {
         let oldPoints = []
         if (this.points.length < this.capacity) {
             this.points.push(point)
-        } else if (this.points.length >= this.capacity && this.splits < this.maxSplits && !this.split) {
-            oldPoints = this.points
-            this.subdivise()
-            if (this.nw.boundary.overlap(point)) {
-                this.nw.insert(point)
-            }
-            if (this.ne.boundary.overlap(point)) {
-                this.ne.insert(point)
-            }
-            if (this.sw.boundary.overlap(point)) {
-                this.sw.insert(point)
-            }
-            if (this.se.boundary.overlap(point)) {
-                this.se.insert(point)
-            }
-            oldPoints.forEach((p) => {
-                if (this.nw.boundary.overlap(p)) {
-                    this.nw.insert(p)
+        } else {
+            if (this.splits < this.maxSplits && !this.split) {
+                oldPoints = this.points
+                this.points = []
+                this.subdivise()
+                oldPoints.forEach((p) => {
+                    if (this.nw.boundary.overlap(p)) {
+                        this.nw.insert(p)
+                    }
+                    if (this.ne.boundary.overlap(p)) {
+                        this.ne.insert(p)
+                    }
+                    if (this.sw.boundary.overlap(p)) {
+                        this.sw.insert(p)
+                    }
+                    if (this.se.boundary.overlap(p)) {
+                        this.se.insert(p)
+                    }
+                })
+                if (this.nw.boundary.overlap(point)) {
+                    this.nw.insert(point)
                 }
-                if (this.ne.boundary.overlap(p)) {
-                    this.ne.insert(p)
+                if (this.ne.boundary.overlap(point)) {
+                    this.ne.insert(point)
                 }
-                if (this.sw.boundary.overlap(p)) {
-                    this.sw.insert(p)
+                if (this.sw.boundary.overlap(point)) {
+                    this.sw.insert(point)
                 }
-                if (this.se.boundary.overlap(p)) {
-                    this.se.insert(p)
+                if (this.se.boundary.overlap(point)) {
+                    this.se.insert(point)
                 }
-            })
+            }
         }
     }
     reset() {
+        this.split = false
+        this.splits = 0
+        this.points = []
         this.nw = null
         this.ne = null
         this.sw = null
         this.se = null
-        this.split = false
-        this.splits = 0
-        this.points = []
     }
 }
