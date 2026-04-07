@@ -23,15 +23,15 @@ let mouseDraggingBox = false;
 let mouseDraggingBoxClass = null;
 let dropHandled = false
 
-export let mapSize = 4000,
+export let mapSize = 5000,
                     entities = [],
                     mobs = [],
                     allEntities = [],
                     decors = [],
-                    frictionMultiplier = 0.94
+                    frictionMultiplier = 0.92
 let inventoryPetalToSlot = []
 
-let spatialHash = new SpatialHash(32, mapSize)
+let spatialHash = new SpatialHash(12, mapSize)
 spatialHash.innitGrid()
 
 let rect = new Rect(0, 0, mapSize, mapSize)
@@ -50,13 +50,15 @@ export var rarities = [
     ["Hellish", "rgb(170, 35, 35)"],
     ["Stellar", "rgb(0, 0, 0)"],
     ["Radiant", "rgb(0, 0, 0)"],
-    ["Ancient", "rgb(175, 122, 0)"]
-//     ["Eternal", "rgb(255, 255, 255)"],
-//     ["Apotheotic", "rgb(216, 23, 153)"],
-//     ["Radiant", "rgba(204, 0, 255, 1)"],
-//     ["Prismathic", "rgba(255, 187, 199, 1)"],
-//     ["Chaos", "rgba(100, 0, 207, 1)"],
-//     ["Godly", "rgb(255, 255, 100)"]
+    ["Ancient", "rgb(175, 122, 0)"],
+    ["Eternal", "rgb(255, 255, 255)"],
+    ["Apotheotic", "rgb(216, 23, 153)"],
+    ["Amethyst", "rgba(204, 0, 255, 1)"],
+    ["Prismathic", "rgba(255, 187, 199, 1)"],
+    ["Chaos", "rgba(100, 0, 207)"],
+    ["Godly", "rgb(255, 255, 100)"],
+    ["Divinity", "rgb(100, 0, 255)"],
+    ["Universal", "rgb(200, 105, 125)"]
 ]
 
 
@@ -98,10 +100,10 @@ function spawnTestMob() {
      let mob = new availableMobs[0].constructor(
         mapSize/2 + 250,
         mapSize/2 + 250,
-        9,
+        rarities.length,
         availableMobs[0].health,
         availableMobs[0].damage,
-        availableMobs[0].size
+        0.3
     )
     mob.rarities = rarities
     mobs.push(mob)
@@ -240,7 +242,7 @@ document.addEventListener("mouseup", (e) => {
     }
 })
 setInterval(() => {
-    if (mobs.length < 250) {
+    if (mobs.length < 25) {
         spawnMob()
     }
 }, 500)
