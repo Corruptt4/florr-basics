@@ -28,23 +28,29 @@ export class Decorator {
     constructor(amount, mapSize, decorColor, minSize, maxSize) {
         this.amount = amount;
         this.mapSize = mapSize;
+        this.gridSize = 150
         this.decorColor = decorColor
         this.sizes = {
             minSize: minSize,
             maxSize: maxSize
         }
     }
-    createDecoration(decorArray) {
-        for (let i = 0; i < this.amount; i++) {
-            let decor = new Decoration(
-                Math.random() * this.mapSize, 
-                Math.random() * this.mapSize, 
-                this.sizes.minSize + Math.random()*(this.sizes.maxSize - this.sizes.minSize),
-                6,
-                this.decorColor,
-                1
-            )
-            decorArray.push(decor)
+    makeGrid() {
+        ctx.beginPath()
+        ctx.lineWidth = 1
+        ctx.strokeStyle = "rgb(0, 185, 0)"
+        // x lines
+        for (let i = this.gridSize; i < this.mapSize*3-this.gridSize; i+=this.gridSize) {
+            ctx.moveTo(i, -this.mapSize)
+            ctx.lineTo(i, this.mapSize*2)
         }
+        
+        // y lines
+        for (let i = this.gridSize; i < this.mapSize*3-this.gridSize; i+=this.gridSize) {
+            ctx.moveTo(-this.mapSize, i)
+            ctx.lineTo(this.mapSize*2, i)
+        }
+        ctx.stroke()
+        ctx.closePath()
     }
 }

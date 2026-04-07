@@ -33,6 +33,13 @@ export function boxBoxCollision(bx1, by1, bx2, by2, bl1, bl2) {
             by1 < by2 + bl2 &&
             by1 + bl1 > by2);
 }
+export function entityDist(entity1, entity2) {
+    let dx = entity1.x-entity2.x
+    let dy = entity1.y-entity2.y
+    let size = entity1.size+entity2.size
+    let dist = dx*dx+dy*dy
+    return dist < Math.pow(size,2)
+}
 export function abbreviate(num) {
 
     if (num < 1000) return num.toFixed(0)

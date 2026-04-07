@@ -8,6 +8,7 @@ import { availableMobs } from "./MODULES/STORAGE/mobs.js";
 import { QuadTree, Rect } from "./MODULES/PHYSICS/quadTree.js";
 import { Inventory, InventoryPetalBox } from "./MODULES/UI/inventory.js";
 import { Petal, PlaceholderPetal } from "./MODULES/ENTITIES/petal.js";
+import { SpatialHash } from "./MODULES/PHYSICS/spatialHash.js";
 
 export const canvas = document.getElementById("canvas"),
                           ctx = canvas.getContext("2d");
@@ -30,6 +31,9 @@ export let mapSize = 4000,
                     frictionMultiplier = 0.94
 let inventoryPetalToSlot = []
 
+let spatialHash = new SpatialHash(32, mapSize)
+spatialHash.innitGrid()
+
 let rect = new Rect(0, 0, mapSize, mapSize)
 let quadTree = new QuadTree(rect)
 export var rarities = [
@@ -45,7 +49,8 @@ export var rarities = [
     ["Zenith", "rgb(255, 255, 170)"],
     ["Hellish", "rgb(170, 35, 35)"],
     ["Stellar", "rgb(0, 0, 0)"],
-    ["Radiant", "rgb(0, 0, 0)"]
+    ["Radiant", "rgb(0, 0, 0)"],
+    ["Ancient", "rgb(175, 122, 0)"]
 //     ["Eternal", "rgb(255, 255, 255)"],
 //     ["Apotheotic", "rgb(216, 23, 153)"],
 //     ["Radiant", "rgba(204, 0, 255, 1)"],
@@ -58,6 +63,7 @@ export var rarities = [
 var petalBoxes = []
 let player = new Player(mapSize/2,mapSize/2, 25, "rgb(255, 255, 0)")
 let camera = new Camera(player)
+let decorator = new Decorator(0, mapSize, )
 player.innitPetals()
 let petalBoxHolders = []
 let mobRarities = []
@@ -132,10 +138,6 @@ player.equippedPetals.forEach((petal) => {
     }
 })
 entities.push(player)
-
-let decorator = new Decorator(250, mapSize, "rgb(0, 210, 0)", 20, 30)
-
-decorator.createDecoration(decors)
 
 
 document.addEventListener("keydown", (e) => {
@@ -241,63 +243,64 @@ setInterval(() => {
     if (mobs.length < 250) {
         spawnMob()
     }
-}, 200)
+}, 500)
 setInterval(() => {
-   allEntities = mobs.concat(player).concat(entities)
+    allEntities = mobs.concat(player).concat(entities)
+    spatialHash.clearCellEntities()
+    for (let entity of allEntities) {
+        if (
+            (entity.x - entity.size > mapSize) ||
+            (entity.x + entity.size < 0) ||
+            (entity.y - entity.size > mapSize) ||
+            (entity.y + entity.size < 0)
+        ) {
+            continue;
+        }
+        spatialHash.addEntity(entity)
+    }
+    spatialHash.update()
 
-    quadTree.reset()
-    allEntities.forEach((e) => {
-        quadTree.insert(e)
-    })
-    quadTree.update()
-    
-    quadTree.entityBoundaries.forEach((b) => {
-        if (b.collisions.length == 0) return;
-        b.collisions.forEach((collision) => {
-            let collider1 = collision[0]
-            let collider2 = collision[1]
+    spatialHash.collisions.forEach((collision) => {
+        let collider1 = collision[0]
+        let collider2 = collision[1]
 
-            let angle = Math.atan2(collider2.y - collider1.y, collider2.x - collider1.x)
-            if (collider1.type !== "petal" && collider2.type !== "petal") {
-                if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
-                if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
+        let angle = Math.atan2(collider2.y - collider1.y, collider2.x - collider1.x)
+        if (collider1.type !== "petal" && collider2.type !== "petal") {
+            if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
+            if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
+            collider2.push.x += 8*Math.max(1, (collider1.mass/collider2.mass)) * Math.cos(angle)
+            collider2.push.y += 8*Math.max(1, (collider1.mass/collider2.mass)) * Math.sin(angle)
+            
+            collider1.push.x -= 8*Math.max(1, (collider2.mass/collider1.mass)) * Math.cos(angle)
+            collider1.push.y -= 8*Math.max(1, (collider2.mass/collider1.mass)) * Math.sin(angle)
+            if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
+                collider1.health -= collider2.damage
+                collider2.health -= collider1.damage
+                collider2.damageTick = 6
+                collider1.damageTick = 6
+            }
+            if ((collider2.type == "mob" && !collider2.pet) && (collider1.type == "mob" && collider1.pet)) {
+                collider1.health -= collider2.damage
+                collider2.health -= collider1.damage
+                collider2.damageTick = 6
+                collider1.damageTick = 6
+            }
+        }
+        if ((collider1.type == "petal" && collider2.type == "mob") || (collider1.type == "mob" && collider2.type == "petal")) {
+            let petal = collider1.type == "petal" ? collider1 : collider2
+            let mob = collider1.type == "mob" ? collider1 : collider2
+            if (!petal.dead && !mob.pet) {
+                petal.stats.health -= Math.max(0, mob.damage - petal.stats.armor);
+            }
+            if (!mob.pet && !petal.dead) {
+                mob.health -= petal.stats.damage;
+                mob.damageTick = 6;
 
-                collider2.push.x += 8*Math.max(1, (collider1.mass/collider2.mass)) * Math.cos(angle)
-                collider2.push.y += 8*Math.max(1, (collider1.mass/collider2.mass)) * Math.sin(angle)
-                
-                collider1.push.x -= 8*Math.max(1, (collider2.mass/collider1.mass)) * Math.cos(angle)
-                collider1.push.y -= 8*Math.max(1, (collider2.mass/collider1.mass)) * Math.sin(angle)
-
-                if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
-                    collider1.health -= collider2.damage
-                    collider2.health -= collider1.damage
-                    collider2.damageTick = 6
-                    collider1.damageTick = 6
+                if (petal.poison.poison > 0) {
+                    mob.poisonTake(petal.poison.poison, petal.poison.tick);
                 }
             }
-            if (collider1.type == "petal" && collider2.type == "mob") {
-                if (collider1.type == "petal" && !collider1.dead && !collider2.pet) {
-                    collider1.stats.health -= Math.max(0, collider2.damage-collider1.stats.armor)
-                }
-                if (collider1.type == "mob" && !collider1.pet && !collider2.dead) {
-                    collider1.health -= collider2.stats.damage
-                    collider1.damageTick = 6
-                    if (collider2.poison.poison > 0) {
-                        collider1.poisonTake(collider2.poison.poison, collider2.poison.tick)
-                    }
-                }
-                if (collider2.type == "petal" && !collider2.dead && !collider1.pet) {
-                    collider2.stats.health -= Math.max(0, collider2.damage-collider1.stats.armor)
-                }
-                if (collider2.type == "mob" && !collider2.pet && !collider1.dead) {
-                    collider2.health -= collider1.stats.damage
-                    collider2.damageTick = 6
-                    if (collider1.poison.poison > 0) {
-                        collider2.poisonTake(collider1.poison.poison, collider1.poison.tick)
-                    }
-                }
-            }
-        })
+        }
     })
 }, 1000/15)
 
@@ -361,15 +364,12 @@ function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.save()
     camera.apply()
-    decors.forEach((decor) => {
-        decor.draw()
-    })
+    decorator.makeGrid()
     mobs.forEach((mob) => {
         mob.draw()
         mob.drawRarity()
     })
     player.draw()
-    quadTree.draw()
     ctx.restore()
     petalBoxHolders.forEach((pBox) => {
         pBox.y = canvas.height - pBox.boxSize - 38
