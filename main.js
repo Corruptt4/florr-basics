@@ -28,7 +28,7 @@ export let mapSize = 5000,
                     mobs = [],
                     allEntities = [],
                     decors = [],
-                    frictionMultiplier = 0.92
+                    frictionMultiplier = 0.95
 let inventoryPetalToSlot = []
 
 let spatialHash = new SpatialHash(12, mapSize)

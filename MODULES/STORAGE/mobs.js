@@ -156,6 +156,7 @@ class Rock extends Mob {
         this.rarities = rarities
         this.shape = 15 + Math.floor(Math.random() * 10)
         this.speed = 0
+        this.sizeVariation = true
         this.mass = 25 * Math.pow(1.2, rarity-1)
         this.variationSides = true;
         this.color = "rgb(110, 110, 110)"
@@ -184,6 +185,42 @@ class Rock extends Mob {
         )
         ctx.fill()
         ctx.stroke()
+        ctx.closePath()
+
+        ctx.restore()
+    }
+}
+
+class Bubble extends Mob {
+    constructor(x, y, rarity, health, damage, size) {
+        super(x, y, rarity, health, damage, size)
+        this.name = "Bubble"
+        this.rarities = rarities
+        this.speed = 0
+        this.sizeVariation = true
+        this.mass = 15 * Math.pow(1.2, rarity-1)
+        this.color = "rgba(255, 255, 255, 0.4)"
+    }
+    draw() {
+        this.varieties[this.shape-1] = 1
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = "rgb(225, 225, 225)"
+
+        ctx.arc(0, 0, this.size, 0, Math.PI*2)
+        ctx.lineWidth = this.size/10
+        
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+
+        ctx.beginPath()
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)"
+        ctx.arc(-3*(this.size/10), -3*(this.size/10), this.size/3, 0, Math.PI*2)
+        ctx.fill()
         ctx.closePath()
 
         ctx.restore()
@@ -284,5 +321,6 @@ export let availableMobs = [
     new Beetle(0, 0, 1, 250, 6, 35),
     new Sandstorm(0, 0, 1, 350, 8, 40),
     new SoldierAnt(0, 0, 1, 180, 3, 18),
-    new Rock(0, 0, 1, 225, 3, 25)
+    new Rock(0, 0, 1, 225, 3, 25),
+    new Bubble(0, 0, 1, 2, 5, 30)
 ]
