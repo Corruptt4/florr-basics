@@ -52,7 +52,7 @@ export class WaveMode {
         this.raritiesToSpawn[2] = Math.min(this.raritiesToSpawn[0]+1, this.rarities.length)
         this.raritiesToSpawn[3] = Math.min(this.raritiesToSpawn[0]+2, this.rarities.length)
 
-        this.sizeFactor = Math.min(1 / (wave/25), 1)
+        this.sizeFactor = Math.min(1 / (wave/10), 1)
         let mobsToSet = Math.min((10+wave*8), 700)
         this.amountInWave = mobsToSet
         for (let i = 0; i < mobsToSet; i++) {

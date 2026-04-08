@@ -1,4 +1,4 @@
-import { ctx, frictionMultiplier, mobs, rarities } from "../../main.js";
+import { ctx, frictionMultiplier, summons, rarities } from "../../main.js";
 import { darkenRGB, degreesToRads } from "../../SCRIPTS/functions.js";
 import { availableMobs } from "../STORAGE/mobs.js";
 import { Mob } from "./mob.js";
@@ -98,7 +98,7 @@ export class Petal {
             summon.pet = true
             summon.innitMob()
             this.summons.push(summon)
-            mobs.push(summon)
+            summons.push(summon)
         }
     }
     reloadPetal() {
@@ -127,12 +127,12 @@ export class Petal {
         }
         if (this.isSummoner) {
             this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2 : this.rarity-2-this.summoner.lowerRarity
-            this.summoner.timer *= Math.pow(1.4, this.summoner.summonRarity)
+            this.summoner.timer *= Math.pow(1.27, this.summoner.summonRarity)
             this.summoner.timer2 = this.summoner.timer
         }
         this.maxSummonTimer = this.summoner.timer
-        let exponential = 1.3
-        let mainExponent = 2.3
+        let exponential = 1.35
+        let mainExponent = 2.6
         this.x = this.host.x
         this.y = this.host.y
         this.stats.health *= Math.pow(mainExponent, this.rarity-1) * Math.pow(exponential, this.rarity-1)
