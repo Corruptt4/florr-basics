@@ -9,6 +9,7 @@ import { QuadTree, Rect } from "./MODULES/PHYSICS/quadTree.js";
 import { Inventory, InventoryPetalBox } from "./MODULES/UI/inventory.js";
 import { Petal, PlaceholderPetal } from "./MODULES/ENTITIES/petal.js";
 import { SpatialHash } from "./MODULES/PHYSICS/spatialHash.js";
+import { WaveMode } from "./MODULES/GAME/waveHandler.js";
 
 export const canvas = document.getElementById("canvas"),
                           ctx = canvas.getContext("2d");
@@ -23,15 +24,16 @@ let mouseDraggingBox = false;
 let mouseDraggingBoxClass = null;
 let dropHandled = false
 
-export let mapSize = 5000,
+export let mapSize = 2000,
                     entities = [],
                     mobs = [],
+                    summons = [],
                     allEntities = [],
                     decors = [],
                     frictionMultiplier = 0.95
 let inventoryPetalToSlot = []
 
-let spatialHash = new SpatialHash(12, mapSize)
+let spatialHash = new SpatialHash(16, mapSize)
 spatialHash.innitGrid()
 
 let rect = new Rect(0, 0, mapSize, mapSize)
@@ -63,39 +65,15 @@ export var rarities = [
 
 
 var petalBoxes = []
-let player = new Player(mapSize/2,mapSize/2, 25, "rgb(255, 255, 0)")
+let player = new Player(0, 0, 25, "rgb(255, 255, 0)")
 let camera = new Camera(player)
 let decorator = new Decorator(0, mapSize, )
 player.innitPetals()
 let petalBoxHolders = []
 let mobRarities = []
+let wave = new WaveMode(1, rarities)
 let inventory = new Inventory(20, canvas.height - 80, 90, 90)
 inventory.innitPetals(rarities)
-for (let i = 0; i < 11; i++) {
-    mobRarities.push([i, 1/Math.pow(1.6, i)])
-}
-function spawnMob() {
-    let randomRarity = Math.random()
-    let chosenRarity = 0
-    mobRarities.forEach((r) => {
-        let [rarity, chance] = r
-        if (chance >= randomRarity) {
-            chosenRarity = rarity
-        }
-    })
-    let randomMob = Math.floor(Math.random()*availableMobs.length)
-    let mob = new availableMobs[randomMob].constructor(
-        Math.random()*mapSize,
-        Math.random()*mapSize,
-        chosenRarity+1,
-        availableMobs[randomMob].health,
-        availableMobs[randomMob].damage,
-        availableMobs[randomMob].size
-    )
-    mob.innitMob()
-    mob.rarities = rarities
-    mobs.push(mob)
-}
 function spawnTestMob() {
      let mob = new availableMobs[0].constructor(
         mapSize/2 + 250,
@@ -242,12 +220,7 @@ document.addEventListener("mouseup", (e) => {
     }
 })
 setInterval(() => {
-    if (mobs.length < 25) {
-        spawnMob()
-    }
-}, 500)
-setInterval(() => {
-    allEntities = mobs.concat(player).concat(entities)
+    allEntities = mobs.concat(player).concat(entities).concat(summons)
     spatialHash.clearCellEntities()
     for (let entity of allEntities) {
         if (
@@ -270,11 +243,17 @@ setInterval(() => {
         if (collider1.type !== "petal" && collider2.type !== "petal") {
             if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
             if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
-            collider2.push.x += 8*Math.max(1, (collider1.mass/collider2.mass)) * Math.cos(angle)
-            collider2.push.y += 8*Math.max(1, (collider1.mass/collider2.mass)) * Math.sin(angle)
+            let totalMass = collider1.mass+collider2.mass
+            let p1 = collider1.mass/totalMass
+            let p2 = collider2.mass/totalMass
+            let strength1 = Math.max(p1, 1)
+            let strength2 = Math.max(p2, 1)
+            let pushPower = 12
+            collider2.push.x += pushPower * strength2 * Math.cos(angle)
+            collider2.push.y += pushPower * strength2 * Math.sin(angle)
             
-            collider1.push.x -= 8*Math.max(1, (collider2.mass/collider1.mass)) * Math.cos(angle)
-            collider1.push.y -= 8*Math.max(1, (collider2.mass/collider1.mass)) * Math.sin(angle)
+            collider1.push.x -= pushPower * strength1 * Math.cos(angle)
+            collider1.push.y -= pushPower * strength1 * Math.sin(angle)
             if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
                 collider1.health -= collider2.damage
                 collider2.health -= collider1.damage
@@ -305,7 +284,9 @@ setInterval(() => {
         }
     })
 }, 1000/15)
-
+setInterval(() => {
+    wave.update()
+}, 1000/60)
 setInterval(() => {
     camera.moveTo()
     entities.forEach((entity) => {
@@ -316,7 +297,7 @@ setInterval(() => {
             }
         }
     })
-    mobs.forEach((mob) => {
+    mobs.concat(summons).forEach((mob) => {
         mob.update(player)
         if (mob.pet) {
             mob.givenTargets = mobs.filter((givenMob) => !givenMob.pet)
@@ -329,7 +310,11 @@ setInterval(() => {
                     } 
                 }
             }
-            mobs.splice(mobs.indexOf(mob), 1)
+            if (!mob.pet) {
+                mobs.splice(mobs.indexOf(mob), 1)
+            } else {
+                summons.splice(mobs.indexOf(mob), 1)
+            }
             if (mob.pet) {
                 mob.hostPetal.summons.splice(mob.hostPetal.summons.indexOf(mob), 1)
             }
@@ -367,7 +352,9 @@ function render() {
     ctx.save()
     camera.apply()
     decorator.makeGrid()
-    mobs.forEach((mob) => {
+    decorator.makeBoundaries()
+    // spatialHash.draw()
+    mobs.concat(summons).forEach((mob) => {
         mob.draw()
         mob.drawRarity()
     })
@@ -534,6 +521,7 @@ function render() {
             }
         }
     }
+    wave.draw()
     requestAnimationFrame(render)
 }
 render()

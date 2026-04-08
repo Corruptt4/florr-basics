@@ -10,14 +10,14 @@ export class Mob {
         this.rarityName = null;
         this.rarityColor = null;
         this.originalSize = size
-        this.size = size * Math.pow(1.30, rarity-1)
+        this.size = size * 0.95 * rarity
         this.startingHP = health
         this.startingDMG = damage
         this.speed = 0.2
         this.actualSpeed = this.speed
-        this.health = this.startingHP * Math.pow(3.5, rarity-1) * Math.pow(1.25, rarity-1);
-        this.maxHealth = this.startingHP * Math.pow(3.5, rarity-1) * Math.pow(1.25, rarity-1);
-        this.damage = this.startingDMG * Math.pow(2.55, rarity-1) * Math.pow(1.32, rarity-1);
+        this.health = this.startingHP * Math.pow(3.8, rarity-1) * Math.pow(1.25, rarity-1);
+        this.maxHealth = this.startingHP * Math.pow(3.8, rarity-1) * Math.pow(1.25, rarity-1);
+        this.damage = this.startingDMG * Math.pow(2.75, rarity-1) * Math.pow(1.42, rarity-1);
         this.angle = 0
         this.type = "mob"
         this.name = "Baby Ant" // PLACEHOLDER
@@ -28,6 +28,7 @@ export class Mob {
         this.poisonTick = 0;
         this.poisonToTake = 0;
         this.poisonTicks = 0;
+        this.mass = 50;
         this.moving = true
         this.target = null
         this.mass = 10 * Math.pow(1.2, rarity-1)
@@ -70,6 +71,7 @@ export class Mob {
             this.varieties.push(1 - 0.15+Math.random()*0.3)
         }
         this.angle = Math.PI * 2 * Math.random() - Math.PI
+        this.mass *= Math.pow(1.15, this.rarity-1)
         if (this.pet) {
             this.size = this.originalSize * Math.pow(1.25, this.rarity-1)
         }
@@ -212,8 +214,8 @@ export class Mob {
         this.velocity.y *= frictionMultiplier
     }
     getSpecificStats(rarity) {
-        this.specificHP = this.startingHP * Math.pow(3.5, rarity) * Math.pow(1.25, rarity);
-        this.specificDMG = this.startingDMG * Math.pow(2.55, rarity) * Math.pow(1.32, rarity);
+        this.specificHP = this.startingHP * Math.pow(3.8, rarity) * Math.pow(1.25, rarity);
+        this.specificDMG = this.startingDMG * Math.pow(2.75, rarity) * Math.pow(1.42, rarity);
         return {
             hp: this.specificHP,
             dmg: this.specificDMG
@@ -305,13 +307,13 @@ export class Mob {
         ctx.strokeStyle = darkenRGB(this.rarityColor, 20)
         ctx.font = "15px Arial"
         ctx.textAlign = "right"
-        ctx.strokeText(this.rarityName, healthWidth/2, this.size+70)
-        ctx.fillText(this.rarityName, healthWidth/2, this.size+70)
+        ctx.strokeText(this.rarityName, healthWidth/2, this.size+75)
+        ctx.fillText(this.rarityName, healthWidth/2, this.size+75)
         ctx.fillStyle = "white"
         ctx.strokeStyle = "black"
         ctx.textAlign = "left"
-        ctx.strokeText(this.name, -healthWidth/2, this.size+35)
-        ctx.fillText(this.name, -healthWidth/2, this.size+35)
+        ctx.strokeText(this.name, -healthWidth/2, this.size+32)
+        ctx.fillText(this.name, -healthWidth/2, this.size+32)
         ctx.textAlign = "center"
         ctx.closePath()
 

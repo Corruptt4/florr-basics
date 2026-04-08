@@ -18,6 +18,9 @@
         return `rgb(${r}, ${g}, ${b})`;
     }
 }
+export function randomElement(x) {
+    return Math.floor(Math.random()*x.length)
+}
 export function degreesToRads(x) {
     return x * (Math.PI / 180)
 }
@@ -45,7 +48,7 @@ export function abbreviate(num) {
     if (num < 1000) return num.toFixed(0)
 
     let abbreviations = [
-        "k","m","b","t","qa","qi"
+        "k","m","b","t","qa","qi", "sx", "sp", "oc", "no", "dc"
     ]
     let index = Math.floor(Math.log10(num)/3)-1
     let shortNum = (num / Math.pow(10, (index+1)*3))

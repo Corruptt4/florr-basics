@@ -16,6 +16,8 @@ export class Player {
         this.showPetalRarity = false;
         this.keyDown = [];
         this.mass = 10;
+        this.dir = 0
+        this.isMoving = false;
         this.petalsOrbiting = []
         this.damageTick = 0
         this.equippedPetals = []
@@ -38,7 +40,7 @@ export class Player {
                     id: i+1,
                     petal: null,
                     offset: (360 / n) * i,
-                    rarity: 8
+                    rarity: 7
                 }
             )
         }

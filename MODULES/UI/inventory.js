@@ -120,6 +120,7 @@ export class Inventory {
         ctx.closePath()
         if (this.open) {
             ctx.beginPath()
+            ctx.lineJoin = "round"
             ctx.fillStyle = "white"
             ctx.strokeStyle = "black"
             ctx.textAlign = "center"
@@ -129,6 +130,7 @@ export class Inventory {
             ctx.closePath()
 
             ctx.beginPath()
+            ctx.lineJoin = "round"
             ctx.fillStyle = this.exitBox.color
             ctx.strokeStyle = darkenRGB(this.exitBox.color, 20)
             ctx.lineWidth = 6
@@ -141,6 +143,7 @@ export class Inventory {
 
             ctx.beginPath()
             let textSize = 16
+            ctx.lineJoin = "round"
             ctx.fillStyle = this.petalFilter.color
             ctx.strokeStyle = darkenRGB(this.petalFilter.color, 20)
             ctx.lineWidth = 6
