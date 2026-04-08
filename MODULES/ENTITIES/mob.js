@@ -10,7 +10,7 @@ export class Mob {
         this.rarityName = null;
         this.rarityColor = null;
         this.originalSize = size
-        this.size = size * 0.95 * rarity
+        this.size = size * 0.9 * rarity
         this.startingHP = health
         this.startingDMG = damage
         this.speed = 0.2
