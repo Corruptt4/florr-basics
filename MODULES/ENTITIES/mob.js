@@ -34,6 +34,8 @@ export class Mob {
         this.mass = 10 * Math.pow(1.2, rarity-1)
         this.turnSpeed = 0.08;
         this.pet = false
+        this.boxOffsetX = 0;
+        this.boxOffsetY = 0;
         this.hostPetal = null;
         this.givenTargets = [];
         this.sizeVariation = false
@@ -42,6 +44,7 @@ export class Mob {
         this.chasesMobs = false
         this.potentialEnemies = [];
         this.goingToPlayer = false
+        this.description = "Are you meant to even see this description?"
 
 
         this.oldAngle = 0;
@@ -54,6 +57,7 @@ export class Mob {
         this.stormMaxTimer = 30
         this.damageTick = 0;
         this.detecDistPet = 0;
+        this.rock = false;
         this.varieties = []
         this.velocity = {
             x: 0,
@@ -67,8 +71,10 @@ export class Mob {
         this.color = "rgb(85, 85, 85)"
     }
     innitMob() {
-        for (let i = 0; i < this.shape; i++) {
-            this.varieties.push(1 - 0.15+Math.random()*0.3)
+        if (this.rock) {
+            for (let i = 0; i < this.shape; i++) {
+                this.varieties.push(1 - 0.15+Math.random()*0.3)
+            }
         }
         this.angle = Math.PI * 2 * Math.random() - Math.PI
         this.mass *= Math.pow(1.15, this.rarity-1)
@@ -304,7 +310,7 @@ export class Mob {
 
         ctx.fillStyle = this.rarityColor
         ctx.lineWidth = 4
-        ctx.strokeStyle = darkenRGB(this.rarityColor, 20)
+        ctx.strokeStyle = darkenRGB(this.rarityColor, 25)
         ctx.font = "15px Arial"
         ctx.textAlign = "right"
         ctx.strokeText(this.rarityName, healthWidth/2, this.size+75)

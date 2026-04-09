@@ -220,8 +220,8 @@ class BeetleEgg extends Petal {
         this.isSummoner = true
         this.summoner = {
             type: 1,
-            timer: 60,
-            timer2: 60,
+            timer: 90,
+            timer2: 90,
             killsPetal: true,
             scalesWithRarity: true,
             summonRarity: this.rarity-1,
@@ -311,8 +311,8 @@ class AntEgg extends Petal {
         this.isSummoner = true
         this.summoner = {
             type: 3,
-            timer: 30,
-            timer2: 30,
+            timer: 60,
+            timer2: 60,
             killsPetal: true,
             capacity: 3,
             scalesWithRarity: true,
@@ -403,8 +403,8 @@ class DryStick extends Petal {
         this.isSummoner = true
         this.summoner = {
             type: 2,
-            timer: 30,
-            timer2: 30,
+            timer: 60,
+            timer2: 70,
             killsPetal: false,
             scalesWithRarity: true,
             summonRarity: this.rarity-2,
@@ -557,8 +557,8 @@ class Stick extends Petal {
         this.isSummoner = true
         this.summoner = {
             type: 2,
-            timer: 30,
-            timer2: 30,
+            timer: 80,
+            timer2: 80,
             killsPetal: false,
             scalesWithRarity: true,
             summonRarity: this.rarity-1,
@@ -711,8 +711,8 @@ class MagicStick extends Petal {
         this.isSummoner = true
         this.summoner = {
             type: 2,
-            timer: 10,
-            timer2: 10,
+            timer: 25,
+            timer2: 25,
             killsPetal: false,
             scalesWithRarity: true,
             summonRarity: this.rarity-1,

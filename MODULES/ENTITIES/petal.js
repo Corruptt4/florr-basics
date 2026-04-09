@@ -94,11 +94,10 @@ export class Petal {
             )
             summon.rarities = rarities
             summon.hostPetal = this
-            summon.color = this.host.color
+            summon.color = "rgb(255, 255, 0)"
             summon.pet = true
             summon.innitMob()
             this.summons.push(summon)
-            summons.push(summon)
         }
     }
     reloadPetal() {

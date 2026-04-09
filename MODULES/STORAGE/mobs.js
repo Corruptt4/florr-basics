@@ -8,6 +8,8 @@ class BabyAnt extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
         this.color = "rgb(80, 80, 80)"
+        this.description = "Weak and defenseless, with dreams."
+        this.mass = 20
     }
 }
 
@@ -15,8 +17,12 @@ class SoldierAnt extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
         this.name = "Soldier Ant",
+        this.description = "It's ready to use its wings to protect the queen!"
         this.rarities = rarities
         this.speed = 0.18
+        this.mass = 35
+        this.boxOffsetX = 2.5
+        this.boxOffsetY = -2.5
         this.chasesMobs = true
         this.chasesPlayers = true
         this.color = "rgb(80, 80, 80)"
@@ -116,9 +122,13 @@ class Sandstorm extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
         this.name = "Sandstorm"
+        this.description = "This storm is random... Maybe go away from it"
         this.rarities = rarities
         this.sandstormMovement = true;
         this.shape = 6
+        this.sizeMulti = 1.5
+        this.boxExtraRotation = 20
+        this.mass = 50
         this.actualSpeed = 0.25
         this.isSandstorm = true;
         this.color = "rgb(212,199,167)"
@@ -129,7 +139,11 @@ class Sandstorm extends Mob {
             ctx.translate(this.x, this.y)
             let size = this.size / [1, 1.4, 2.5][i]
             ctx.beginPath();
-            ctx.rotate(0.6*[1,1.2,1.4][i]*this.t*[-1,1,-1][i])
+            if (!this.isSandstorm) {
+                ctx.rotate(this.angle + this.boxExtraRotation)
+            } else {
+                ctx.rotate(0.6*[1,1.2,1.4][i]*this.t*[-1,1,-1][i])
+            }
             ctx.fillStyle = darkenRGB(this.color, 0 + (20*i))
             ctx.strokeStyle = darkenRGB(this.color, 0 + (20*i))
             ctx.lineWidth = size / 3 / [1, 1.4, 2.5][i]
@@ -153,11 +167,14 @@ class Rock extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
         this.name = "Rock"
+        this.description = "The Rock."
         this.rarities = rarities
         this.shape = 15 + Math.floor(Math.random() * 10)
         this.speed = 0
+        this.sizeMulti = 1.5
+        this.rock = true;
         this.sizeVariation = true
-        this.mass = 25 * Math.pow(1.2, rarity-1)
+        this.mass = 70
         this.variationSides = true;
         this.color = "rgb(110, 110, 110)"
     }
@@ -173,7 +190,7 @@ class Rock extends Mob {
         ctx.moveTo(this.size*Math.cos(0), this.size*Math.sin(0))
         for (let i = 0; i <= this.shape; i++) {
             ctx.lineTo(
-                this.size*Math.cos(((Math.PI * 2)/this.shape) * i),
+                this.size*this.varieties[i]*Math.cos(((Math.PI * 2)/this.shape) * i),
                 this.size*this.varieties[i]*Math.sin(((Math.PI * 2)/this.shape) * i)
             )
         }
@@ -186,7 +203,6 @@ class Rock extends Mob {
         ctx.fill()
         ctx.stroke()
         ctx.closePath()
-
         ctx.restore()
     }
 }
@@ -195,10 +211,12 @@ class Bubble extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
         this.name = "Bubble"
+        this.description = "It pops, that's all... And maybe flings you lightly."
         this.rarities = rarities
         this.speed = 0
+        this.sizeMulti = 1.6
         this.sizeVariation = true
-        this.mass = 15 * Math.pow(1.2, rarity-1)
+        this.mass = 9
         this.color = "rgba(255, 255, 255, 0.4)"
     }
     draw() {
@@ -231,9 +249,14 @@ class Beetle extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
         this.chasesPlayers = true
+        this.description = "It's hungry for flowers, but why flowers instead of insects?"
         this.name = "Beetle"
         this.rarities = rarities
+        this.boxOffsetX = -2.5
+        this.boxOffsetY = 2.5
+        this.sizeMulti = 1.4
         this.chasesMobs = true
+        this.mass = 40
         this.color = "rgb(138,90,170)"
     }
     draw() {

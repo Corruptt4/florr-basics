@@ -40,7 +40,7 @@ export class Player {
                     id: i+1,
                     petal: null,
                     offset: (360 / n) * i,
-                    rarity: 7
+                    rarity: 15
                 }
             )
         }

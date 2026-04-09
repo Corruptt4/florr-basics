@@ -25,6 +25,7 @@ class Cell {
                 }
             }
         }
+        this.entities = []
     }
 }
 
@@ -33,6 +34,7 @@ export class SpatialHash {
     constructor(gridSize, mapSize) {
         this.mapSize = mapSize
         this.gridSize = gridSize ?? 16
+        this.factor = mapSize/50
         this.collisions = []
         this.grid = []
     }
@@ -44,6 +46,17 @@ export class SpatialHash {
                 this.grid[index] = new Cell(cellSize*x, cellSize*y, cellSize, cellSize)
             }
         }
+    }
+    draw() {
+        this.grid.forEach((cell) => {
+            ctx.beginPath()
+            ctx.fillStyle = "rgba(255, 255, 255, 0.3)"
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.6)"
+            ctx.roundRect(cell.x, cell.y, cell.width, cell.height, 0)
+            ctx.fill()
+            ctx.stroke()
+            ctx.closePath()
+        })
     }
     clearCellEntities() {
         this.grid.forEach((cell) => { 
@@ -59,14 +72,14 @@ export class SpatialHash {
     }
     addEntity(entity) {
         let cSize = this.mapSize/this.gridSize
-        let cSx = Math.floor(entity.x/cSize)
-        let cSy = Math.floor(entity.y/cSize)
-        let cEx = Math.floor((entity.x+entity.size)/cSize)
-        let cEy = Math.floor((entity.y+entity.size)/cSize)
-        cSx = Math.max(0, cSx);
-        cSy = Math.max(0, cSy);
-        cEx = Math.min(this.gridSize - 1, cEx);
-        cEy = Math.min(this.gridSize - 1, cEy);
+        let cSx = Math.floor((entity.x-entity.size-this.factor)/cSize)
+        let cSy = Math.floor((entity.y-entity.size-this.factor)/cSize)
+        let cEx = Math.floor((entity.x+entity.size+this.factor)/cSize)
+        let cEy = Math.floor((entity.y+entity.size+this.factor)/cSize)
+        cSx = Math.max(0, cSx)
+        cSy = Math.max(0, cSy)
+        cEx = Math.min(this.gridSize-1, cEx)
+        cEy = Math.min(this.gridSize-1, cEy)
         for (let x = cSx; x <= cEx; x++) {
             for (let y = cSy; y <= cEy; y++) {
                 let index = y*this.gridSize+x

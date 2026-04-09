@@ -133,14 +133,12 @@ export class PetalBox {
             let x = this.x - this.boxSize/2-tabWidth/3.3
             let y = this.y - tabHeight -  20
             ctx.beginPath()
-            ctx.globalAlpha = 0.7
-            ctx.fillStyle = "rgba(0, 0, 0, 0.8)"
-            ctx.strokeStyle = "rgba(0, 0, 0, 0.8"
+            ctx.fillStyle = "rgba(0, 0, 0, 0.7)"
+            ctx.strokeStyle = "rgba(0, 0, 0, 1)"
             ctx.lineJoin = "round"
-            ctx.roundRect(x, y, tabWidth, tabHeight, tabWidth/15)
+            ctx.roundRect(x, y, tabWidth, tabHeight, tabWidth/25)
             ctx.fill()
             ctx.stroke()
-            ctx.globalAlpha = 1
             ctx.font = "45px Arial"
             ctx.fillStyle = "white"
             ctx.strokeStyle = "black"

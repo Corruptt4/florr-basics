@@ -28,25 +28,35 @@ export class Decorator {
     constructor(amount, mapSize, decorColor, minSize, maxSize) {
         this.amount = amount;
         this.mapSize = mapSize;
-        this.gridSize = 150
+        this.gridSize = 75
+        this.boundarySize = 15000
         this.decorColor = decorColor
         this.sizes = {
             minSize: minSize,
             maxSize: maxSize
         }
     }
+    makeBoundaries() {
+        ctx.beginPath()
+        ctx.fillStyle = "rgba(0, 0, 0, 0.3)"
+        ctx.fillRect(0, -this.boundarySize, this.mapSize, this.boundarySize)
+        ctx.fillRect(-this.boundarySize, -this.boundarySize, this.boundarySize, this.boundarySize*3)
+        ctx.fillRect(0, this.mapSize, this.boundarySize, this.boundarySize)
+        ctx.fillRect(this.mapSize, -this.boundarySize, this.boundarySize, this.boundarySize+this.mapSize)
+        ctx.closePath()
+    }
     makeGrid() {
         ctx.beginPath()
-        ctx.lineWidth = 1
-        ctx.strokeStyle = "rgb(0, 185, 0)"
+        ctx.lineWidth = 2
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.1)"
         // x lines
-        for (let i = this.gridSize; i < this.mapSize*3-this.gridSize; i+=this.gridSize) {
+        for (let i = -this.mapSize; i < this.mapSize*2-this.gridSize; i+=this.gridSize) {
             ctx.moveTo(i, -this.mapSize)
             ctx.lineTo(i, this.mapSize*2)
         }
         
         // y lines
-        for (let i = this.gridSize; i < this.mapSize*3-this.gridSize; i+=this.gridSize) {
+        for (let i = -this.mapSize; i < this.mapSize*2-this.gridSize; i+=this.gridSize) {
             ctx.moveTo(-this.mapSize, i)
             ctx.lineTo(this.mapSize*2, i)
         }

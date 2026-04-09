@@ -1,6 +1,7 @@
-import { mapSize, mobs, canvas, ctx } from "../../main.js";
+import { mapSize, mobs, canvas, ctx, mobBoxes } from "../../main.js";
 import { randomElement } from "../../SCRIPTS/functions.js";
 import { availableMobs } from "../STORAGE/mobs.js";
+import { MobBox } from "../UI/mobBox.js";
 
 export class WaveMode {
     /**
@@ -10,8 +11,8 @@ export class WaveMode {
      * Intermission bar = red
      */
     constructor(startWave, rarities) {
-        this.startWave = 1
-        this.wave = 1
+        this.startWave = startWave
+        this.wave = startWave
         this.waveTick = 0
         this.rarities = rarities;
         this.intermissionTick = 0
@@ -27,13 +28,16 @@ export class WaveMode {
         this.time = 0;
         this.seconds = 0;
         this.minutes = 0;
+        this.chanceGrowthFactor = 160
+        this.mobSizeFactor = 20
         this.chances = [
             [0.8, 0],
             [0.2, 1],
             [0.1, 2],
-            [0.02, 3]
+            [0.05, 3],
+            [0.005, 4]
         ]
-        this.raritiesToSpawn = [0, 0, 0, 0]
+        this.raritiesToSpawn = [0, 0, 0, 0, 0]
         this.mobsToSpawn = []
         this.createWave(this.wave)
     }
@@ -47,13 +51,20 @@ export class WaveMode {
         this.minutes = Math.floor(this.time/60)
     }
     createWave(wave) {
-        this.raritiesToSpawn[0] = Math.min(1+Math.floor(wave*0.15), this.rarities.length)
+        this.raritiesToSpawn[0] = Math.min(1+Math.floor((wave-1)*0.13), this.rarities.length)
         this.raritiesToSpawn[1] = Math.max(this.raritiesToSpawn[0]-1, 1)
         this.raritiesToSpawn[2] = Math.min(this.raritiesToSpawn[0]+1, this.rarities.length)
         this.raritiesToSpawn[3] = Math.min(this.raritiesToSpawn[0]+2, this.rarities.length)
+        this.raritiesToSpawn[4] = Math.min(this.raritiesToSpawn[0]+3, this.rarities.length)
 
-        this.sizeFactor = Math.min(1 / (wave/10), 1)
-        let mobsToSet = Math.min((10+wave*8), 700)
+        this.chances[0][0] = Math.min(0.8 - (wave-1)/this.chanceGrowthFactor, 0.2)
+        this.chances[0][1] = Math.min(0.2 - (wave-1)/this.chanceGrowthFactor, 0.05)
+        this.chances[0][2] = Math.min(0.1 + (wave-1)/this.chanceGrowthFactor, 0.6)
+        this.chances[0][3] = Math.min(0.05 + (wave-1)/this.chanceGrowthFactor, 0.5)
+        this.chances[0][4] = Math.min(0.005 + (wave-1)/this.chanceGrowthFactor, 0.1)
+
+        this.sizeFactor = Math.min(1 / (wave/this.mobSizeFactor), 1)
+        let mobsToSet = Math.min((20+(wave-1)*3), 700)
         this.amountInWave = mobsToSet
         for (let i = 0; i < mobsToSet; i++) {
             let randomMob = randomElement(availableMobs)
@@ -167,7 +178,7 @@ export class WaveMode {
             }
             if (this.spawnMobTick <= 0) {
                 this.spawnMobTick = 100 + Math.floor(Math.random()*100)
-                this.spawnAmount = Math.min(this.amountInWave/8, this.mobsToSpawn.length)
+                this.spawnAmount = Math.min(this.amountInWave/10, this.mobsToSpawn.length)
                 for (let i = 0; i < this.spawnAmount; i++) {
                     let mob = this.mobsToSpawn.shift()
                     mob.rarities = this.rarities

@@ -10,6 +10,7 @@ import { Inventory, InventoryPetalBox } from "./MODULES/UI/inventory.js";
 import { Petal, PlaceholderPetal } from "./MODULES/ENTITIES/petal.js";
 import { SpatialHash } from "./MODULES/PHYSICS/spatialHash.js";
 import { WaveMode } from "./MODULES/GAME/waveHandler.js";
+import { MobBox } from "./MODULES/UI/mobBox.js";
 
 export const canvas = document.getElementById("canvas"),
                           ctx = canvas.getContext("2d");
@@ -24,14 +25,25 @@ let mouseDraggingBox = false;
 let mouseDraggingBoxClass = null;
 let dropHandled = false
 
+let mobRockBoxVar = []
+let rockMobShape = 20
+for (let i = 0; i < rockMobShape; i++) {
+    mobRockBoxVar.push(1 + 0.15+Math.random()*(-0.30))
+}
+
 export let mapSize = 2000,
                     entities = [],
                     mobs = [],
                     summons = [],
                     allEntities = [],
                     decors = [],
+                    mobBoxes = [],
+                    petals = [],
                     frictionMultiplier = 0.95
 let inventoryPetalToSlot = []
+let sameMobBoxes = [] // only applies to same name boxes.
+let sameSummonBoxes = []
+let summonBoxes = []
 
 let spatialHash = new SpatialHash(16, mapSize)
 spatialHash.innitGrid()
@@ -65,7 +77,7 @@ export var rarities = [
 
 
 var petalBoxes = []
-let player = new Player(0, 0, 25, "rgb(255, 255, 0)")
+let player = new Player(0, 0, 25, "rgb(255,231,99)")
 let camera = new Camera(player)
 let decorator = new Decorator(0, mapSize, )
 player.innitPetals()
@@ -94,7 +106,7 @@ for (let i = 0; i < player.equippedPetals.length; i++) {
     petalBoxHolders.push(petalBoxHolder)
 }
 player.equippedPetals.forEach((petal) => {
-    let randomPetal = 0
+    let randomPetal = 3
     let newPetal = new availablePetals[randomPetal].constructor(
         player, {
             health: 10,
@@ -113,6 +125,9 @@ player.equippedPetals.forEach((petal) => {
     let neededBox = petalBoxHolders.find((box) => box.id == petal.id)
     neededBox.box = petalBox
     petalBox.boxOn = neededBox
+    if (!petals.includes(newPetal)) {
+        petals.push(newPetal)
+    }
     if (!entities.includes(newPetal)) {
         entities.push(newPetal)
     }
@@ -227,7 +242,8 @@ setInterval(() => {
             (entity.x - entity.size > mapSize) ||
             (entity.x + entity.size < 0) ||
             (entity.y - entity.size > mapSize) ||
-            (entity.y + entity.size < 0)
+            (entity.y + entity.size < 0) ||
+            (entity.type === "petal" && entity.dead)
         ) {
             continue;
         }
@@ -345,6 +361,22 @@ setInterval(() => {
 }, 1000/60)
 
 function render() {
+    petals = []
+    summons = []
+    player.equippedPetals.forEach((p) => {
+        if (p.petal instanceof Petal) {
+            if (!petals.includes(p.petal)) {
+                petals.push(p.petal)
+            }
+        }
+    })
+    petals.forEach((petal) => {
+        petal.summons.forEach((s) => {
+            if (!summons.includes(s)) {
+                summons.push(s)
+            }
+        })
+    })
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -521,6 +553,136 @@ function render() {
             }
         }
     }
+    
+    summonBoxes = []
+    summons.forEach((summon) => {
+        let summonBox = new MobBox(50, 80, 55, summon)
+        summonBox.innitClone()
+        summonBoxes.push(summonBox)
+    })
+    
+    for (let i = 0; i < summonBoxes.length; i++) {
+        let s1 = summonBoxes[i]
+        for (let j = i+1; j < summonBoxes.length; j++) {
+            let s2 = summonBoxes[j]
+            if (s1.mob.name == s2.mob.name && s1.mob.rarity == s2.mob.rarity) {
+                s1.amount += 1
+                summonBoxes.splice(j, 1)
+                j--
+            }
+        }
+    }
+    sameSummonBoxes = []
+    while (summonBoxes.length > 0) {
+        let s1 = summonBoxes.shift()
+        let row = [s1]
+        for (let i = summonBoxes.length - 1; i >= 0; i--) {
+            if (summonBoxes[i].mob.name == s1.mob.name) {
+                row.push(summonBoxes[i])
+                summonBoxes.splice(i, 1)
+            }
+        }
+        sameSummonBoxes.push(row)
+    }
+    sameSummonBoxes.forEach((similarMobs, rowIndex) => {
+        similarMobs.sort((a, b) => a.mob.rarity - b.mob.rarity);
+        similarMobs.forEach((box, i) => {
+            box.x = box.l/2+10 + ((box.l*2)/1.5)*rowIndex
+            box.y = box.l/2+10 + ((box.l*2)/1.5)*i;
+        });
+    });
+    
+    mobBoxes = [];
+    mobs.forEach(mob => {
+        let mobBox = new MobBox(50, 80, 55, mob);
+        if (mob.name === "Rock") {
+            mobBox.shape = rockMobShape;
+            mobBox.varieties = mobRockBoxVar;
+        }
+        mobBox.innitClone();
+        mobBoxes.push(mobBox);
+    });
+
+    
+    for (let i = 0; i < mobBoxes.length; i++) {
+        let box1 = mobBoxes[i];
+        for (let j = i + 1; j < mobBoxes.length; j++) {
+            let box2 = mobBoxes[j];
+            if (box1.mob.name === box2.mob.name && box1.mob.rarity === box2.mob.rarity) {
+                box1.amount += 1;
+                mobBoxes.splice(j, 1);
+                j--;
+            }
+        }
+    }
+
+    sameMobBoxes = [];
+    while (mobBoxes.length > 0) {
+        let mob1 = mobBoxes.shift();
+        let row = [mob1];
+
+        for (let i = mobBoxes.length - 1; i >= 0; i--) {
+            if (mobBoxes[i].mob.name === mob1.mob.name) {
+                row.push(mobBoxes[i]);
+                mobBoxes.splice(i, 1);
+            }
+        }
+
+        sameMobBoxes.push(row);
+    }
+    sameMobBoxes.forEach((similarMobs, rowIndex) => {
+        similarMobs.sort((a, b) => a.mob.rarity - b.mob.rarity);
+        similarMobs.forEach((box, i) => {
+            box.x = box.l/2+(canvas.width/2-((box.l*2)*1.2)*(sameMobBoxes.length/4)) + (box.l*1.5) * rowIndex;
+            box.y = box.l+110 + (box.l*1.3) * i;
+        });
+    });
+    
+    sameMobBoxes.forEach((row) => {
+        row.forEach((box) => {
+            if (boxCollision(mx, my, box.x-box.l/2, box.y-box.l/2, box.l) && !mouseDraggingBox) {
+                box.hovered = true
+            } else {
+                box.hovered = false
+            }
+        })
+    })
+        sameSummonBoxes.forEach((row) => {
+        row.forEach((box) => {
+            if (boxCollision(mx, my, box.x-box.l/2, box.y-box.l/2, box.l) && !mouseDraggingBox) {
+                box.hovered = true
+            } else {
+                box.hovered = false
+            }
+        })
+    })
+    sameMobBoxes.forEach((similarMobs, rowIndex) => {
+        similarMobs.forEach((box) => {
+            box.draw();
+        });
+    });    
+    sameSummonBoxes.forEach((similarMobs, rowIndex) => {
+        similarMobs.sort((a, b) => a.mob.rarity - b.mob.rarity);
+        similarMobs.forEach((box, i) => {
+            box.draw();
+        });
+    });
+    
+    sameMobBoxes.forEach((similarMobs, rowIndex) => {
+        similarMobs.forEach((box) => {
+            if (box.hovered) {
+                box.drawStatBox()
+            }
+        });
+    });    
+    sameSummonBoxes.forEach((similarMobs, rowIndex) => {
+        similarMobs.sort((a, b) => a.mob.rarity - b.mob.rarity);
+        similarMobs.forEach((box, i) => {
+            if (box.hovered) {
+                box.drawStatBox()
+            }
+        });
+    });
     wave.draw()
     requestAnimationFrame(render)
 }
