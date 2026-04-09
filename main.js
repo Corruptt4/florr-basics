@@ -85,7 +85,7 @@ let decorator = new Decorator(0, mapSize, )
 player.innitPetals()
 let petalBoxHolders = []
 let mobRarities = []
-let wave = new WaveMode(125, rarities)
+let wave = new WaveMode(1, rarities)
 let inventory = new Inventory(20, canvas.height - 80, 90, 90)
 inventory.innitPetals(rarities)
 function spawnTestMob() {
