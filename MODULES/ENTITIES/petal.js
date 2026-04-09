@@ -59,6 +59,7 @@ export class Petal {
             summonRarity: 1,
             capacity: 1,
             lowerRarity: 0,
+            mobSnapToPlayer: false,
             scalesPetal: false,
         }
         /* 
@@ -89,12 +90,18 @@ export class Petal {
                 this.y,
                 this.summoner.summonRarity+1,
                 availableMobs[this.summoner.type].health,
-                availableMobs[this.summoner.type].damage,
+                availableMobs[this.summoner.type].damage*2,
                 availableMobs[this.summoner.type].size*sizeFactor,
             )
             summon.rarities = rarities
             summon.hostPetal = this
-            summon.color = "rgb(255, 255, 0)"
+            if (summon.name !== "Bubble") {
+                summon.color = "rgb(255, 255, 0)"
+            }
+            if (summon.name == "Bubble") {
+                summon.description += " Blessed by the Flower to deal damage to nearby mobs."
+            }
+            summon.snapToPlayer = this.summoner.mobSnapToPlayer
             summon.pet = true
             summon.innitMob()
             this.summons.push(summon)
@@ -126,8 +133,10 @@ export class Petal {
         }
         if (this.isSummoner) {
             this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2 : this.rarity-2-this.summoner.lowerRarity
-            this.summoner.timer *= Math.pow(1.27, this.summoner.summonRarity)
-            this.summoner.timer2 = this.summoner.timer
+            if (this.summoner.scalesWithRarity) {
+                this.summoner.timer *= Math.pow(1.27, this.summoner.summonRarity)
+                this.summoner.timer2 = this.summoner.timer
+            }
         }
         this.maxSummonTimer = this.summoner.timer
         let exponential = 1.35

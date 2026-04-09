@@ -697,6 +697,121 @@ class Stick extends Petal {
         ctx.closePath();
     }
 }
+class Bubble extends Petal {
+    constructor(host, stats) {
+        super(host, stats)
+        this.name = "Bubble"
+        this.altName = "Bubble"
+        this.size = 12
+        this.maxReload = 10
+        this.stats.health = 1
+        this.stats.damage = 15
+        this.sizeMulti = 1
+        this.lockedAngle = false
+        this.isSummoner = true
+        this.summoner = {
+            type: 5,
+            timer: 10,
+            timer2: 10,
+            killsPetal: true,
+            scalesWithRarity: false,
+            summonRarity: this.rarity-1,
+            capacity: 1,
+            snapToPlayer: true,
+            scalesPetal: false,
+            lowerRarity: -1
+        }
+        this.description = "Summons a bubble for you to pop."
+        this.color = "rgb(0,0,0)"
+        this.actualColor = "rgb(255,255,255)"
+        this.fillColor = "rgba(255,255,255,0.5)"
+        this.shineColor = "rgba(255,255,255,0.4)"
+    }
+    
+    drawOnBox(box, size) {
+        let boxSize = box.boxSize
+        ctx.save()
+        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.rotate(this.angle)
+        ctx.beginPath();
+        ctx.fillStyle = this.fillColor;
+        ctx.strokeStyle = this.actualColor;
+        ctx.lineWidth = 3
+        ctx.lineJoin = "round"
+        ctx.arc(0, 0, size*this.sizeMulti, 0, Math.PI*2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+
+        ctx.beginPath()
+        ctx.fillStyle = this.fillColor;
+        ctx.lineWidth = 4
+        ctx.lineJoin = "round"
+        ctx.arc(size*this.sizeMulti/4, size*this.sizeMulti/3.5, size*this.sizeMulti/3, 0, Math.PI*2)
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+        ctx.beginPath();
+        ctx.lineWidth = 4
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.font = "18px Arial"
+        ctx.lineJoin = "round"
+        ctx.textAlign = "center"
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.closePath()
+    }
+    draw() {
+        if (this.showRarity) {
+            ctx.beginPath()
+            ctx.globalAlpha = 0.5
+            let rarityName = rarities[this.rarity-1][0]
+            ctx.fillStyle = rarities[this.rarity-1][1]
+            ctx.arc(this.x, this.y, this.size*1.6, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.globalAlpha = 1
+            ctx.lineWidth = 2
+            ctx.font = "20px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.closePath()
+        }
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath();
+        ctx.fillStyle = this.fillColor;
+        ctx.strokeStyle = this.actualColor;
+        ctx.lineWidth = 3
+        ctx.lineJoin = "round"
+        ctx.arc(0, 0, this.size, 0, Math.PI*2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+
+        ctx.beginPath()
+        ctx.fillStyle = this.fillColor;
+        ctx.lineWidth = 4
+        ctx.lineJoin = "round"
+        ctx.arc(this.size/4, this.size/3.5, this.size/3, 0, Math.PI*2)
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+        
+        if (this.showRarity) {
+            ctx.fillStyle = "white"
+            ctx.strokeStyle = "black"
+            ctx.lineWidth = 3
+            ctx.font = "10px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(this.id, this.x, this.y+10/3)
+            ctx.fillText(this.id, this.x, this.y+10/3)
+        }
+        ctx.closePath();
+    }
+}
 class MagicStick extends Petal {
     constructor(host, stats) {
         super(host, stats)
@@ -1064,6 +1179,11 @@ export var availablePetals = [
         armor: 0
     }),
     new Rock(null, {
+        health: 100,
+        damage: 1,
+        armor: 0
+    }),
+    new Bubble(null, {
         health: 100,
         damage: 1,
         armor: 0
