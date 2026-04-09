@@ -90,25 +90,40 @@ export class MobBox {
         ctx.font = "20px Arial"
         ctx.textAlign = "left"
         let healthSpacing = ctx.measureText("Health: ")
-        ctx.strokeText("Health: ", 15, tabHeight-50)
-        ctx.fillText("Health: ", 15, tabHeight-50)
+        ctx.strokeText("Health: ", 15, tabHeight-50-(this.mob.bubbleBurst.power>0?20:0))
+        ctx.fillText("Health: ", 15, tabHeight-50-(this.mob.bubbleBurst.power>0?20:0))
         ctx.fillStyle = "white"
         ctx.strokeStyle = "black"
-        ctx.strokeText(abbreviate(this.mob.maxHealth), 15+healthSpacing.width, tabHeight-50)
-        ctx.fillText(abbreviate(this.mob.maxHealth), 15+healthSpacing.width, tabHeight-50)
+        ctx.strokeText(abbreviate(this.mob.maxHealth), 15+healthSpacing.width, tabHeight-50-(this.mob.bubbleBurst.power>0?20:0))
+        ctx.fillText(abbreviate(this.mob.maxHealth), 15+healthSpacing.width, tabHeight-50-(this.mob.bubbleBurst.power>0?20:0))
         
-        ctx.fillStyle = "RED"
+        ctx.fillStyle = "red"
         ctx.strokeStyle =  "black"
         ctx.font = "20px Arial"
         ctx.textAlign = "left"
         let damageSpacing = ctx.measureText("Damage: ")
-        ctx.strokeText("Damage: ", 15, tabHeight-25)
-        ctx.fillText("Damage: ", 15, tabHeight-25)
+        ctx.strokeText("Damage: ", 15, tabHeight-25-(this.mob.bubbleBurst.power>0?20:0))
+        ctx.fillText("Damage: ", 15, tabHeight-25-(this.mob.bubbleBurst.power>0?20:0))
         ctx.fillStyle = "white"
         ctx.strokeStyle = "black"
-        ctx.strokeText(abbreviate(this.mob.damage), 15+damageSpacing.width, tabHeight-25)
-        ctx.fillText(abbreviate(this.mob.damage), 15+damageSpacing.width, tabHeight-25)
+        ctx.strokeText(abbreviate(this.mob.damage) + ((this.mob.pet&&this.mob.name=="Bubble")?` (${abbreviate(this.mob.damage*this.mob.bubbleBurst.damageMulti)} on pop)`:``), 15+damageSpacing.width, tabHeight-25-(this.mob.bubbleBurst.power>0?20:0))
+        ctx.fillText(abbreviate(this.mob.damage) + ((this.mob.pet&&this.mob.name=="Bubble")?` (${abbreviate(this.mob.damage*this.mob.bubbleBurst.damageMulti)} on pop)`:``), 15+damageSpacing.width, tabHeight-25-(this.mob.bubbleBurst.power>0?20:0))
 
+        if (this.mob.bubbleBurst.power>0) {
+            ctx.fillStyle = "blue"
+            ctx.strokeStyle =  "black"
+            ctx.font = "20px Arial"
+            ctx.textAlign = "left"
+            let burstSpacing = ctx.measureText("Burst: ")
+            ctx.strokeText("Burst: ", 15, tabHeight-20)
+            ctx.fillText("Burst: ", 15, tabHeight-20)
+            ctx.fillStyle = "white"
+            ctx.strokeStyle =  "black"
+            ctx.strokeText(abbreviate(this.mob.bubbleBurst.power),15+burstSpacing.width, tabHeight-20)
+            ctx.fillText(abbreviate(this.mob.bubbleBurst.power, ), 15+burstSpacing.width, tabHeight-20)
+
+        }
+        
         ctx.closePath()
         ctx.restore()
     }

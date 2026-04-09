@@ -74,7 +74,8 @@ export var rarities = [
     ["Chaos", "rgba(100, 0, 207)"],
     ["Godly", "rgb(255, 255, 100)"],
     ["Divinity", "rgb(100, 0, 255)"],
-    ["Universal", "rgb(200, 105, 125)"]
+    ["Universal", "rgb(200, 105, 125)"],
+    ["Megaversal", "rgb(172, 200, 199)"]
 ]
 
 
@@ -85,7 +86,7 @@ let decorator = new Decorator(0, mapSize, )
 player.innitPetals()
 let petalBoxHolders = []
 let mobRarities = []
-let wave = new WaveMode(1, rarities)
+let wave = new WaveMode(50, rarities)
 let inventory = new Inventory(20, canvas.height - 80, 90, 90)
 inventory.innitPetals(rarities)
 function spawnTestMob() {
@@ -108,7 +109,7 @@ for (let i = 0; i < player.equippedPetals.length; i++) {
     petalBoxHolders.push(petalBoxHolder)
 }
 player.equippedPetals.forEach((petal) => {
-    let randomPetal = 3
+    let randomPetal = 0
     let newPetal = new availablePetals[randomPetal].constructor(
         player, {
             health: 10,
@@ -326,6 +327,30 @@ setInterval(() => {
                     if (otherMob.target == mob) {
                         otherMob.target = null
                     } 
+                }
+            }
+            if (mob.bubbleBurst.power > 0) {
+                for (let entity of allEntities) {
+                    if (entity !== mob && entity.type !== "petal" && !entity.pet) {
+                        let dx = mob.x-entity.x
+                        let dy = mob.y-entity.y
+                        let dist = dx*dx+dy*dy
+                        let angle = Math.atan2(dy, dx)
+                        if (mob.pet) {
+                            if (entity.type !== "player") {
+                                if (Math.sqrt(dist) <= 600) {
+                                    entity.health -= mob.damage*mob.bubbleBurst.damageMulti
+                                    entity.velocity.x -= (mob.bubbleBurst.power/(entity.size**1.3)/(Math.sqrt(dist)/150))*Math.cos(angle)
+                                    entity.velocity.y -= (mob.bubbleBurst.power/(entity.size**1.3)/(Math.sqrt(dist)/150))*Math.sin(angle)
+                                }
+                            }
+                        } else {
+                            if (Math.sqrt(dist) <= 600) {
+                                entity.velocity.x -= (mob.bubbleBurst.power/(entity.size**1.3)/(Math.sqrt(dist)/150))*Math.cos(angle)
+                                entity.velocity.y -= (mob.bubbleBurst.power/(entity.size**1.3)/(Math.sqrt(dist)/150))*Math.sin(angle)
+                            }
+                        }
+                    }
                 }
             }
             if (!mob.pet) {
@@ -635,8 +660,8 @@ function render() {
     sameMobBoxes.forEach((similarMobs, rowIndex) => {
         similarMobs.sort((a, b) => a.mob.rarity - b.mob.rarity);
         similarMobs.forEach((box, i) => {
-            box.x = box.l/2.5+(canvas.width/2-((box.l*2)*1.1)*(sameMobBoxes.length/4)) + (box.l*1.5) * rowIndex;
-            box.y = box.l+110 + (box.l*1.3) * i;
+            box.x = (canvas.width/2-((box.l*2)*1.15)*(sameMobBoxes.length/4)) + (box.l*1.35) * rowIndex;
+            box.y = box.l+120 + (box.l*1.15) * i;
         });
     });
     
