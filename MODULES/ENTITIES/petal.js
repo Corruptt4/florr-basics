@@ -1,4 +1,4 @@
-import { ctx, frictionMultiplier, summons, rarities } from "../../main.js";
+import { ctx, frictionMultiplier, summons, rarities, sizeFactor } from "../../main.js";
 import { darkenRGB, degreesToRads } from "../../SCRIPTS/functions.js";
 import { availableMobs } from "../STORAGE/mobs.js";
 import { Mob } from "./mob.js";
@@ -90,7 +90,7 @@ export class Petal {
                 this.summoner.summonRarity+1,
                 availableMobs[this.summoner.type].health,
                 availableMobs[this.summoner.type].damage,
-                availableMobs[this.summoner.type].size,
+                availableMobs[this.summoner.type].size*sizeFactor,
             )
             summon.rarities = rarities
             summon.hostPetal = this

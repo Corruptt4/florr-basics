@@ -40,6 +40,8 @@ export let mapSize = 2000,
                     mobBoxes = [],
                     petals = [],
                     frictionMultiplier = 0.95
+export let sizeFactor = 1
+
 let inventoryPetalToSlot = []
 let sameMobBoxes = [] // only applies to same name boxes.
 let sameSummonBoxes = []
@@ -83,7 +85,7 @@ let decorator = new Decorator(0, mapSize, )
 player.innitPetals()
 let petalBoxHolders = []
 let mobRarities = []
-let wave = new WaveMode(1, rarities)
+let wave = new WaveMode(125, rarities)
 let inventory = new Inventory(20, canvas.height - 80, 90, 90)
 inventory.innitPetals(rarities)
 function spawnTestMob() {
@@ -259,17 +261,17 @@ setInterval(() => {
         if (collider1.type !== "petal" && collider2.type !== "petal") {
             if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
             if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
-            let totalMass = collider1.mass+collider2.mass
-            let p1 = collider1.mass/totalMass
-            let p2 = collider2.mass/totalMass
+            let totalMass = collider1.size+collider2.size
+            let p1 = collider1.size/totalMass
+            let p2 = collider2.size/totalMass
             let strength1 = Math.max(p1, 1)
             let strength2 = Math.max(p2, 1)
-            let pushPower = 12
-            collider2.push.x += pushPower * strength2 * Math.cos(angle)
-            collider2.push.y += pushPower * strength2 * Math.sin(angle)
+            let pushPower = 20
+            collider2.push.x += (collider2.type == "player" ? 1 : pushPower) * strength2 * Math.cos(angle)
+            collider2.push.y += (collider2.type == "player" ? 1 : pushPower) * strength2 * Math.sin(angle)
             
-            collider1.push.x -= pushPower * strength1 * Math.cos(angle)
-            collider1.push.y -= pushPower * strength1 * Math.sin(angle)
+            collider1.push.x -= (collider1.type == "player" ? 1 : pushPower) * strength1 * Math.cos(angle)
+            collider1.push.y -= (collider1.type == "player" ? 1 : pushPower) * strength1 * Math.sin(angle)
             if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
                 collider1.health -= collider2.damage
                 collider2.health -= collider1.damage
@@ -633,7 +635,7 @@ function render() {
     sameMobBoxes.forEach((similarMobs, rowIndex) => {
         similarMobs.sort((a, b) => a.mob.rarity - b.mob.rarity);
         similarMobs.forEach((box, i) => {
-            box.x = box.l/2+(canvas.width/2-((box.l*2)*1.2)*(sameMobBoxes.length/4)) + (box.l*1.5) * rowIndex;
+            box.x = box.l/2.5+(canvas.width/2-((box.l*2)*1.1)*(sameMobBoxes.length/4)) + (box.l*1.5) * rowIndex;
             box.y = box.l+110 + (box.l*1.3) * i;
         });
     });
@@ -683,6 +685,7 @@ function render() {
             }
         });
     });
+    sizeFactor = wave.sizeFactor
     wave.draw()
     requestAnimationFrame(render)
 }
