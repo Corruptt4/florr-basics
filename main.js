@@ -189,9 +189,7 @@ document.addEventListener("mousedown", (e) => {
         if (inventory.open) {
             for (let invSlot of inventory.visibleSlots) {
                 if (boxCollision(mx, my, invSlot.x, invSlot.y, invSlot.boxSize)) {
-                    console.log(invSlot)
                     let editSlot = inventory.shownPetals.filter((petal) => invSlot.petal.name == petal.petal.name)
-                    console.log(editSlot)
                     editSlot = editSlot.filter((petal) => (invSlot.rarity) == petal.actualRarity)
                     editSlot = editSlot[0]
                     const clonedPetal = structuredClone(editSlot.petal);
