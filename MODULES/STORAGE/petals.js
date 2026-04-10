@@ -705,7 +705,7 @@ class Bubble extends Petal {
         this.size = 12
         this.maxReload = 10
         this.stats.health = 1
-        this.stats.damage = 15
+        this.stats.damage = 0.1
         this.sizeMulti = 1
         this.lockedAngle = false
         this.isSummoner = true
@@ -721,7 +721,7 @@ class Bubble extends Petal {
             scalesPetal: false,
             lowerRarity: -1
         }
-        this.description = "Summons a bubble for you to pop."
+        this.description = "Pops easily, but summons a bubble summon... Some say your bubble is blessed."
         this.color = "rgb(0,0,0)"
         this.actualColor = "rgb(255,255,255)"
         this.fillColor = "rgba(255,255,255,0.5)"

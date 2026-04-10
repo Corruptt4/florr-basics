@@ -217,7 +217,8 @@ class Bubble extends Mob {
         this.sizeMulti = 1.6
         this.bubbleBurst = {
             power: 25,
-            damageMulti: 5
+            damageMulti: 5,
+            burstRange: 15
         }
         this.sizeVariation = true
         this.mass = 9
@@ -349,5 +350,5 @@ export let availableMobs = [
     new Sandstorm(0, 0, 1, 350, 8, 40),
     new SoldierAnt(0, 0, 1, 180, 3, 18),
     new Rock(0, 0, 1, 225, 3, 25),
-    new Bubble(0, 0, 1, 2, 3, 30)
+    new Bubble(0, 0, 1, 0.2, 3, 30)
 ]

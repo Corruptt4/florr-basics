@@ -75,18 +75,21 @@ export var rarities = [
     ["Godly", "rgb(255, 255, 100)"],
     ["Divinity", "rgb(100, 0, 255)"],
     ["Universal", "rgb(200, 105, 125)"],
-    ["Megaversal", "rgb(172, 200, 199)"]
+    ["Megaversal", "rgb(172, 200, 199)"],
+    ["Infinity", "rgb(255, 188, 100)"],
+    ["Dimensional", "rgb(92, 100, 160)"],
+    ["Multidimensional", "rgb(170, 100, 200)"]
 ]
 
 
 var petalBoxes = []
-let player = new Player(0, 0, 25, "rgb(255,231,99)")
+let player = new Player(100, 100, 25, "rgb(255,231,99)")
 let camera = new Camera(player)
 let decorator = new Decorator(0, mapSize, )
 player.innitPetals()
 let petalBoxHolders = []
 let mobRarities = []
-let wave = new WaveMode(50, rarities)
+let wave = new WaveMode(1, rarities)
 let inventory = new Inventory(20, canvas.height - 80, 90, 90)
 inventory.innitPetals(rarities)
 function spawnTestMob() {
@@ -262,17 +265,19 @@ setInterval(() => {
         if (collider1.type !== "petal" && collider2.type !== "petal") {
             if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
             if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
-            let totalMass = collider1.size+collider2.size
-            let p1 = collider1.size/totalMass
-            let p2 = collider2.size/totalMass
-            let strength1 = Math.max(p1, 1)
-            let strength2 = Math.max(p2, 1)
-            let pushPower = 20
-            collider2.push.x += (collider2.type == "player" ? 1 : pushPower) * strength2 * Math.cos(angle)
-            collider2.push.y += (collider2.type == "player" ? 1 : pushPower) * strength2 * Math.sin(angle)
+            let invMass1 = 1 / collider1.mass
+            let invMass2 = 1 / collider2.mass
+            let totalInvMass = invMass1 + invMass2
+            let p1 = invMass1 / totalInvMass
+            let p2 = invMass2 / totalInvMass
+            let strength1 = Math.min(p1, 1)
+            let strength2 = Math.min(p2, 1)
+            let pushPower = 1
+            collider2.push.x += pushPower * strength2 * Math.cos(angle)
+            collider2.push.y += pushPower * strength2 * Math.sin(angle)
             
-            collider1.push.x -= (collider1.type == "player" ? 1 : pushPower) * strength1 * Math.cos(angle)
-            collider1.push.y -= (collider1.type == "player" ? 1 : pushPower) * strength1 * Math.sin(angle)
+            collider1.push.x -= pushPower * strength1 * Math.cos(angle)
+            collider1.push.y -= pushPower * strength1 * Math.sin(angle)
             if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
                 collider1.health -= collider2.damage
                 collider2.health -= collider1.damage
@@ -338,16 +343,16 @@ setInterval(() => {
                         let angle = Math.atan2(dy, dx)
                         if (mob.pet) {
                             if (entity.type !== "player") {
-                                if (Math.sqrt(dist) <= 600) {
+                                if (Math.sqrt(dist) <= mob.size*mob.bubbleBurst.burstRange) {
                                     entity.health -= mob.damage*mob.bubbleBurst.damageMulti
-                                    entity.velocity.x -= (mob.bubbleBurst.power/(entity.size**1.3)/(Math.sqrt(dist)/150))*Math.cos(angle)
-                                    entity.velocity.y -= (mob.bubbleBurst.power/(entity.size**1.3)/(Math.sqrt(dist)/150))*Math.sin(angle)
+                                    entity.velocity.x -= (mob.bubbleBurst.power/(entity.mass**0.8)/(Math.sqrt(dist)/75))*Math.cos(angle)
+                                    entity.velocity.y -= (mob.bubbleBurst.power/(entity.mass**0.8)/(Math.sqrt(dist)/75))*Math.sin(angle)
                                 }
                             }
                         } else {
                             if (Math.sqrt(dist) <= 600) {
-                                entity.velocity.x -= (mob.bubbleBurst.power/(entity.size**1.3)/(Math.sqrt(dist)/150))*Math.cos(angle)
-                                entity.velocity.y -= (mob.bubbleBurst.power/(entity.size**1.3)/(Math.sqrt(dist)/150))*Math.sin(angle)
+                                entity.velocity.x -= (((entity.type == "player" ? mob.bubbleBurst.power**0.6 : mob.bubbleBurst.power**3))/(entity.mass)/(Math.sqrt(dist)/75))*Math.cos(angle)
+                                entity.velocity.y -= (((entity.type == "player" ? mob.bubbleBurst.power**0.6 : mob.bubbleBurst.power**3))/(entity.mass)/(Math.sqrt(dist)/75))*Math.sin(angle)
                             }
                         }
                     }
@@ -428,6 +433,7 @@ function render() {
         slot.draw()
         slot.petal[0].drawOnBox(slot, 18)
     })
+    
     inventory.x = 20
     inventory.y = canvas.height - inventory.height - 37
     inventory.draw()
@@ -710,8 +716,8 @@ function render() {
             }
         });
     });
-    sizeFactor = wave.sizeFactor
     wave.draw()
+    sizeFactor = wave.sizeFactor
     requestAnimationFrame(render)
 }
 render()

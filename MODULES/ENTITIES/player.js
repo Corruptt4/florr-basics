@@ -1,4 +1,4 @@
-import { ctx, frictionMultiplier, mapSize, rarities } from "../../main.js";
+import { ctx, frictionMultiplier, rarities, mapSize } from "../../main.js";
 import { darkenRGB } from "../../SCRIPTS/functions.js";
 
 export class Player {
@@ -15,7 +15,7 @@ export class Player {
         this.attacking = false;
         this.showPetalRarity = false;
         this.keyDown = [];
-        this.mass = 10;
+        this.mass = 25;
         this.dir = 0
         this.isMoving = false;
         this.petalsOrbiting = []
@@ -40,7 +40,7 @@ export class Player {
                     id: i+1,
                     petal: null,
                     offset: (360 / n) * i,
-                    rarity: 15
+                    rarity: 1
                 }
             )
         }
@@ -79,18 +79,6 @@ export class Player {
         this.petalsOrbiting.forEach((p, index) => {
             p.id = index+1
         })
-        if (this.x - this.size < 0) {
-            this.velocity.x += 1
-        }
-        if (this.x + this.size > mapSize) {
-            this.velocity.x -= 1
-        }
-        if (this.y - this.size < 0) {
-            this.velocity.y += 1
-        }
-        if (this.y + this.size > mapSize) {
-            this.velocity.y -= 1
-        }
         if (this.petalsOrbiting.length > 0) {
             this.petalsOrbiting.forEach((p) => {
                 p.host = this
@@ -156,10 +144,12 @@ export class Player {
             this.showPetalRarity = false
         }
 
-        this.x += this.push.x / this.mass
-        this.y += this.push.y / this.mass 
+        this.x += this.push.x/this.mass
+        this.y += this.push.y/this.mass
         this.x += this.velocity.x
         this.y += this.velocity.y
+        this.x = Math.min(Math.max(this.x, this.size), mapSize-this.size)
+        this.y = Math.min(Math.max(this.y, this.size), mapSize-this.size)
         this.push.x *= frictionMultiplier
         this.push.y *= frictionMultiplier
         this.velocity.x *= frictionMultiplier

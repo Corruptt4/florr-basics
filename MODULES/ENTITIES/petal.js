@@ -90,7 +90,7 @@ export class Petal {
                 this.y,
                 this.summoner.summonRarity+1,
                 availableMobs[this.summoner.type].health,
-                availableMobs[this.summoner.type].damage*2,
+                availableMobs[this.summoner.type].damage,
                 availableMobs[this.summoner.type].size*sizeFactor,
             )
             summon.rarities = rarities
@@ -132,7 +132,7 @@ export class Petal {
             }
         }
         if (this.isSummoner) {
-            this.summoner.summonRarity = (this.rarity-1 == 0) ? this.rarity-1 : (this.rarity-1 == 1) ? this.rarity - 2 : this.rarity-2-this.summoner.lowerRarity
+            this.summoner.summonRarity = Math.max(this.rarity-2-this.summoner.lowerRarity, 0)
             if (this.summoner.scalesWithRarity) {
                 this.summoner.timer *= Math.pow(1.27, this.summoner.summonRarity)
                 this.summoner.timer2 = this.summoner.timer
