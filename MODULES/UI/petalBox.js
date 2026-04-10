@@ -71,7 +71,7 @@ export class PetalBoxPlace {
                 this.box.y += (this.y - this.box.y) * 0.3;
             }
             this.box.draw()
-            this.box.petal[0].drawOnBox(this.box, 17)
+            this.box.petal[0].drawOnBox(this.box, 17, 18)
         }
     }
 }
@@ -220,25 +220,25 @@ export class PetalBox {
                 let summonSP = ctx.measureText(this.rarities[this.petal[0].summoner.summonRarity][0] + " " + availableMobs[this.petal[0].summoner.type].name)
                 ctx.fillStyle = "lime"
                 ctx.strokeText(
-                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).hp)}`, 
+                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, true).hp)}`, 
                     x+25+ (this.petal[0].summoner.capacity > 1 ? 5 : 0)+summonsExtraSpacing.width + summonSP.width, 
                     y+tabHeight/1.45
                 )
                 ctx.fillText(
-                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).hp)}`, 
+                    `(HP: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, true).hp)}`, 
                     x+ (this.petal[0].summoner.capacity > 1 ? 5 : 0)+25+summonsExtraSpacing.width + summonSP.width,
                     y+tabHeight/1.45
                 )
                 
-                let summonSP2 = ctx.measureText(abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).hp))
+                let summonSP2 = ctx.measureText(abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, true).hp))
                 ctx.fillStyle = "lime"
                 ctx.strokeText(
-                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).dmg)})`, 
+                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, true).dmg)})`, 
                     x+(this.petal[0].summoner.capacity > 1 ? 5 : 0)+65+summonsExtraSpacing.width + summonSP2.width + summonSP.width, 
                     y+tabHeight/1.45
                 )
                 ctx.fillText(
-                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, this.rarities).dmg)})`, 
+                    `DMG: ${abbreviate(availableMobs[this.petal[0].summoner.type].getSpecificStats(this.petal[0].summoner.summonRarity, true).dmg)})`, 
                     x+(this.petal[0].summoner.capacity > 1 ? 5 : 0)+65+summonsExtraSpacing.width + summonSP2.width + summonSP.width,
                     y+tabHeight/1.45
                 )

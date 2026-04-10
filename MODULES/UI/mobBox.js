@@ -36,8 +36,8 @@ export class MobBox {
     }
     drawStatBox() {
         ctx.save()        
-        let tabWidth = 500
-        let tabHeight = 300
+        let tabWidth = 600
+        let tabHeight = 400
         ctx.translate(Math.max(this.x-tabWidth/2.5-this.l, 10), Math.min(this.y+this.l/1.5, canvas.height-10))
         ctx.beginPath()
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)"
@@ -109,6 +109,18 @@ export class MobBox {
         ctx.strokeText(abbreviate(this.mob.damage) + ((this.mob.pet&&this.mob.name=="Bubble")?` (${abbreviate(this.mob.damage*this.mob.bubbleBurst.damageMulti)} on pop)`:``), 15+damageSpacing.width, tabHeight-25-(this.mob.bubbleBurst.power>0?20:0))
         ctx.fillText(abbreviate(this.mob.damage) + ((this.mob.pet&&this.mob.name=="Bubble")?` (${abbreviate(this.mob.damage*this.mob.bubbleBurst.damageMulti)} on pop)`:``), 15+damageSpacing.width, tabHeight-25-(this.mob.bubbleBurst.power>0?20:0))
 
+        ctx.fillStyle = "gray"
+        ctx.strokeStyle =  "black"
+        ctx.font = "20px Arial"
+        ctx.textAlign = "left"
+        let massSpacing = ctx.measureText("Mass: ")
+        ctx.strokeText("Mass: ", 15, tabHeight-75-(this.mob.bubbleBurst.power>0?20:0))
+        ctx.fillText("Mass: ", 15, tabHeight-75-(this.mob.bubbleBurst.power>0?20:0))
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.strokeText(abbreviate(this.mob.mass), 15+massSpacing.width, tabHeight-75-(this.mob.bubbleBurst.power>0?20:0))
+        ctx.fillText(abbreviate(this.mob.mass), 15+massSpacing.width, tabHeight-75-(this.mob.bubbleBurst.power>0?20:0))
+        
         if (this.mob.bubbleBurst.power>0) {
             ctx.fillStyle = "blue"
             ctx.strokeStyle =  "black"

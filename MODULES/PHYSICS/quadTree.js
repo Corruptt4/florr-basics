@@ -84,9 +84,6 @@ export class QuadTree {
             ctx.closePath()
         })
     }
-    update() {
-        
-    }
     subdivise() {
         this.split = true
         this.splits++

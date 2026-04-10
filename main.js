@@ -160,6 +160,12 @@ document.addEventListener("mousemove", (e) => {
             box.box.hovered = true
         }
     })
+    inventory.visibleSlots.forEach((box) => {
+        if (boxCollision(mx, my, box.x, box.y, box.boxSize)) {
+            canvas.style.cursor = "pointer"
+            box.hovered = true
+        }
+    })
     
     if (boxCollision2(mx, my, inventory.x, inventory.y, inventory.width, inventory.height) && !inventory.open) {
         canvas.style.cursor = "pointer"
@@ -169,15 +175,6 @@ document.addEventListener("mousemove", (e) => {
     }
     if (inventory.open && boxCollision2(mx, my, inventory.petalFilter.position.x, inventory.petalFilter.position.y, inventory.petalFilter.width, inventory.petalFilter.height)) {
         canvas.style.cursor = "pointer"
-    }
-    
-
-    if (inventory.open) {
-        inventory.visibleSlots.forEach((slot) => {
-            if (boxCollision(mx, my, slot.x, slot.y, slot.boxSize)) {
-                canvas.style.cursor = "pointer"
-            }
-        })
     }
 })
 document.addEventListener("mousedown", (e) => {
@@ -189,25 +186,25 @@ document.addEventListener("mousedown", (e) => {
         if (inventory.open && boxCollision(mx, my, inventory.exitBox.position.x, inventory.exitBox.position.y, inventory.exitBox.size)) {
             inventory.open = false
         }
-        if (inventory.open && boxCollision2(mx, my, inventory.petalFilter.position.x, inventory.petalFilter.position.y, inventory.petalFilter.width, inventory.petalFilter.height)) {
-            inventory.petalFilter.setFilter()
-        }
         if (inventory.open) {
             for (let invSlot of inventory.visibleSlots) {
                 if (boxCollision(mx, my, invSlot.x, invSlot.y, invSlot.boxSize)) {
-                    let editSlot = inventory.petals.filter((petal) => invSlot.petal == petal.petal)
-                    editSlot = editSlot.filter((petal) => (invSlot.petal.rarity-1) == petal.actualRarity)
-                    console.log(invSlot.petal.rarity)
-                    editSlot = editSlot[0]
+                    console.log(invSlot)
+                    let editSlot = inventory.shownPetals.filter((petal) => invSlot.petal.name == petal.petal.name)
                     console.log(editSlot)
-                    const clonedPetal = structuredClone(invSlot.petal);
+                    editSlot = editSlot.filter((petal) => (invSlot.rarity) == petal.actualRarity)
+                    editSlot = editSlot[0]
+                    const clonedPetal = structuredClone(editSlot.petal);
                     Object.setPrototypeOf(
                         clonedPetal,
-                        Object.getPrototypeOf(invSlot.petal)
+                        Object.getPrototypeOf(editSlot.petal)
                     );
-
+                    console.log(editSlot.petal)
                     clonedPetal.host = player;
+                    clonedPetal.stats = editSlot.petal.stats
+                    clonedPetal.rarity = editSlot.actualRarity
                     clonedPetal.innit();
+                    console.log(clonedPetal)
                     let slotToDrag = new PetalBox(player)
                     slotToDrag.petal = [clonedPetal];
                     inventoryPetalToSlot.push(slotToDrag)
@@ -238,6 +235,11 @@ document.addEventListener("mousedown", (e) => {
 document.addEventListener("mouseup", (e) => {
     if (e.button == 0) {
         mouseHolding = false
+    }
+})
+window.addEventListener("wheel", (e) => {
+    if (boxCollision2(mx, my, inventory.x, inventory.y, inventory.width, inventory.height) && inventory.open) {
+        inventory.toScrollTarget += e.deltaY
     }
 })
 setInterval(() => {

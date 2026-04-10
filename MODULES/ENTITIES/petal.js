@@ -125,6 +125,13 @@ export class Petal {
 
         return Math.sqrt(dx*dx+dy*dy)
     }
+    makeSides() {
+        if (this.sides > 0) {
+            for (let i = 0; i < this.sides; i++) {
+                this.variations.push(0.8 + Math.random() * 0.4)
+            }
+        }
+    }
     innit() {
         if (this.sides > 0) {
             for (let i = 0; i < this.sides; i++) {
@@ -224,7 +231,7 @@ export class Petal {
         }
         ctx.closePath();
     }
-    drawOnBox(box, size) {
+    drawOnBox(box, size, textSize) {
         let boxSize = box.boxSize
         ctx.beginPath();
         ctx.fillStyle = this.color;
@@ -239,7 +246,7 @@ export class Petal {
         ctx.lineWidth = 4
         ctx.fillStyle = "white"
         ctx.strokeStyle = "black"
-        ctx.font = "18px Arial"
+        ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
         ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)

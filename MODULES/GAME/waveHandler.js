@@ -95,8 +95,6 @@ export class WaveMode {
         let height = 30
 
         ctx.save()
-        
-        
         ctx.beginPath()
         ctx.fillStyle = "black"
         ctx.strokeStyle = "black"
@@ -131,7 +129,10 @@ export class WaveMode {
         ctx.closePath()
         ctx.restore()
         
+        ctx.save()
         ctx.beginPath()
+        ctx.lineWidth = 6
+        ctx.lineJoin = "round"
         ctx.fillStyle = "white"
         ctx.strokeStyle = "black"
         ctx.font = "35px Arial"
@@ -148,6 +149,8 @@ export class WaveMode {
         ctx.strokeText(`${this.minutes}:${this.seconds<10?`0${this.seconds}`:this.seconds}`, canvas.width/2-width/2+15, 80+15/3+height/2)
         ctx.fillText(`${this.minutes}:${this.seconds<10?`0${this.seconds}`:this.seconds}`, canvas.width/2-width/2+15, 80+15/3+height/2)
         ctx.closePath()
+        ctx.restore()
+        
     }
     startNextWave() {
         this.waveTick = 0
@@ -177,7 +180,7 @@ export class WaveMode {
                 this.spawnMobTick--
             }
             if (this.spawnMobTick <= 0) {
-                this.spawnMobTick = 100 + Math.floor(Math.random()*100)
+                this.spawnMobTick = 100 + Math.floor(Math.random()*230)
                 this.spawnAmount = Math.min(this.amountInWave/10, this.mobsToSpawn.length)
                 for (let i = 0; i < this.spawnAmount; i++) {
                     let mob = this.mobsToSpawn.shift()
