@@ -334,6 +334,13 @@ setInterval(() => {
             mob.givenTargets = mobs.filter((givenMob) => !givenMob.pet)
         }
         if (mob.health <= 0) {
+            for (let otherMob in mobs) {
+                if (otherMob !== mob) {
+                    if (otherMob.target == mob) {
+                        otherMob.target = null
+                    } 
+                }
+            }
             if (mob.bubbleBurst.power > 0) {
                 for (let entity of allEntities) {
                     if (entity !== mob && entity.type !== "petal" && !entity.pet && entity.type != "drop") {
@@ -342,7 +349,6 @@ setInterval(() => {
                         let dist = dx*dx+dy*dy
                         let angle = Math.atan2(dy, dx)
                         if (mob.pet) {
-                            console.log("BUBL")
                             if (entity.type !== "player") {
                                 if (Math.sqrt(dist) <= (mob.size*mob.bubbleBurst.burstRange)) {
                                     entity.health -= mob.damage*mob.bubbleBurst.damageMulti
@@ -350,38 +356,29 @@ setInterval(() => {
                                     entity.velocity.y -= (mob.bubbleBurst.power/(entity.mass**0.8)/(Math.sqrt(dist)/75))*Math.sin(angle)
                                 }
                             }
-                        } else {
+                        }
+                        if (!mob.pet) {
                             if (Math.sqrt(dist) <= 600) {
-                                entity.velocity.x -= (((entity.type == "player" ? mob.bubbleBurst.power**0.6 : mob.bubbleBurst.power**3))/(entity.mass)/(Math.sqrt(dist)/75))*Math.cos(angle)
-                                entity.velocity.y -= (((entity.type == "player" ? mob.bubbleBurst.power**0.6 : mob.bubbleBurst.power**3))/(entity.mass)/(Math.sqrt(dist)/75))*Math.sin(angle)
+                                entity.velocity.x -= (((entity.type == "player" ? mob.bubbleBurst.power**0.6 : mob.bubbleBurst.power))/(entity.mass)/(Math.sqrt(dist)/75))*Math.cos(angle)
+                                entity.velocity.y -= (((entity.type == "player" ? mob.bubbleBurst.power**0.6 : mob.bubbleBurst.power))/(entity.mass)/(Math.sqrt(dist)/75))*Math.sin(angle)
                             }
                         }
                     }
                 }
             }
-        }
-        if (mob.health <= 0) {
-            for (let otherMob in mobs) {
-                if (otherMob !== mob) {
-                    if (otherMob.target == mob) {
-                        otherMob.target = null
-                    } 
-                }
-            }
             if (!mob.pet) {
                 if (mob.actualDrops.length > 0) {
                     let totalDrops = []
-                    mob.actualDrops.forEach((drop) => {
-                        let rng = Math.random()
-                        for (let i = drop.length-1; i >= 0; i--) {
-                            let [petal, rarity, chance] = drop[i]
-                            if (chance > rng) {
+                    let totalWeight = 0
+
+                    mob.actualDrops.forEach((drops) => {
+                        drops.forEach(([petal, rarity, chance]) => {
+                            if (Math.random() < chance) {
                                 let drop = new Drop(mob.x, mob.y, petal, 1)
                                 drop.rarity = rarity
                                 totalDrops.push(drop)
-                                break;
                             }
-                        }
+                        })
                     })
                     if (totalDrops.length == 1) {
                         drops.push(totalDrops[0])
