@@ -1,5 +1,6 @@
 import { ctx, entities, frictionMultiplier, mapSize, mobs } from "../../main.js";
 import { abbreviate, darkenRGB } from "../../SCRIPTS/functions.js";
+import { findPetal } from "../STORAGE/petals.js";
 
 export class Mob {
     constructor(x, y, rarity, health, damage, size) {
@@ -63,7 +64,11 @@ export class Mob {
         this.damageTick = 0;
         this.detecDistPet = 0;
         this.rock = false;
+        this.dropChances = []
         this.varieties = []
+        this.drops = []
+        this.actualDrops = []
+        this.petalIDs = []
         this.velocity = {
             x: 0,
             y: 0
@@ -76,6 +81,35 @@ export class Mob {
         this.color = "rgb(85, 85, 85)"
     }
     innitMob() {
+        if (!this.pet) {
+            this.petalIDs.forEach((petal) => {
+                this.drops.push(findPetal(`${petal}`))
+            })
+            this.drops.forEach((drop, index) => {
+                let rarity = this.rarity
+                let chance = this.dropChances[index]
+
+                let rarityChances = this.rarity < 2
+                    ? [chance, chance / 2.8332] : this.rarity == 2 ? [chance/2.1223, chance/1.432]
+                    : [Math.min((chance / 5.882)*(13/this.rarity), 0.9), Math.min((chance / 3.291)*(13/this.rarity), 0.8), Math.min((chance / 4.823)*(13/this.rarity), 0.6)]
+
+                let rarityPool = this.rarity <= 2
+                    ? this.rarity == 1 ? [rarity, rarity+1] : [Math.max(rarity-1, 1), rarity]
+                    : [Math.max(rarity - 2, 1), rarity - 1, rarity]
+
+                let dropsToParse = []
+
+                for (let k = 0; k < Math.min(rarityChances.length, rarityPool.length); k++) {
+                    dropsToParse.push([
+                        drop,
+                        Math.max(rarityPool[k], 0),
+                        rarityChances[k]
+                    ])
+                }
+
+                this.actualDrops.push(dropsToParse)
+            })
+        }
         if (this.rock) {
             for (let i = 0; i < this.shape; i++) {
                 this.varieties.push(1 - 0.15+Math.random()*0.3)

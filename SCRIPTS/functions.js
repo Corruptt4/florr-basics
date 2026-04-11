@@ -1,3 +1,5 @@
+import { availablePetals } from "../MODULES/STORAGE/petals.js";
+
  export function darkenRGB(rgb, darken) {
     if (typeof rgb !== "string") {
         console.error("Invalid input to darkenRGB:", rgb);

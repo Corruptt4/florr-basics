@@ -28,6 +28,7 @@ export class Petal {
         this.reload = 0;
         this.maxHealth = 0;
         this.size = 10;
+        this.innited = false;
         this.maxReload = 60;
         this.description = "A basic petal, not too strong or too weak."
         this.orbitoffset = 0
@@ -47,6 +48,7 @@ export class Petal {
         this.lockedAngle = false
         this.showRarity = false;
         this.sides = 0
+        this.extraSpeed = 0
         this.variations = []
         this.type = "petal"
         this.maxSummonTimer = 0;
@@ -133,6 +135,7 @@ export class Petal {
         }
     }
     innit() {
+        this.innited = true
         if (this.sides > 0) {
             for (let i = 0; i < this.sides; i++) {
                 this.variations.push(0.8 + Math.random() * 0.4)
@@ -145,6 +148,7 @@ export class Petal {
                 this.summoner.timer2 = this.summoner.timer
             }
         }
+        this.extraSpeed *= (this.rarity+1)
         this.maxSummonTimer = this.summoner.timer
         let exponential = 1.35
         let mainExponent = 2.6
@@ -231,25 +235,28 @@ export class Petal {
         }
         ctx.closePath();
     }
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
+        ctx.save()
+        ctx.translate(box.x + boxSize/2-boxOffset, box.y + boxSize/2 - 10-boxOffset)
+        ctx.rotate(degreesToRads(box.boxRotation))
         ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, size * (boxSize/boxSize), 0, Math.PI * 2);
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
         ctx.fill()
         ctx.stroke()
         ctx.closePath();
-        
-        
+
         ctx.lineWidth = 4
         ctx.fillStyle = "white"
         ctx.strokeStyle = "black"
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, 0, +boxSize/2.2)
+        ctx.fillText(`${this.altName}`, 0, +boxSize/2.2)
+        ctx.restore()
     }
 }

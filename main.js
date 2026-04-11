@@ -1,9 +1,9 @@
 import { Decorator } from "./MODULES/ENTITIES/decorator.js";
 import { Player } from "./MODULES/ENTITIES/player.js";
 import { Camera } from "./MODULES/camera.js";
-import { availablePetals } from "./MODULES/STORAGE/petals.js";
+import { availablePetals, findPetal } from "./MODULES/STORAGE/petals.js";
 import { EmptySlot, PetalBox, PetalBoxPlace } from "./MODULES/UI/petalBox.js";
-import { abbreviate, boxBoxCollision, boxCollision, boxCollision2 } from "./SCRIPTS/functions.js";
+import { abbreviate, boxBoxCollision, boxCollision, boxCollision2, degreesToRads } from "./SCRIPTS/functions.js";
 import { availableMobs } from "./MODULES/STORAGE/mobs.js";
 import { QuadTree, Rect } from "./MODULES/PHYSICS/quadTree.js";
 import { Inventory, InventoryPetalBox } from "./MODULES/UI/inventory.js";
@@ -11,6 +11,7 @@ import { Petal, PlaceholderPetal } from "./MODULES/ENTITIES/petal.js";
 import { SpatialHash } from "./MODULES/PHYSICS/spatialHash.js";
 import { WaveMode } from "./MODULES/GAME/waveHandler.js";
 import { MobBox } from "./MODULES/UI/mobBox.js";
+import { Drop } from "./MODULES/ENTITIES/drop.js";
 
 export const canvas = document.getElementById("canvas"),
                           ctx = canvas.getContext("2d");
@@ -39,6 +40,7 @@ export let mapSize = 2000,
                     decors = [],
                     mobBoxes = [],
                     petals = [],
+                    drops = [],
                     frictionMultiplier = 0.95
 export let sizeFactor = 1
 
@@ -49,7 +51,6 @@ let summonBoxes = []
 
 let spatialHash = new SpatialHash(16, mapSize)
 spatialHash.innitGrid()
-
 let rect = new Rect(0, 0, mapSize, mapSize)
 let quadTree = new QuadTree(rect)
 export var rarities = [
@@ -160,12 +161,6 @@ document.addEventListener("mousemove", (e) => {
             box.box.hovered = true
         }
     })
-    inventory.visibleSlots.forEach((box) => {
-        if (boxCollision(mx, my, box.x, box.y, box.boxSize)) {
-            canvas.style.cursor = "pointer"
-            box.hovered = true
-        }
-    })
     
     if (boxCollision2(mx, my, inventory.x, inventory.y, inventory.width, inventory.height) && !inventory.open) {
         canvas.style.cursor = "pointer"
@@ -188,7 +183,7 @@ document.addEventListener("mousedown", (e) => {
         }
         if (inventory.open) {
             for (let invSlot of inventory.visibleSlots) {
-                if (boxCollision(mx, my, invSlot.x, invSlot.y, invSlot.boxSize)) {
+                if (boxCollision(mx, my, invSlot.x, invSlot.y, invSlot.boxSize) && invSlot.amount > 0) {
                     let editSlot = inventory.shownPetals.filter((petal) => invSlot.petal.name == petal.petal.name)
                     editSlot = editSlot.filter((petal) => (invSlot.rarity) == petal.actualRarity)
                     editSlot = editSlot[0]
@@ -197,12 +192,10 @@ document.addEventListener("mousedown", (e) => {
                         clonedPetal,
                         Object.getPrototypeOf(editSlot.petal)
                     );
-                    console.log(editSlot.petal)
                     clonedPetal.host = player;
-                    clonedPetal.stats = editSlot.petal.stats
+                    clonedPetal.stats = structuredClone(editSlot.petal.stats)
                     clonedPetal.rarity = editSlot.actualRarity
-                    clonedPetal.innit();
-                    console.log(clonedPetal)
+                    clonedPetal.innit()
                     let slotToDrag = new PetalBox(player)
                     slotToDrag.petal = [clonedPetal];
                     inventoryPetalToSlot.push(slotToDrag)
@@ -241,7 +234,7 @@ window.addEventListener("wheel", (e) => {
     }
 })
 setInterval(() => {
-    allEntities = mobs.concat(player).concat(entities).concat(summons)
+    allEntities = mobs.concat(player).concat(entities).concat(summons).concat(drops)
     spatialHash.clearCellEntities()
     for (let entity of allEntities) {
         if (
@@ -261,8 +254,22 @@ setInterval(() => {
         let collider1 = collision[0]
         let collider2 = collision[1]
 
+        if ((collider1.type == "player" && collider2.type == "drop") || (collider1.type == "drop" && collider2.type == "player")) {
+            let drop = collider1.type == "drop" ? collider1 : collider2
+            if (drop.collected) return;
+            let petal = new drop.petal.constructor(
+                drop.petal.host,
+                drop.petal.stats
+            )
+            petal.rarity = drop.rarity
+            for (let i = 0; i < drop.amount; i++) {
+                inventory.petalsToParse.push(petal)
+            }
+            drop.collected = true
+            drops.splice(drops.indexOf(drop), 1)
+        }
         let angle = Math.atan2(collider2.y - collider1.y, collider2.x - collider1.x)
-        if (collider1.type !== "petal" && collider2.type !== "petal") {
+        if (collider1.type !== "petal" && collider2.type !== "petal" && collider1.type !== "drop" && collider2.type !== "drop") {
             if (collider1.type == "player" && collider2.type == "mob" && collider2.pet) return;
             if (collider2.type == "player" && collider1.type == "mob" && collider1.pet) return;
             let invMass1 = 1 / collider1.mass
@@ -327,23 +334,17 @@ setInterval(() => {
             mob.givenTargets = mobs.filter((givenMob) => !givenMob.pet)
         }
         if (mob.health <= 0) {
-            for (let otherMob in mobs) {
-                if (otherMob !== mob) {
-                    if (otherMob.target == mob) {
-                        otherMob.target = null
-                    } 
-                }
-            }
             if (mob.bubbleBurst.power > 0) {
                 for (let entity of allEntities) {
-                    if (entity !== mob && entity.type !== "petal" && !entity.pet) {
+                    if (entity !== mob && entity.type !== "petal" && !entity.pet && entity.type != "drop") {
                         let dx = mob.x-entity.x
                         let dy = mob.y-entity.y
                         let dist = dx*dx+dy*dy
                         let angle = Math.atan2(dy, dx)
                         if (mob.pet) {
+                            console.log("BUBL")
                             if (entity.type !== "player") {
-                                if (Math.sqrt(dist) <= mob.size*mob.bubbleBurst.burstRange) {
+                                if (Math.sqrt(dist) <= (mob.size*mob.bubbleBurst.burstRange)) {
                                     entity.health -= mob.damage*mob.bubbleBurst.damageMulti
                                     entity.velocity.x -= (mob.bubbleBurst.power/(entity.mass**0.8)/(Math.sqrt(dist)/75))*Math.cos(angle)
                                     entity.velocity.y -= (mob.bubbleBurst.power/(entity.mass**0.8)/(Math.sqrt(dist)/75))*Math.sin(angle)
@@ -358,7 +359,41 @@ setInterval(() => {
                     }
                 }
             }
+        }
+        if (mob.health <= 0) {
+            for (let otherMob in mobs) {
+                if (otherMob !== mob) {
+                    if (otherMob.target == mob) {
+                        otherMob.target = null
+                    } 
+                }
+            }
             if (!mob.pet) {
+                if (mob.actualDrops.length > 0) {
+                    let totalDrops = []
+                    mob.actualDrops.forEach((drop) => {
+                        let rng = Math.random()
+                        for (let i = drop.length-1; i >= 0; i--) {
+                            let [petal, rarity, chance] = drop[i]
+                            if (chance > rng) {
+                                let drop = new Drop(mob.x, mob.y, petal, 1)
+                                drop.rarity = rarity
+                                totalDrops.push(drop)
+                                break;
+                            }
+                        }
+                    })
+                    if (totalDrops.length == 1) {
+                        drops.push(totalDrops[0])
+                    } else if (totalDrops.length > 1) {
+                        totalDrops.forEach((drop, i) => {
+                            let angle = (360/totalDrops.length)*i
+                            drop.x = mob.x + Math.cos(degreesToRads(angle))*80
+                            drop.y = mob.y + Math.sin(degreesToRads(angle))*80
+                            drops.push(drop)
+                        })
+                    }
+                }
                 mobs.splice(mobs.indexOf(mob), 1)
             } else {
                 summons.splice(mobs.indexOf(mob), 1)
@@ -372,6 +407,9 @@ setInterval(() => {
         mouseDraggingBoxClass.x += (mx - mouseDraggingBoxClass.x) * 0.3;
         mouseDraggingBoxClass.y += (my - mouseDraggingBoxClass.y) * 0.3;
     }
+    drops.forEach((drop) => {
+        drop.update()
+    })
     inventory.update()
     t += 0.025
     let catarValue = Math.abs(Math.sin(t)*50+150)
@@ -422,6 +460,9 @@ function render() {
         mob.draw()
         mob.drawRarity()
     })
+    drops.forEach((drop) => {
+        drop.draw()
+    })
     player.draw()
     ctx.restore()
     petalBoxHolders.forEach((pBox) => {
@@ -436,6 +477,14 @@ function render() {
     
     inventory.x = 20
     inventory.y = canvas.height - inventory.height - 37
+    inventory.visibleSlots.forEach((box) => {
+        if (boxCollision(mx, my, box.x, box.y, box.boxSize)) {
+            canvas.style.cursor = "pointer"
+            box.hovered = true
+        } else {
+            box.hovered = false
+        }
+    })
     inventory.draw()
     if (!mouseHolding && mouseDraggingBox) {
         let swapping = false
@@ -576,7 +625,7 @@ function render() {
                 mouseDraggingBox = false
                 inventory.petalsToParse.push(petal)
                 entities.splice(entities.indexOf(petal), 1)
-                player.petalsOrbiting.splice(player.petalsOrbiting.indexOf(petal), 1)
+                player.allPetals.splice(player.allPetals.indexOf(petal), 1)
                 selfBox.box = new EmptySlot(selfBox)
             } else {
                 mouseDraggingBox = false
@@ -680,7 +729,7 @@ function render() {
             }
         })
     })
-        sameSummonBoxes.forEach((row) => {
+    sameSummonBoxes.forEach((row) => {
         row.forEach((box) => {
             if (boxCollision(mx, my, box.x-box.l/2, box.y-box.l/2, box.l) && !mouseDraggingBox) {
                 box.hovered = true

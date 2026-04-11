@@ -17,8 +17,10 @@ export class Player {
         this.keyDown = [];
         this.mass = 25;
         this.dir = 0
+        this.extraSpeed = 0
         this.isMoving = false;
         this.petalsOrbiting = []
+        this.allPetals = []
         this.damageTick = 0
         this.equippedPetals = []
         this.speed = 0.2
@@ -49,6 +51,11 @@ export class Player {
                 this.petalsOrbiting.push([p.id, p.petal])
             }
         })
+        this.equippedPetals.forEach((p) => {
+            if (!this.allPetals.includes(p) && p.type != "PlaceholderPetal") {
+                this.allPetals.push([p.id, p.petal])
+            }
+        })
     }
     draw() {
         // Just draw the petals if they're NOT null.
@@ -70,6 +77,7 @@ export class Player {
         ctx.closePath();
     }
     update() {
+        this.extraSpeed = 0
         this.petalsOrbiting = []
         this.equippedPetals.forEach((p) => {
             if (p.petal != null && p.petal.type != "PlaceholderPetal") {
@@ -83,9 +91,13 @@ export class Player {
             this.petalsOrbiting.forEach((p) => {
                 p.host = this
                 p.reloadPetal()
+                if (p.name == "Faster") {
+                    this.extraSpeed += p.extraSpeed
+                }
                 if (p.isSummoner) p.summon();
             })
         }
+        
 
         /** Key codes */
         // right 39, 68
@@ -95,7 +107,7 @@ export class Player {
         // attack 32 || defend 16
         // show petal rarities 71
 
-        this.globalAngle += this.petalSpeed
+        this.globalAngle += this.petalSpeed+this.extraSpeed
 
         if (this.attacking) {
             this.petalOrbitDistance = 60 + this.extraRange

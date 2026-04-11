@@ -3,14 +3,13 @@ import { abbreviate, darkenRGB } from "../../SCRIPTS/functions.js";
 import { availableMobs } from "../STORAGE/mobs.js";
 import { availablePetals } from "../STORAGE/petals.js";
 
-
 export class InventoryPetalBox {
     constructor(x, y, set, rarity, rarities) {
         this.x = x;
         this.y = y;
         this.rarity = rarity;
         this.hovered = false
-        this.amount = 0
+        this.amount = 1
         this.boxSize = 75
         this.innited = true
         this.rarities = rarities
@@ -152,7 +151,6 @@ export class InventoryPetalBox {
     }
     draw() {
         this.rarities = rarities
-        this.petal.rarity = this.rarity
         ctx.beginPath()
         ctx.fillStyle = this.rarities[this.rarity-1][1]
         ctx.strokeStyle = darkenRGB(this.rarities[this.rarity-1][1], 20)
@@ -205,7 +203,7 @@ export class Inventory {
             height: 45,
             color: "rgb(200, 200, 200)"
         }
-        this.open = true;
+        this.open = false;
         this.color = "rgb(0, 188, 188)"
         this.scalingFactor = 0.4;
         this.toScrollTarget = 0;
@@ -213,7 +211,20 @@ export class Inventory {
         this.petalsToParse = []
     }
     update() {
-        this.toScrollTarget = Math.max(Math.min(this.toScrollTarget, this.y+(93.5*Math.floor(this.shownPetals.length/5))-(200+93.5*5)), 0)
+        this.visibleSlots = []
+        if (this.open) {
+            let actualSlots = this.shownPetals.filter((petal) => petal.amount > 0)
+            actualSlots.forEach((petal, index) => {
+                let setRow = index%5
+                let col = Math.floor(index/5)
+                let slot = new InventoryPetalBox(this.x+20+(85*setRow), this.y-this.scrollTarget+100+(93.5*col), petal, petal.actualRarity, this.rarities)
+                slot.petal = petal.petal
+                slot.petal.host = []
+                slot.amount = petal.amount
+                this.visibleSlots.push(slot)
+            })
+        }
+        this.toScrollTarget = Math.max(Math.min(this.toScrollTarget, this.y+(93.5*Math.floor(this.visibleSlots.length/5))-(200+93.5*5)), 0)
         this.scrollTarget += (this.toScrollTarget-this.scrollTarget)*0.2
        
         if (this.open) {
@@ -224,7 +235,6 @@ export class Inventory {
             this.width += (this.originalWidth - this.width) *  this.scalingFactor
             this.height += (this.originalHeight - this.height) *  this.scalingFactor
         }
-        if (this.petalsToParse.length > 0) {
             this.petalsToParse.forEach((p) => {
                 let petalRarity = p.rarity
                 let petalName = p.name
@@ -234,26 +244,9 @@ export class Inventory {
                 r[0].amount++
                 this.petalsToParse.splice(this.petalsToParse.indexOf(p), 1)
             })
-        }
     }
     draw() {
-        this.visibleSlots = []
-        if (this.open) {
-            this.shownPetals.forEach((petal, index) => {
-                let setRow = index%5
-                let col = Math.floor(index/5)
-                let slot = new InventoryPetalBox(this.x+20+(85*setRow), this.y-this.scrollTarget+100+(93.5*col), petal, petal.actualRarity, this.rarities)
-                slot.petal = petal.petal
-                slot.petal.host = []
-                slot.petal.makeSides()
-                slot.amount = petal.amount
-                this.visibleSlots.push(slot)
-            })
-        }
         ctx.save()
-        this.visibleSlots.forEach((s) => {
-            s.drawBox()
-        })
         ctx.beginPath()
         ctx.fillStyle = this.color
         ctx.strokeStyle = darkenRGB(this.color, 20)
@@ -293,27 +286,35 @@ export class Inventory {
         ctx.clip()
         if (this.open) {
             this.visibleSlots.forEach((s) => {
-                s.draw()
+                if (s.amount > 0) {
+                    s.draw()
+                }
             })
         }
         ctx.restore()
     }
     innitPetals(rarities) {
+        this.shownPetals = [];
+
         for (let i = 0; i < availablePetals.length; i++) {
-            let petal = new availablePetals[i].constructor(
-                availablePetals[i].host,
-                availablePetals[i].stats
-            )
             for (let k = 1; k <= rarities.length; k++) {
+                let petal = new availablePetals[i].constructor(
+                    availablePetals[i].host,
+                    availablePetals[i].stats
+                );
                 this.shownPetals.push({
                     petal: petal,
-                    amount: 10,
+                    amount: 0,
                     rarity: rarities[k],
                     actualRarity: k
-                })
+                });
             }
         }
-        this.shownPetals.sort((a, b) => b.actualRarity-a.actualRarity)
-        this.rarities = rarities
+
+        this.shownPetals.sort((a, b) => b.actualRarity - a.actualRarity);
+        this.shownPetals.forEach((p) => {
+            p.petal.makeSides()
+        })
+        this.rarities = rarities;
     }
 }

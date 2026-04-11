@@ -26,6 +26,82 @@ class Basic extends Petal {
         this.stats.damage = 6
     }
 }
+class Faster extends Petal {
+    constructor(host, stats) {
+        super(host, stats)
+        this.name = "Faster"
+        this.altName = "Faster"
+        this.size = 9
+        this.maxReload = 50
+        this.stats.health = 2
+        this.stats.damage = 4
+        this.extraSpeed = 0.002
+        this.sizeMulti = 1
+        this.stats.armor = 0
+        this.description = "It's fast."
+        this.color = "rgb(235, 255, 197)"
+    }
+    drawOnBox(box, size, textSize, boxOffset = 0) {
+        let boxSize = box.boxSize
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 4
+        ctx.arc(box.x + boxSize/2-boxOffset, box.y + boxSize/2 - 10-boxOffset, (size*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2);
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath();
+        
+        ctx.lineWidth = textSize/4
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.font = `${textSize}px Arial`
+        ctx.lineJoin = "round"
+        ctx.textAlign = "center"
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+    }
+    draw() {
+        if (this.showRarity) {
+            ctx.beginPath()
+            ctx.globalAlpha = 0.5
+            let rarityName = rarities[this.rarity-1][0]
+            ctx.fillStyle = rarities[this.rarity-1][1]
+            ctx.arc(this.x, this.y, this.size*1.6, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.globalAlpha = 1
+            ctx.lineWidth = 2
+            ctx.font = "20px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.closePath()
+        }
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = darkenRGB(this.color, 20);
+        ctx.lineWidth = 4
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+        
+        if (this.showRarity) {
+            ctx.fillStyle = "white"
+            ctx.strokeStyle = "black"
+            ctx.lineWidth = 3
+            ctx.font = "10px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(this.id, this.x, this.y+10/3)
+            ctx.fillText(this.id, this.x, this.y+10/3)
+        }
+        ctx.closePath();
+    }
+}
 class Iris extends Petal {
     constructor(host, stats) {
         super(host, stats)
@@ -44,13 +120,13 @@ class Iris extends Petal {
         this.description = "Poisonous. Takes some time to do its effect."
         this.color = "rgba(150, 0, 196, 1)"
     }
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, (size*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2);
+        ctx.arc(box.x + boxSize/2-boxOffset, box.y + boxSize/2 - 10-boxOffset, (size*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2);
         ctx.fill()
         ctx.stroke()
         ctx.closePath();
@@ -61,8 +137,8 @@ class Iris extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
     }
     draw() {
         if (this.showRarity) {
@@ -115,15 +191,15 @@ class Rock extends Petal {
         this.stats.health = 25
         this.sides = 5
         this.stats.damage = 8
-        this.sizeMulti = 0.95
+        this.sizeMulti = 0.9
         this.stats.armor = 0
         this.description = "Very durable."
         this.color = "rgb(110, 110, 110)"
     }
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.save()
-        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.translate(box.x + boxSize / 2 -boxOffset, box.y + boxSize/2 - 10 -boxOffset)
         ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
@@ -151,8 +227,8 @@ class Rock extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
     }
     draw() {
         if (this.showRarity) {
@@ -232,7 +308,7 @@ class BeetleEgg extends Petal {
         this.color = "rgb(254,240,185)"
     }
     
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.save()
         ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
@@ -240,7 +316,7 @@ class BeetleEgg extends Petal {
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.ellipse(0, 0, (size*this.sizeMulti)/1.4, (size*this.sizeMulti), 0, 0, Math.PI * 2)
+        ctx.ellipse(-boxOffset, -boxOffset, (size*this.sizeMulti)/1.4, (size*this.sizeMulti), 0, 0, Math.PI * 2)
         ctx.fill()
         ctx.stroke()
         ctx.closePath();
@@ -252,8 +328,8 @@ class BeetleEgg extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
         ctx.closePath()
     }
     draw() {
@@ -324,7 +400,7 @@ class AntEgg extends Petal {
         this.color = "rgb(254,240,185)"
     }
     
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.save()
         ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
@@ -332,7 +408,7 @@ class AntEgg extends Petal {
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.ellipse(0, 0, (size*this.sizeMulti), (size*this.sizeMulti), 0, 0, Math.PI * 2)
+        ctx.ellipse(-boxOffset, -boxOffset, (size*this.sizeMulti), (size*this.sizeMulti), 0, 0, Math.PI * 2)
         ctx.fill()
         ctx.stroke()
         ctx.closePath();
@@ -344,8 +420,8 @@ class AntEgg extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
         ctx.closePath()
     }
     draw() {
@@ -416,10 +492,10 @@ class DryStick extends Petal {
         this.color = "rgb(114,81,20)"
     }
     
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.save()
-        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.translate(box.x + boxSize / 2-boxOffset, box.y + boxSize/2 - 10-boxOffset)
         ctx.beginPath();
         ctx.lineJoin = "round"
         ctx.fillStyle = this.color;
@@ -468,8 +544,8 @@ class DryStick extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
         ctx.closePath()
     }
     draw() {
@@ -570,10 +646,10 @@ class Stick extends Petal {
         this.color = "rgb(124,91,30)"
     }
     
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.save()
-        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.translate(box.x + boxSize / 2-boxOffset, box.y + boxSize/2 - 10-boxOffset)
         ctx.beginPath();
         ctx.lineJoin = "round"
         ctx.fillStyle = this.color;
@@ -622,8 +698,8 @@ class Stick extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
         ctx.closePath()
     }
     draw() {
@@ -728,10 +804,10 @@ class Bubble extends Petal {
         this.shineColor = "rgba(255,255,255,0.4)"
     }
     
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.save()
-        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.translate(box.x + boxSize / 2-boxOffset, box.y + boxSize/2 - 10-boxOffset)
         ctx.rotate(this.angle)
         ctx.beginPath();
         ctx.fillStyle = this.fillColor;
@@ -758,8 +834,8 @@ class Bubble extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
         ctx.closePath()
     }
     draw() {
@@ -812,6 +888,70 @@ class Bubble extends Petal {
         ctx.closePath();
     }
 }
+class Air extends Petal {
+    constructor(host, stats) {
+        super(host, stats)
+        this.name = "Air"
+        this.altName = "Air"
+        this.size = 12
+        this.maxReload = 10
+        this.stats.health = 1
+        this.stats.damage = 0.1
+        this.sizeMulti = 1
+        this.lockedAngle = false
+        this.description = "It's nothing. Somehow takes space in a slot... How?"
+        this.color = "rgb(0,0,0)"
+        this.actualColor = "rgb(255,255,255)"
+        this.fillColor = "rgba(255,255,255,0.5)"
+        this.shineColor = "rgba(255,255,255,0.4)"
+    }
+    
+    drawOnBox(box, size, textSize, boxOffset = 0) {
+        let boxSize = box.boxSize
+        ctx.save()
+        ctx.translate(box.x + boxSize / 2-boxOffset, box.y + boxSize/2 - 10-boxOffset)
+        ctx.rotate(this.angle)
+        ctx.restore()
+
+        ctx.beginPath();
+        ctx.lineWidth = textSize/4
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.font = `${textSize}px Arial`
+        ctx.lineJoin = "round"
+        ctx.textAlign = "center"
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.closePath()
+    }
+    draw() {
+        if (this.showRarity) {
+            ctx.beginPath()
+            ctx.globalAlpha = 0.5
+            let rarityName = rarities[this.rarity-1][0]
+            ctx.fillStyle = rarities[this.rarity-1][1]
+            ctx.arc(this.x, this.y, this.size*1.6, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.globalAlpha = 1
+            ctx.lineWidth = 2
+            ctx.font = "20px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.fillText(rarityName, this.x, this.y-20/3 - this.size*1.5)
+            ctx.closePath()
+        }
+        if (this.showRarity) {
+            ctx.fillStyle = "white"
+            ctx.strokeStyle = "black"
+            ctx.lineWidth = 3
+            ctx.font = "10px Arial"
+            ctx.textAlign = "center"
+            ctx.strokeText(this.id, this.x, this.y+10/3)
+            ctx.fillText(this.id, this.x, this.y+10/3)
+        }
+        ctx.closePath();
+    }
+}
 class MagicStick extends Petal {
     constructor(host, stats) {
         super(host, stats)
@@ -839,10 +979,10 @@ class MagicStick extends Petal {
         this.color = "rgb(0, 143, 238)"
     }
     
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.save()
-        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.translate(box.x + boxSize / 2-boxOffset, box.y + boxSize/2 - 10-boxOffset)
         ctx.beginPath();
         ctx.lineJoin = "round"
         ctx.fillStyle = this.color;
@@ -891,8 +1031,8 @@ class MagicStick extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
         ctx.closePath()
     }
     draw() {
@@ -981,10 +1121,10 @@ class Bacteria extends Petal {
         this.color = "rgb(82, 255, 82)"
     }
     
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.save()
-        ctx.translate(box.x + boxSize / 2, box.y + boxSize/2 - 10)
+        ctx.translate(box.x + boxSize / 2-boxOffset, box.y + boxSize/2 - 10-boxOffset)
         ctx.rotate(Math.PI/4)
         ctx.beginPath();
         ctx.fillStyle = this.color;
@@ -1002,8 +1142,8 @@ class Bacteria extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
         ctx.closePath()
     }
     draw() {
@@ -1061,20 +1201,20 @@ class Heavy extends Petal {
         this.description = "This petal is pretty heavy, don't get in its way."
         this.color = "rgb(55, 55, 55)"
     }
-    drawOnBox(box, size, textSize) {
+    drawOnBox(box, size, textSize, boxOffset = 0) {
         let boxSize = box.boxSize
         ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.strokeStyle = darkenRGB(this.color, 20);
         ctx.lineWidth = 4
-        ctx.arc(box.x + boxSize/2, box.y + boxSize/2 - 10, (size*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2);
+        ctx.arc(box.x + boxSize/2-boxOffset, box.y + boxSize/2 - 10-boxOffset, (size*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2);
         ctx.fill()
         ctx.stroke()
         ctx.closePath();
 
         ctx.beginPath();
         ctx.fillStyle = "rgba(255, 255, 255, 0.3)"
-        ctx.arc(box.x + boxSize/2 - 5, box.y + boxSize/2 - 10 - 5, ((size/2)*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2)
+        ctx.arc(box.x + boxSize/2 - 5-boxOffset, box.y + boxSize/2 - 10 - 5-boxOffset, ((size/2)*this.sizeMulti) * (boxSize/85), 0, Math.PI * 2)
         ctx.fill()
         ctx.closePath();
         
@@ -1084,8 +1224,8 @@ class Heavy extends Petal {
         ctx.font = `${textSize}px Arial`
         ctx.lineJoin = "round"
         ctx.textAlign = "center"
-        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
-        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2, box.y + box.boxSize/1.25)
+        ctx.strokeText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
+        ctx.fillText(`${this.altName}`, box.x + box.boxSize/2-boxOffset, box.y + box.boxSize/1.25-boxOffset)
     }
     draw() {
         if (this.showRarity) {
@@ -1187,5 +1327,19 @@ export var availablePetals = [
         health: 100,
         damage: 1,
         armor: 0
+    }),
+    new Air(null, {
+        health: 100,
+        damage: 1,
+        armor: 0
+    }),
+    new Faster(null, {
+        health: 100,
+        damage: 1,
+        armor: 0
     })
 ]
+export function findPetal(petalName) {
+    let petal = availablePetals.filter((petal) => petal.name == petalName)
+    return petal[0]
+}

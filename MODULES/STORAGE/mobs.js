@@ -1,13 +1,16 @@
 import { Mob } from "../ENTITIES/mob.js";
 import { ctx, rarities } from "../../main.js";
 import { darkenRGB, degreesToRads } from "../../SCRIPTS/functions.js";
+import { availablePetals, findPetal } from "./petals.js";
+
 
 // x, y, rarity, health, damage, size
-
 class BabyAnt extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
         this.color = "rgb(80, 80, 80)"
+        this.dropChances = [0.93]
+        this.petalIDs = ["Faster"]
         this.description = "Weak and defenseless, with dreams."
         this.mass = 20
     }
@@ -21,6 +24,8 @@ class SoldierAnt extends Mob {
         this.rarities = rarities
         this.speed = 0.18
         this.mass = 35
+        this.dropChances = [0.7]
+        this.petalIDs = ["Ant Egg"]
         this.boxOffsetX = 2.5
         this.boxOffsetY = -2.5
         this.chasesMobs = true
@@ -127,6 +132,8 @@ class Sandstorm extends Mob {
         this.sandstormMovement = true;
         this.shape = 6
         this.sizeMulti = 1.5
+        this.dropChances = [0.0924, 0.211, 0.6892]
+        this.petalIDs = ["Magic Stick", "Dry Stick", "Mysterious Stick"]
         this.boxExtraRotation = 20
         this.mass = 50
         this.actualSpeed = 0.25
@@ -171,6 +178,8 @@ class Rock extends Mob {
         this.rarities = rarities
         this.shape = 15 + Math.floor(Math.random() * 10)
         this.speed = 0
+        this.dropChances = [0.9122]
+        this.petalIDs = ["Rock"]
         this.sizeMulti = 1.5
         this.rock = true;
         this.sizeVariation = true
@@ -213,6 +222,8 @@ class Bubble extends Mob {
         this.name = "Bubble"
         this.description = "Pop!"
         this.rarities = rarities
+        this.dropChances = [0.473, 0.914]
+        this.petalIDs = ["Bubble", "Air"]
         this.speed = 0
         this.sizeMulti = 1.6
         this.bubbleBurst = {
@@ -259,6 +270,8 @@ class Beetle extends Mob {
         this.rarities = rarities
         this.boxOffsetX = -2.5
         this.boxOffsetY = 2.5
+        this.dropChances = [0.394]
+        this.petalIDs = ["Beetle Egg"]
         this.sizeMulti = 1.4
         this.chasesMobs = true
         this.mass = 40

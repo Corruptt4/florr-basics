@@ -2,6 +2,51 @@ import { ctx, canvas, mobs, rarities } from "../../main.js"
 import { abbreviate, darkenRGB, degreesToRads } from "../../SCRIPTS/functions.js"
 import { availableMobs } from "../STORAGE/mobs.js";
 
+export class MobPetalBox {
+    constructor(x, y, petal, amount = 1) {
+        this.x = x;
+        this.y = y;
+        this.petal = petal;
+        this.rarities = rarities;
+        this.rarity = 1
+        this.boxSize = 50
+        this.chance = 0;
+        this.t = 0
+        this.amount = amount;
+    }
+    update() {
+        this.t += 0.2
+    }
+    draw() {
+        this.rarity = this.petal[1]
+        this.chance = this.petal[2]
+        ctx.save()
+        ctx.translate(this.x, this.y-2)
+        ctx.beginPath()
+        ctx.lineWidth = 4
+        ctx.fillStyle = this.rarities[this.rarity-1][1]
+        ctx.strokeStyle = darkenRGB(this.rarities[this.rarity-1][1], 25)
+        ctx.roundRect(
+            -this.boxSize/2, 
+            -this.boxSize/2, 
+            this.boxSize, 
+            this.boxSize, 
+            this.boxSize/10
+        )
+        ctx.fill()
+        ctx.stroke()
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.font = "10px Arial"
+        ctx.strokeText((this.chance*100).toFixed(2)+"%", 0, this.boxSize/1.2)
+        ctx.fillText((this.chance*100).toFixed(2)+"%", 0, this.boxSize/1.2)
+        ctx.closePath()
+        ctx.restore()
+        this.petal[0].makeSides()
+        this.petal[0].drawOnBox(this, 10, 11, this.boxSize/2)
+    }
+}
+
 export class MobBox {
     /**
      * 
@@ -21,6 +66,8 @@ export class MobBox {
         this.hovered = false;
         this.drawable = true;
         this.shape = mob.shape
+        this.drops = []
+        this.visibleDrops = []
         this.varieties = []
     }
     innitClone() {
@@ -33,11 +80,18 @@ export class MobBox {
         this.clone.color = this.mob.color
         this.clone.varieties = this.varieties
         this.clone.size = (this.l/5) * (this.mob.sizeMulti ?? 1)
+        this.drops = this.mob.actualDrops
+        this.drops.forEach((dr, index) => {
+            dr.forEach((drop) => {
+                let dropBox = new MobPetalBox(this.x, this.y, drop, 1)
+                this.visibleDrops.push(dropBox)
+            })
+        })
     }
     drawStatBox() {
         ctx.save()        
         let tabWidth = 600
-        let tabHeight = 400
+        let tabHeight = 500
         ctx.translate(Math.max(this.x-tabWidth/2.5-this.l, 10), Math.min(this.y+this.l/1.5, canvas.height-10))
         ctx.beginPath()
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)"
@@ -47,7 +101,26 @@ export class MobBox {
         ctx.stroke()
         ctx.closePath()
 
+        this.visibleDrops.forEach((drop, index) => {
+            if (this.mob.petalIDs.length > 1) {
+                let columns = this.visibleDrops.length / this.mob.petalIDs.length
+
+                let row = Math.floor(index / columns)
+                let col = index % columns
+
+                drop.x = 40 + col * 70
+                drop.y = 150 + row * 75
+
+                drop.draw()
+            } else {
+                drop.x = (40+(70*(index)))
+                drop.y = 150+50
+            }
+            drop.draw()
+        })
+
         ctx.beginPath()
+        ctx.lineJoin = "round"
         ctx.lineWidth = 5
         ctx.fillStyle = "white"
         ctx.strokeStyle =  "black"
@@ -144,6 +217,7 @@ export class MobBox {
             ctx.save()
             ctx.translate(this.x, this.y)
             ctx.beginPath()
+            ctx.lineJoin = "round"
             ctx.lineWidth = 5;
             ctx.fillStyle = rarities[this.rarity-1][1]
             ctx.strokeStyle = darkenRGB(rarities[this.rarity-1][1], 25)
@@ -161,6 +235,7 @@ export class MobBox {
                 ctx.translate(this.l/2-4, -this.l/2+4)
                 ctx.rotate(degreesToRads(20))
                 ctx.beginPath()
+                ctx.lineJoin = "round"
                 ctx.fillStyle = "white"
                 ctx.strokeStyle = "black"
                 ctx.font = "13px Arial"

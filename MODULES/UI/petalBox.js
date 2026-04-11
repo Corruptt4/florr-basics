@@ -71,7 +71,7 @@ export class PetalBoxPlace {
                 this.box.y += (this.y - this.box.y) * 0.3;
             }
             this.box.draw()
-            this.box.petal[0].drawOnBox(this.box, 17, 18)
+            this.box.petal[0].drawOnBox(this.box, 18, 18)
         }
     }
 }
@@ -157,6 +157,14 @@ export class PetalBox {
             ctx.textAlign = "right"
             ctx.strokeText((this.petal[0].maxReload/60).toFixed(2) + "s" + (this.petal[0].isSummoner ? " + " + (this.petal[0].summoner.timer2/60).toFixed(2) + "s": ""),  x+tabWidth/1.05, y+35)
             ctx.fillText((this.petal[0].maxReload/60).toFixed(2) + "s" + (this.petal[0].isSummoner ? " + " + (this.petal[0].summoner.timer2/60).toFixed(2) + "s" : ""),  x+tabWidth/1.05, y+35)
+
+            if (this.petal[0].extraSpeed > 0) {
+                ctx.font = "15px Arial"
+                ctx.fillStyle = "blue"
+                ctx.strokeStyle = "black"
+                ctx.strokeText("extra " + this.petal[0].extraSpeed + " rads/s",  x+tabWidth/1.05, y+65)
+                ctx.fillText("extra " + this.petal[0].extraSpeed + " rads/s",  x+tabWidth/1.05, y+65)
+            }
             ctx.font = "20px Arial"
             ctx.fillStyle = "lime"
             ctx.strokeStyle = "black"
