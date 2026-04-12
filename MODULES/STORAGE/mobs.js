@@ -19,6 +19,7 @@ class BabyAnt extends Mob {
 class SoldierAnt extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
+        this.infected = Math.random() < 0.5
         this.name = "Soldier Ant",
         this.description = "It's ready to use its wings to protect the queen!"
         this.rarities = rarities
@@ -30,7 +31,7 @@ class SoldierAnt extends Mob {
         this.boxOffsetY = -2.5
         this.chasesMobs = true
         this.chasesPlayers = true
-        this.color = "rgb(80, 80, 80)"
+        this.color = this.infected ? "rgb(80, 160, 80)" : "rgb(80, 80, 80)"
     }
     draw() {
         ctx.save()
@@ -264,6 +265,7 @@ class Bubble extends Mob {
 class Beetle extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
+        this.infected = Math.random() < 0.5
         this.chasesPlayers = true
         this.description = "It's hungry for flowers, but why flowers instead of insects?"
         this.name = "Beetle"

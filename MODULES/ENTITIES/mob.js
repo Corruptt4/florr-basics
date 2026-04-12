@@ -11,6 +11,7 @@ export class Mob {
         this.rarityName = null;
         this.rarityColor = null;
         this.originalSize = size
+        this.infected = 0
         this.size = size  * rarity
         this.startingHP = health
         this.startingDMG = damage
@@ -81,6 +82,16 @@ export class Mob {
         this.color = "rgb(85, 85, 85)"
     }
     innitMob() {
+        if (this.infected && !this.pet) {
+            this.health *= 1.5
+            this.maxHealth *= 1.5
+            this.damage *= 0.7
+            this.name = "Infected " + this.name
+            this.color = "rgb(56, 206, 93)"
+            this.description += " Why is it green?"
+            this.petalIDs.push("Bacteria")
+            this.dropChances.push(this.dropChances[0]*1.1)
+        }
         if (!this.pet) {
             this.petalIDs.forEach((petal) => {
                 this.drops.push(findPetal(`${petal}`))
