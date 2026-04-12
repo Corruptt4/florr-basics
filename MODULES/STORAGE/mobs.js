@@ -123,6 +123,125 @@ class SoldierAnt extends Mob {
     }
 }
 
+class QueenAnt extends Mob {
+    constructor(x, y, rarity, health, damage, size) {
+        super(x, y, rarity, health, damage, size)
+        //this.infected = Math.random() < 0.5
+        this.name = "Queen Ant",
+        this.description = "What have you done... Why is the queen after you?"
+        this.rarities = rarities
+        this.speed = 0.18
+        this.mass = 100
+        this.dropChances = [0.9]
+        this.petalIDs = ["Ant Egg"]
+        this.boxOffsetX = 2.5
+        this.boxOffsetY = -2.5
+        this.chasesMobs = true
+        this.chasesPlayers = true
+        this.color = this.infected ? "rgb(80, 160, 80)" : "rgb(80, 80, 80)"
+    }
+    draw() {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.beginPath()
+        ctx.rotate(this.angle+(Math.sin(this.t) * (Math.PI / 40)))
+        ctx.moveTo(this.size/2, this.size/1.7)
+        ctx.lineTo(this.size*1.95, this.size/2.5)
+        ctx.lineTo(this.size/2, this.size/1.7)
+        ctx.lineWidth = this.size/4
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = "rgb(25, 25, 25)"
+        ctx.fillStyle = "rgb(25, 25, 25)"
+        ctx.stroke()
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.beginPath()
+        ctx.rotate(this.angle-((Math.PI / 40)*Math.sin(this.t)))
+        ctx.lineWidth = this.size/4
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = "rgb(25, 25, 25)"
+        ctx.fillStyle = "rgb(25, 25, 25)"
+        ctx.moveTo(this.size/2, -this.size/1.7)
+        ctx.lineTo(this.size*1.95, -this.size/2.5)
+        ctx.lineTo(this.size/2, -this.size/1.7)
+        
+        ctx.stroke()
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.lineWidth = this.size/4
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = darkenRGB(this.color, 20)
+        ctx.arc(-this.size/1.2, 0, this.size*1.15, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.lineWidth = this.size/4
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = darkenRGB(this.color, 20)
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.beginPath()
+        ctx.rotate(this.angle+(Math.sin(this.t) * (Math.PI / 40)))
+        ctx.ellipse(-this.size/4, -this.size/1.7, this.size*1.1, this.size/2.5, degreesToRads(10), 0, Math.PI*2)
+        ctx.lineWidth = this.size/4
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"
+        ctx.fillStyle = "rgba(255, 255, 255, 0.5)"
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+        
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.beginPath()
+        ctx.rotate(this.angle-(Math.sin(this.t) * (Math.PI / 40)))
+        ctx.ellipse(-this.size/4, this.size/1.7, this.size*1.1, this.size/2.5, -degreesToRads(10), 0, Math.PI*2)
+        ctx.lineWidth = this.size/4
+        ctx.lineJoin = "round"
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"
+        ctx.fillStyle = "rgba(255, 255, 255, 0.5)"
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.lineWidth = this.size/4
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = darkenRGB(this.color, 20)
+        ctx.arc(this.size/1.2, 0, this.size/1.3, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+    }
+}
+
 
 class Sandstorm extends Mob {
     constructor(x, y, rarity, health, damage, size) {
@@ -210,6 +329,39 @@ class Rock extends Mob {
             this.size*Math.cos(((Math.PI * 2)/this.shape) * 1), 
             this.size*this.varieties[1]*Math.sin(((Math.PI * 2)/this.shape) * 1)
         )
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+    }
+}
+
+class AntEgg extends Mob {
+    constructor(x, y, rarity, health, damage, size) {
+        super(x, y, rarity, health, damage, size)
+        this.name = "Ant Egg"
+        this.description = "No ants?"
+        this.rarities = rarities
+        this.speed = 0
+        this.canHatch = true;
+        this.hatchTime = 600
+        this.summonMob = ["Baby Ant"]
+        this.dropChances = [0.9122]
+        this.petalIDs = ["Ant Egg"]
+        this.sizeMulti = 1.5
+        this.mass = 150
+        this.color = "rgb(245, 245, 200)"
+    }
+    draw() {
+        this.varieties[this.shape-1] = 1
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = darkenRGB(this.color, 20)
+        ctx.lineWidth = this.size/6
+        ctx.arc(0, 0, this.size, 0, Math.PI*2, 0)
         ctx.fill()
         ctx.stroke()
         ctx.closePath()
@@ -365,5 +517,7 @@ export let availableMobs = [
     new Sandstorm(0, 0, 1, 350, 8, 40),
     new SoldierAnt(0, 0, 1, 180, 3, 18),
     new Rock(0, 0, 1, 225, 3, 25),
-    new Bubble(0, 0, 1, 0.2, 3, 30)
+    new Bubble(0, 0, 1, 0.2, 3, 30),
+    new QueenAnt(0, 0, 1, 500, 3, 50),
+    new AntEgg(0, 0, 1, 350, 3, 40)
 ]

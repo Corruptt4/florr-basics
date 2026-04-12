@@ -1,5 +1,5 @@
 import { ctx, entities, frictionMultiplier, mapSize, mobs } from "../../main.js";
-import { abbreviate, darkenRGB } from "../../SCRIPTS/functions.js";
+import { abbreviate, darkenRGB, findMob } from "../../SCRIPTS/functions.js";
 import { findPetal } from "../STORAGE/petals.js";
 
 export class Mob {
@@ -53,7 +53,10 @@ export class Mob {
         this.goingToPlayer = false
         this.description = "Are you meant to even see this description?"
 
-
+        this.hatchTime = 0
+        this.summonMob = []
+        this.mobToSpawn = null
+        this.canHatch = false;
         this.oldAngle = 0;
         this.oldHealth = this.maxHealth
         this.normalHP = this.maxHealth
@@ -93,6 +96,10 @@ export class Mob {
             this.dropChances.push(this.dropChances[0]*1.1)
         }
         if (!this.pet) {
+            if (this.canHatch) {
+                let mob = findMob(this.summonMob[0])
+                this.mobToSpawn = mob
+            }
             this.petalIDs.forEach((petal) => {
                 this.drops.push(findPetal(`${petal}`))
             })
@@ -152,6 +159,20 @@ export class Mob {
         }
 
         if (!this.pet) {
+            if (this.canHatch) {
+                this.hatchTime--
+                if (this.hatchTime <= 0) {
+                    let hatchedMob = new this.mobToSpawn.constructor(
+                        this.x, this.y,
+                        this.rarity, this.mobToSpawn.health, this.mobToSpawn.damage, this.mobToSpawn.size
+                    )
+                    hatchedMob.rarity = this.rarity
+                    hatchedMob.rarities = this.rarities
+                    hatchedMob.innitMob()
+                    mobs.push(hatchedMob)
+                    mobs.splice(mobs.indexOf(this), 1)
+                }
+            }
             let dx = player.x-this.x
             let dy = player.y-this.y
             let dist = dx*dx+dy*dy
