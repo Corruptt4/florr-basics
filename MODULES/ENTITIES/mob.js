@@ -1,5 +1,5 @@
 import { ctx, entities, frictionMultiplier, mapSize, mobs } from "../../main.js";
-import { abbreviate, darkenRGB, findMob } from "../../SCRIPTS/functions.js";
+import { abbreviate, darkenRGB, findMob, randomElement } from "../../SCRIPTS/functions.js";
 import { findPetal } from "../STORAGE/petals.js";
 
 export class Mob {
@@ -16,6 +16,10 @@ export class Mob {
         this.startingHP = health
         this.startingDMG = damage
         this.speed = 0.2
+        this.summoner = false
+        this.mobsToSummon = []
+        this.summonMaxTick = 180;
+        this.summonTick = this.summonMaxTick;
         this.actualSpeed = this.speed
         this.health = this.startingHP * Math.pow(3.8, rarity-1) * Math.pow(1.35, rarity-1);
         this.maxHealth = this.startingHP * Math.pow(3.8, rarity-1) * Math.pow(1.35, rarity-1);
@@ -53,6 +57,7 @@ export class Mob {
         this.goingToPlayer = false
         this.description = "Are you meant to even see this description?"
 
+        this.canBeDisplayed = true
         this.hatchTime = 0
         this.summonMob = []
         this.mobToSpawn = null
@@ -159,6 +164,40 @@ export class Mob {
         }
 
         if (!this.pet) {
+            if (this.summoner) {
+                if (this.summonTick > 0) {
+                    this.summonTick--
+                }
+                if (this.summonTick <= 0) {
+                    this.summonTick = this.summonMaxTick
+                    let mobToSpawn = this.mobsToSummon[randomElement(this.mobsToSummon)]
+                    let actualMob = findMob(mobToSpawn)
+                    console.log(actualMob)
+                    let mob = new actualMob.constructor(
+                        this.x,
+                        this.y,
+                        Math.max(this.rarity-1, 1),
+                        actualMob.health,
+                        actualMob.damage,
+                        actualMob.size
+                    )
+                    if (this.infected) {
+                        mob.infected = true
+                    } else {
+                        mob.infected = Math.random() < 0
+                    }
+                    mob.rarities = this.rarities
+                    mob.innitMob()
+                    mob.name += " Summon"
+                    mob.description += " Summoned by " + this.name
+                    mob.petalIDs = []
+                    mob.dropChances = []
+                    mob.boxExtraRotation = -45
+                    mob.canBeDisplayed = false
+                    mob.actualDrops = []
+                    mobs.push(mob)
+                }
+            }
             if (this.canHatch) {
                 this.hatchTime--
                 if (this.hatchTime <= 0) {
@@ -166,7 +205,6 @@ export class Mob {
                         this.x, this.y,
                         this.rarity, this.mobToSpawn.health, this.mobToSpawn.damage, this.mobToSpawn.size
                     )
-                    hatchedMob.rarity = this.rarity
                     hatchedMob.rarities = this.rarities
                     hatchedMob.innitMob()
                     mobs.push(hatchedMob)

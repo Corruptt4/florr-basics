@@ -126,13 +126,16 @@ class SoldierAnt extends Mob {
 class QueenAnt extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
-        //this.infected = Math.random() < 0.5
+        this.infected = Math.random() < 0.1
         this.name = "Queen Ant",
         this.description = "What have you done... Why is the queen after you?"
         this.rarities = rarities
         this.speed = 0.18
         this.mass = 100
-        this.dropChances = [0.9]
+        this.summoner = true
+        this.summonMaxTick = 240;
+        this.mobsToSummon = ["Soldier Ant", "Baby Ant"]
+        this.dropChances = [0.911]
         this.petalIDs = ["Ant Egg"]
         this.boxOffsetX = 2.5
         this.boxOffsetY = -2.5

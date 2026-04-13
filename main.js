@@ -673,6 +673,7 @@ function render() {
     
     mobBoxes = [];
     mobs.forEach(mob => {
+        if (!mob.canBeDisplayed) return;
         let mobBox = new MobBox(50, 80, 55, mob);
         if (mob.name === "Rock") {
             mobBox.shape = rockMobShape;
@@ -712,7 +713,7 @@ function render() {
     sameMobBoxes.forEach((similarMobs, rowIndex) => {
         similarMobs.sort((a, b) => a.mob.rarity - b.mob.rarity);
         similarMobs.forEach((box, i) => {
-            box.x = (canvas.width/2-((box.l*2)*1.15)*(sameMobBoxes.length/4)) + (box.l*1.35) * rowIndex;
+            box.x = (canvas.width/2+25-((box.l*2)*1.15)*(sameMobBoxes.length/4)) + (box.l*1.35) * rowIndex;
             box.y = box.l+120 + (box.l*1.15) * i;
         });
     });
