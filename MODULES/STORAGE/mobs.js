@@ -255,6 +255,14 @@ class Sandstorm extends Mob {
         this.sandstormMovement = true;
         this.shape = 6
         this.sizeMulti = 1.5
+        this.summoner = true
+        this.summonerMaxTick = 120
+        this.mobsToSummon = ["Sandstorm"]
+        this.summonerSettings = {
+            losesHealthPerSpawn: true,
+            minimumRarity: 3,
+            summonRarityDecrease: 2
+        }
         this.dropChances = [0.0924, 0.211, 0.6892]
         this.petalIDs = ["Magic Stick", "Dry Stick", "Mysterious Stick"]
         this.boxExtraRotation = 20

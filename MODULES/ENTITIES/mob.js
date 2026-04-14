@@ -17,9 +17,6 @@ export class Mob {
         this.startingDMG = damage
         this.speed = 0.2
         this.summoner = false
-        this.mobsToSummon = []
-        this.summonMaxTick = 180;
-        this.summonTick = this.summonMaxTick;
         this.actualSpeed = this.speed
         this.health = this.startingHP * Math.pow(3.8, rarity-1) * Math.pow(1.35, rarity-1);
         this.maxHealth = this.startingHP * Math.pow(3.8, rarity-1) * Math.pow(1.35, rarity-1);
@@ -50,6 +47,16 @@ export class Mob {
         this.hostPetal = null;
         this.givenTargets = [];
         this.sizeVariation = false
+
+        // Summoner stuff
+        this.summonerSettings = {
+            minimumRarity: 1,
+            losesHealthPerSpawn: false,
+            summonRarityDecrease: 0
+        }
+        this.mobsToSummon = []
+        this.summonMaxTick = 180;
+        this.summonTick = this.summonMaxTick;
 
         // this.chasesMobs is for pets
         this.chasesMobs = false
@@ -165,7 +172,7 @@ export class Mob {
 
         if (!this.pet) {
             if (this.summoner) {
-                if (this.summonTick > 0) {
+                if (this.summonTick > 0 && this.rarity >= this.summonerSettings.minimumRarity) {
                     this.summonTick--
                 }
                 if (this.summonTick <= 0) {
@@ -176,7 +183,7 @@ export class Mob {
                     let mob = new actualMob.constructor(
                         this.x,
                         this.y,
-                        Math.max(this.rarity-1, 1),
+                        Math.max(this.rarity-1-this.summonerSettings.summonRarityDecrease, 1),
                         actualMob.health,
                         actualMob.damage,
                         actualMob.size
@@ -195,6 +202,9 @@ export class Mob {
                     mob.boxExtraRotation = -45
                     mob.canBeDisplayed = false
                     mob.actualDrops = []
+                    if (this.summonerSettings.losesHealthPerSpawn) {
+                        this.health -= mob.health
+                    }
                     mobs.push(mob)
                 }
             }
