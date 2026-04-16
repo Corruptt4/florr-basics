@@ -278,7 +278,7 @@ class Sandstorm extends Mob {
             let size = this.size / [1, 1.4, 2.5][i]
             ctx.beginPath();
             if (!this.isSandstorm) {
-                ctx.rotate(this.angle + this.boxExtraRotation)
+                ctx.rotate(this.angle)
             } else {
                 ctx.rotate(0.6*[1,1.2,1.4][i]*this.t*[-1,1,-1][i])
             }
@@ -298,6 +298,50 @@ class Sandstorm extends Mob {
             ctx.closePath();
             ctx.restore();
         }
+    }
+}
+
+class AntHole extends Mob {
+    constructor(x, y, rarity, health, damage, size) {
+        super(x, y, rarity, health, damage, size)
+        this.name = "Ant Hole"
+        this.description = "In and out, in and out... What are the ants even up to?"
+        this.rarities = rarities
+        this.sizeMulti = 1.5
+        this.summoner = true
+        this.summonerMaxTick = 120
+        this.mobsToSummon = ["Baby Ant", "Soldier Ant"]
+        this.summonerSettings = {
+            losesHealthPerSpawn: true,
+            minimumRarity: 3,
+            summonRarityDecrease: 0,
+            summonsThroughDamage: true,
+            chance: 0.1
+        }
+        this.dropChances = [0.935, 0.532]
+        this.petalIDs = ["Ant Egg", "Heavy"]
+        this.boxExtraRotation = 0
+        this.mass = 1000
+        this.speed = 0
+        this.color = "rgb(180,133,1)"
+    }
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        for (let i = 0; i < 3; i++) {
+            let size = this.size / [1, 1.4, 2.5][i]
+            ctx.beginPath();
+            ctx.fillStyle = darkenRGB(this.color, 0 + (25*i))
+            ctx.strokeStyle = darkenRGB(this.color, 0 + (25*i))
+            ctx.lineWidth = size / 3 / [1, 1.4, 2.5][i]
+            ctx.lineJoin = "round"
+            ctx.arc(0, 0, size, 0, Math.PI*2, 0)
+            ctx.fill()
+            ctx.stroke()
+            ctx.closePath();
+        }
+        ctx.restore();
     }
 }
 
@@ -530,5 +574,6 @@ export let availableMobs = [
     new Rock(0, 0, 1, 225, 3, 25),
     new Bubble(0, 0, 1, 0.2, 3, 30),
     new QueenAnt(0, 0, 1, 500, 3, 50),
-    new AntEgg(0, 0, 1, 350, 3, 40)
+    new AntEgg(0, 0, 1, 350, 3, 40),
+    new AntHole(0, 0, 1, 1000, 3, 60)
 ]

@@ -52,8 +52,14 @@ export class Mob {
         this.summonerSettings = {
             minimumRarity: 1,
             losesHealthPerSpawn: false,
-            summonRarityDecrease: 0
+            summonRarityDecrease: 0,
+            summonsThroughDamage: false,
+            chance: 0
         }
+
+        this.deathSummon = null
+        this.summonsOnDeath = false;
+        this.summonWithHealth = false;
         this.mobsToSummon = []
         this.summonMaxTick = 180;
         this.summonTick = this.summonMaxTick;
@@ -95,6 +101,28 @@ export class Mob {
         }
         this.aggressive = false
         this.color = "rgb(85, 85, 85)"
+    }
+    takeDamage() {
+        if (this.summoner && this.summonerSettings.summonsThroughDamage) {
+            let chance = Math.random() < this.summonerSettings.chance
+            if (chance) {
+                for (let i = 0; i < 1 + Math.random()*3; i++) {
+                    let mobToSpawn = this.mobsToSummon[randomElement(this.mobsToSummon)]
+                    let actualMob = findMob(mobToSpawn)
+                    let summon = new actualMob.constructor(
+                        this.x,
+                        this.y,
+                        Math.max(this.rarity-1-this.summonerSettings.summonRarityDecrease, 1),
+                        actualMob.health,
+                        actualMob.damage,
+                        actualMob.size
+                    )
+                    summon.rarities = this.rarities
+                    summon.innitMob()
+                    mobs.push(summon)
+                }
+            }
+        }
     }
     innitMob() {
         if (this.infected && !this.pet) {
@@ -172,7 +200,7 @@ export class Mob {
 
         if (!this.pet) {
             if (this.summoner) {
-                if (this.summonTick > 0 && this.rarity >= this.summonerSettings.minimumRarity) {
+                if (this.summonTick > 0 && this.rarity >= this.summonerSettings.minimumRarity && !this.summonerSettings.summonsThroughDamage) {
                     this.summonTick--
                 }
                 if (this.summonTick <= 0) {

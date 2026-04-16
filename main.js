@@ -289,12 +289,16 @@ setInterval(() => {
                 collider2.health -= collider1.damage
                 collider2.damageTick = 6
                 collider1.damageTick = 6
+                collider1.takeDamage()
+                collider2.takeDamage()
             }
             if ((collider2.type == "mob" && !collider2.pet) && (collider1.type == "mob" && collider1.pet)) {
                 collider1.health -= collider2.damage
                 collider2.health -= collider1.damage
                 collider2.damageTick = 6
                 collider1.damageTick = 6
+                collider1.takeDamage()
+                collider2.takeDamage()
             }
         }
         if ((collider1.type == "petal" && collider2.type == "mob") || (collider1.type == "mob" && collider2.type == "petal")) {
@@ -306,6 +310,7 @@ setInterval(() => {
             if (!mob.pet && !petal.dead) {
                 mob.health -= petal.stats.damage;
                 mob.damageTick = 6;
+                mob.takeDamage()
 
                 if (petal.poison.poison > 0) {
                     mob.poisonTake(petal.poison.poison, petal.poison.tick);
@@ -350,6 +355,7 @@ setInterval(() => {
                         if (mob.pet) {
                             if (entity.type !== "player") {
                                 if (Math.sqrt(dist) <= (mob.size*mob.bubbleBurst.burstRange)) {
+                                    entity.takeDamage()
                                     entity.health -= mob.damage*mob.bubbleBurst.damageMulti
                                     entity.velocity.x -= (mob.bubbleBurst.power/(entity.mass**0.8)/(Math.sqrt(dist)/75))*Math.cos(angle)
                                     entity.velocity.y -= (mob.bubbleBurst.power/(entity.mass**0.8)/(Math.sqrt(dist)/75))*Math.sin(angle)
