@@ -88,6 +88,9 @@ export class Mob {
         this.damageTaken = 0
         this.sizeVariation = false
         this.onDeath = () => {
+            const damage = this.damageTaken
+            this.damageTaken = 0
+            damageNumbers.push(new DamageNumber(this.x, this.y, damage))
             switch (this.deathType) {
                 case "Ant Hole": {
                     let spawnMob = findMob("Queen Ant")
@@ -99,6 +102,27 @@ export class Mob {
                     mob.innitMob()
                     mobs.push(mob)
                     break;
+                }
+                case "Sandstorm Explode": {
+                    let spawnMob = findMob("Sandstorm")
+                    if (this.rarity >= 3) {
+                        let amount = Math.floor(minMax(2,6))
+                        for (let i = 0; i < amount; i++) {
+                            let mob = new spawnMob.constructor(
+                                this.x, this.y, this.rarity-2,
+                                spawnMob.health, spawnMob.damage, spawnMob.size*0.7*sizeFactor
+                            )
+                            let force = 10
+                            let angle = ((Math.PI*2)/amount)*i
+                            mob.rarities = this.rarities
+                            mob.velocity.x = force*Math.cos(angle)
+                            mob.velocity.y = force*Math.sin(angle)
+                            mob.deathType = "none"
+                            mob.innitMob()
+                            mob.dropIDs = []
+                            mobs.push(mob)
+                        }
+                    }
                 }
             }
         }

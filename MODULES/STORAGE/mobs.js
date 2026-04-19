@@ -257,6 +257,7 @@ class Sandstorm extends Mob {
         this.sizeMulti = 1.5
         this.summoner = true
         this.summonerMaxTick = 120
+        this.deathType = "Sandstorm Explode"
         this.mobsToSummon = ["Sandstorm"]
         this.summonerSettings = {
             losesHealthPerSpawn: true,
