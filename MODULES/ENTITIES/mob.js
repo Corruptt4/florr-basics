@@ -1,4 +1,4 @@
-import { ctx, entities, frictionMultiplier, mapSize, mobs } from "../../main.js";
+import { ctx, entities, frictionMultiplier, mapSize, mobs, sizeFactor } from "../../main.js";
 import { abbreviate, darkenRGB, findMob, randomElement } from "../../SCRIPTS/functions.js";
 import { findPetal } from "../STORAGE/petals.js";
 
@@ -12,7 +12,7 @@ export class Mob {
         this.rarityColor = null;
         this.originalSize = size
         this.infected = 0
-        this.size = size  * rarity
+        this.size = size  * (0.8 * rarity)
         this.startingHP = health
         this.startingDMG = damage
         this.speed = 0.2
@@ -20,10 +20,11 @@ export class Mob {
         this.actualSpeed = this.speed
         this.health = this.startingHP * Math.pow(3.8, rarity-1) * Math.pow(1.35, rarity-1);
         this.maxHealth = this.startingHP * Math.pow(3.8, rarity-1) * Math.pow(1.35, rarity-1);
-        this.damage = this.startingDMG * Math.pow(2.25, rarity-1) * Math.pow(1.32, rarity-1);
+        this.damage = this.startingDMG * Math.pow(2.35, rarity-1) * Math.pow(1.47, rarity-1);
         this.angle = 0
         this.type = "mob"
         this.name = "Baby Ant" // PLACEHOLDER
+        this.deathType = "none"
         this.t = 0;
         this.bubbleBurst = {
             power: 0,
@@ -47,6 +48,22 @@ export class Mob {
         this.hostPetal = null;
         this.givenTargets = [];
         this.sizeVariation = false
+
+        this.onDeath = () => {
+            switch (this.deathType) {
+                case "Ant Hole": {
+                    let spawnMob = findMob("Queen Ant")
+                    let mob = new spawnMob.constructor(
+                        this.x, this.y, this.rarity,
+                        spawnMob.health, spawnMob.damage, spawnMob.size*sizeFactor
+                    )
+                    mob.rarities = this.rarities
+                    mob.innitMob()
+                    mobs.push(mob)
+                    break;
+                }
+            }
+        }
 
         // Summoner stuff
         this.summonerSettings = {
@@ -115,7 +132,7 @@ export class Mob {
                         Math.max(this.rarity-1-this.summonerSettings.summonRarityDecrease, 1),
                         actualMob.health,
                         actualMob.damage,
-                        actualMob.size
+                        actualMob.size*sizeFactor
                     )
                     summon.rarities = this.rarities
                     summon.innitMob()
@@ -181,7 +198,7 @@ export class Mob {
             if (this.name == "Bubble") {
                 this.snapToPlayer = true
             }
-            this.damage *= (this.pet ? Math.pow(1.25, this.rarity-1) : 1)
+            this.damage *= (this.pet ? Math.pow(1.45, this.rarity-1) : 1)
         }
         if (this.isSandstorm || this.sizeVariation) {
             this.size *= 0.8 + (Math.random() * 0.3)
@@ -214,7 +231,7 @@ export class Mob {
                         Math.max(this.rarity-1-this.summonerSettings.summonRarityDecrease, 1),
                         actualMob.health,
                         actualMob.damage,
-                        actualMob.size
+                        actualMob.size*sizeFactor
                     )
                     if (this.infected) {
                         mob.infected = true
@@ -241,7 +258,8 @@ export class Mob {
                 if (this.hatchTime <= 0) {
                     let hatchedMob = new this.mobToSpawn.constructor(
                         this.x, this.y,
-                        this.rarity, this.mobToSpawn.health, this.mobToSpawn.damage, this.mobToSpawn.size
+                        this.rarity, this.mobToSpawn.health, this.mobToSpawn.damage, 
+                        this.mobToSpawn.size*sizeFactor
                     )
                     hatchedMob.rarities = this.rarities
                     hatchedMob.innitMob()
@@ -372,7 +390,7 @@ export class Mob {
     }
     getSpecificStats(rarity, isPet = false) {
         this.specificHP = this.startingHP * Math.pow(3.8, rarity) * Math.pow(1.35, rarity);
-        this.specificDMG = this.startingDMG * Math.pow(2.25, rarity) * Math.pow(1.32, rarity) * (isPet ? Math.pow(1.25, rarity) : 1);
+        this.specificDMG = this.startingDMG * Math.pow(2.35, rarity) * Math.pow(1.47, rarity) * (isPet ? Math.pow(1.45, rarity) : 1);
         return {
             hp: this.specificHP,
             dmg: this.specificDMG

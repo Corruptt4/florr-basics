@@ -310,6 +310,7 @@ class AntHole extends Mob {
         this.sizeMulti = 1.5
         this.summoner = true
         this.summonerMaxTick = 120
+        this.deathType = "Ant Hole"
         this.mobsToSummon = ["Baby Ant", "Soldier Ant"]
         this.summonerSettings = {
             losesHealthPerSpawn: true,

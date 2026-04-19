@@ -364,14 +364,15 @@ setInterval(() => {
                         }
                         if (!mob.pet) {
                             if (Math.sqrt(dist) <= 600) {
-                                entity.velocity.x -= (((entity.type == "player" ? mob.bubbleBurst.power**0.6 : mob.bubbleBurst.power))/(entity.mass)/(Math.sqrt(dist)/75))*Math.cos(angle)
-                                entity.velocity.y -= (((entity.type == "player" ? mob.bubbleBurst.power**0.6 : mob.bubbleBurst.power))/(entity.mass)/(Math.sqrt(dist)/75))*Math.sin(angle)
+                                entity.velocity.x -= (((entity.type == "player" ? mob.bubbleBurst.power**0.4 : mob.bubbleBurst.power))/(entity.mass)/(Math.sqrt(dist)/75))*Math.cos(angle)
+                                entity.velocity.y -= (((entity.type == "player" ? mob.bubbleBurst.power**0.4 : mob.bubbleBurst.power))/(entity.mass)/(Math.sqrt(dist)/75))*Math.sin(angle)
                             }
                         }
                     }
                 }
             }
             if (!mob.pet) {
+                mob.onDeath()
                 if (mob.actualDrops.length > 0) {
                     let totalDrops = []
                     let totalWeight = 0
