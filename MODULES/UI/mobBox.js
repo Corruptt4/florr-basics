@@ -126,8 +126,8 @@ export class MobBox {
         ctx.strokeStyle =  "black"
         ctx.font = "35px Arial"
         ctx.textAlign = "left"
-        ctx.strokeText(this.clone.name, 15, 35)
-        ctx.fillText(this.clone.name, 15, 35)
+        ctx.strokeText(this.mob.name, 15, 35)
+        ctx.fillText(this.mob.name, 15, 35)
         ctx.font = "15px Arial"
         ctx.strokeText(this.mob.description, 15, 95)
         ctx.fillText(this.mob.description, 15, 95)
@@ -228,7 +228,7 @@ export class MobBox {
 
             this.clone.x = this.mob.boxOffsetX
             this.clone.y = this.mob.boxOffsetY
-            this.clone.angle = degreesToRads(-45+(this.mob.boxExtraRotation??1))
+            this.clone.angle = degreesToRads(-45+(this.mob.boxExtraRotation??0))
             this.clone.draw()
             
             if (this.amount > 1) {

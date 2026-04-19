@@ -15,9 +15,10 @@
 #### ENTITIES - Definition of all entities: Mob, Petal, Player
 - Decorator.js has the decoration, and function to make the decoration on the map.
 
-#### PHYSICS - Contains the QuadTree currently that makes collisions work!
+#### PHYSICS - Contains the QuadTree currently that makes collisions work! SPATIAL HASHING BEING ADDED!
 - COLLISION SYSTEM USED IS BUCKETS (for example, an entity has boundaries bigger than the entity, any other entity entering it and overlapping with it is detected and then distance for collisions are calculated)
--- COLLISIONS WORK IN 15Hz!
+- COLLISIONS WORK IN 15Hz!
+- KEEP IN MIND, THIS NOW USES SPATIAL HASHING! NO QUAD TREE NOW!
 
 #### STORAGE - Contains the mobs and petals.
 - mobs.js - Contains all current mobs in the game. (Sandstorm, Beetle, Baby Ant, more may be added to the project) - If you want to make a new mob, keep in mind default placeholder is the Baby Ant!

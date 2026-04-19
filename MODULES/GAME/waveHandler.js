@@ -77,13 +77,14 @@ export class WaveMode {
                     break;
                 }
             }
+            let givenMob = availableMobs[randomMob]
             let mob = new availableMobs[randomMob].constructor(
                 Math.random()*mapSize,
                 Math.random()*mapSize,
                 this.raritiesToSpawn[rarityToSpawn],
-                availableMobs[randomMob].health,
-                availableMobs[randomMob].damage,
-                availableMobs[randomMob].size*this.sizeFactor
+                givenMob.health,
+                givenMob.damage,
+                givenMob.size*this.sizeFactor
             )
             mob.innitMob()
             this.mobsToSpawn.push(mob)

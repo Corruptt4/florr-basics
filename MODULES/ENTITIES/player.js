@@ -98,11 +98,10 @@ export class Player {
             })
         }
         
-
         /** Key codes */
         // right 39, 68
         // left 37, 65
-        // up 83, 40
+        // up c, 40
         // down 38, 87
         // attack 32 || defend 16
         // show petal rarities 71
@@ -156,8 +155,8 @@ export class Player {
             this.showPetalRarity = false
         }
 
-        this.x += this.push.x/this.mass
-        this.y += this.push.y/this.mass
+        this.x += this.push.x
+        this.y += this.push.y
         this.x += this.velocity.x
         this.y += this.velocity.y
         this.x = Math.min(Math.max(this.x, this.size), mapSize-this.size)

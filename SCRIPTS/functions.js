@@ -1,3 +1,5 @@
+import { mobs } from "../main.js";
+import { availableMobs } from "../MODULES/STORAGE/mobs.js";
 import { availablePetals } from "../MODULES/STORAGE/petals.js";
 
  export function darkenRGB(rgb, darken) {
@@ -22,6 +24,10 @@ import { availablePetals } from "../MODULES/STORAGE/petals.js";
 }
 export function randomElement(x) {
     return Math.floor(Math.random()*x.length)
+}
+export function findMob(mobName) {
+    let petal = availableMobs.filter((mob) => mob.name == mobName)
+    return petal[0]
 }
 export function degreesToRads(x) {
     return x * (Math.PI / 180)
