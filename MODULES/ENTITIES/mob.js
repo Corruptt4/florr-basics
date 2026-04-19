@@ -1,6 +1,44 @@
-import { ctx, entities, frictionMultiplier, mapSize, mobs, sizeFactor } from "../../main.js";
-import { abbreviate, darkenRGB, findMob, randomElement } from "../../SCRIPTS/functions.js";
+import { ctx, damageNumbers, entities, frictionMultiplier, mapSize, mobs, sizeFactor } from "../../main.js";
+import { abbreviate, darkenRGB, findMob, randomElement, degreesToRads, minMax } from "../../SCRIPTS/functions.js";
 import { findPetal } from "../STORAGE/petals.js";
+
+export class DamageNumber {
+    constructor(x, y, damage) {
+        this.x = x;
+        this.y = y;
+        this.damage = damage;
+        this.angle = 0
+        this.t = 0
+        this.color = "rgb(255, 0, 0)"
+        this.vel = {
+            x: 2 * Math.cos(minMax(degreesToRads(-40), degreesToRads(40))),
+            y: -2
+        }
+    }
+    update() {
+        this.t += 1/60
+        this.angle = degreesToRads(15) * Math.sin(this.t*7)
+        this.y += this.vel.y
+
+        if (this.t >= 0.4) {
+            damageNumbers.splice(damageNumbers.indexOf(this), 1)
+        }
+    }
+    draw() {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.font = "30px Arial"
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = darkenRGB(this.color, 25)
+        ctx.textAlign = "center"
+        ctx.strokeText(abbreviate(this.damage), 0, 0)
+        ctx.fillText(abbreviate(this.damage), 0, 0)
+        ctx.closePath()
+        ctx.restore()
+    }
+}
 
 export class Mob {
     constructor(x, y, rarity, health, damage, size) {
@@ -47,8 +85,8 @@ export class Mob {
         this.boxOffsetY = 0;
         this.hostPetal = null;
         this.givenTargets = [];
+        this.damageTaken = 0
         this.sizeVariation = false
-
         this.onDeath = () => {
             switch (this.deathType) {
                 case "Ant Hole": {
@@ -86,6 +124,7 @@ export class Mob {
         this.potentialEnemies = [];
         this.goingToPlayer = false
         this.description = "Are you meant to even see this description?"
+        this.damageTaken = 0
 
         this.canBeDisplayed = true
         this.hatchTime = 0
@@ -118,8 +157,9 @@ export class Mob {
         }
         this.aggressive = false
         this.color = "rgb(85, 85, 85)"
+        this.damageNumber = new DamageNumber(this.x, this.y, this.damageTaken)
     }
-    takeDamage() {
+    takeDamage(damage) {
         if (this.summoner && this.summonerSettings.summonsThroughDamage) {
             let chance = Math.random() < this.summonerSettings.chance
             if (chance) {
@@ -140,6 +180,7 @@ export class Mob {
                 }
             }
         }
+        this.damageTaken += damage
     }
     innitMob() {
         if (this.infected && !this.pet) {
@@ -205,14 +246,22 @@ export class Mob {
         }
     }
     update(player) {
+        this.damageNumber.x = this.x
+        this.damageNumber.y = this.y
         if (this.damageTick > 0) {
             this.damageTick--
+        }
+        if (this.damageTick <= 0 && this.damageTaken > 0) {
+            const damage = this.damageTaken
+            this.damageTaken = 0
+            damageNumbers.push(new DamageNumber(this.x, this.y, damage))
         }
         this.potentialEnemies = []
         if (this.poisonTick > 0) {
             this.poisonTick--
             this.damageTick = 6
             this.health -= this.poisonToTake/this.poisonTicks
+            this.takeDamage(this.poisonToTake/this.poisonTicks)
         }
 
         if (!this.pet) {
@@ -457,6 +506,7 @@ export class Mob {
         this.poisonToTake = poison
     }
     drawRarity() {
+        this.damageNumber.damage = this.damageTaken
         if (this.health < 0) {
             this.health = 0
         }
@@ -533,5 +583,9 @@ export class Mob {
         ctx.closePath()
 
         ctx.restore()
+
+        if (this.damageNumber.damage > 0) {
+            this.damageNumber.draw()
+        }
     }
 }

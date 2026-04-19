@@ -41,6 +41,7 @@ export let mapSize = 2000,
                     mobBoxes = [],
                     petals = [],
                     drops = [],
+                    damageNumbers = [],
                     frictionMultiplier = 0.95
 export let sizeFactor = 1
 
@@ -287,18 +288,18 @@ setInterval(() => {
             if ((collider1.type == "mob" && !collider1.pet) && (collider2.type == "mob" && collider2.pet)) {
                 collider1.health -= collider2.damage
                 collider2.health -= collider1.damage
-                collider2.damageTick = 6
-                collider1.damageTick = 6
-                collider1.takeDamage()
-                collider2.takeDamage()
+                collider2.damageTick = 8
+                collider1.damageTick = 8
+                collider1.takeDamage(collider2.damage)
+                collider2.takeDamage(collider1.damage)
             }
             if ((collider2.type == "mob" && !collider2.pet) && (collider1.type == "mob" && collider1.pet)) {
                 collider1.health -= collider2.damage
                 collider2.health -= collider1.damage
-                collider2.damageTick = 6
-                collider1.damageTick = 6
-                collider1.takeDamage()
-                collider2.takeDamage()
+                collider2.damageTick = 8
+                collider1.damageTick = 8
+                collider1.takeDamage(collider2.damage)
+                collider2.takeDamage(collider1.damage)
             }
         }
         if ((collider1.type == "petal" && collider2.type == "mob") || (collider1.type == "mob" && collider2.type == "petal")) {
@@ -309,8 +310,8 @@ setInterval(() => {
             }
             if (!mob.pet && !petal.dead) {
                 mob.health -= petal.stats.damage;
-                mob.damageTick = 6;
-                mob.takeDamage()
+                mob.damageTick = 8;
+                mob.takeDamage(petal.stats.damage)
 
                 if (petal.poison.poison > 0) {
                     mob.poisonTake(petal.poison.poison, petal.poison.tick);
@@ -355,7 +356,7 @@ setInterval(() => {
                         if (mob.pet) {
                             if (entity.type !== "player") {
                                 if (Math.sqrt(dist) <= (mob.size*mob.bubbleBurst.burstRange)) {
-                                    entity.takeDamage()
+                                    entity.takeDamage(mob.damage*mob.bubbleBurst.damageMulti)
                                     entity.health -= mob.damage*mob.bubbleBurst.damageMulti
                                     entity.velocity.x -= (mob.bubbleBurst.power/(entity.mass**0.8)/(Math.sqrt(dist)/75))*Math.cos(angle)
                                     entity.velocity.y -= (mob.bubbleBurst.power/(entity.mass**0.8)/(Math.sqrt(dist)/75))*Math.sin(angle)
@@ -413,6 +414,9 @@ setInterval(() => {
     drops.forEach((drop) => {
         drop.update()
     })
+    damageNumbers.forEach((num) => {
+        num.update()
+    })
     inventory.update()
     t += 0.025
     let catarValue = Math.abs(Math.sin(t)*50+150)
@@ -459,14 +463,17 @@ function render() {
     decorator.makeGrid()
     decorator.makeBoundaries()
     // spatialHash.draw()
+    drops.forEach((drop) => {
+        drop.draw()
+    })
     mobs.concat(summons).forEach((mob) => {
         mob.draw()
         mob.drawRarity()
     })
-    drops.forEach((drop) => {
-        drop.draw()
-    })
     player.draw()
+    damageNumbers.forEach((num) => {
+        num.draw()
+    })
     ctx.restore()
     petalBoxHolders.forEach((pBox) => {
         pBox.y = canvas.height - pBox.boxSize - 38
