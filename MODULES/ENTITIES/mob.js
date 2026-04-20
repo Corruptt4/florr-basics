@@ -19,6 +19,7 @@ export class DamageNumber {
         this.t += 1/60
         this.angle = degreesToRads(15) * Math.sin(this.t*7)
         this.y += this.vel.y
+        this.x += this.vel.x
 
         if (this.t >= 0.4) {
             damageNumbers.splice(damageNumbers.indexOf(this), 1)
@@ -29,9 +30,11 @@ export class DamageNumber {
         ctx.translate(this.x, this.y)
         ctx.rotate(this.angle)
         ctx.beginPath()
+        ctx.lineJoin = "round"
+        ctx.lineWidth = 8
         ctx.font = "30px Arial"
         ctx.fillStyle = this.color
-        ctx.strokeStyle = darkenRGB(this.color, 25)
+        ctx.strokeStyle = darkenRGB(this.color, 100)
         ctx.textAlign = "center"
         ctx.strokeText(abbreviate(this.damage), 0, 0)
         ctx.fillText(abbreviate(this.damage), 0, 0)
@@ -88,7 +91,7 @@ export class Mob {
         this.damageTaken = 0
         this.sizeVariation = false
         this.onDeath = () => {
-            const damage = this.damageTaken
+            const damage = Math.min(this.damageTaken, this.oldHealth)
             this.damageTaken = 0
             damageNumbers.push(new DamageNumber(this.x, this.y, damage))
             switch (this.deathType) {
@@ -106,23 +109,24 @@ export class Mob {
                 case "Sandstorm Explode": {
                     let spawnMob = findMob("Sandstorm")
                     if (this.rarity >= 3) {
-                        let amount = Math.floor(minMax(2,6))
+                        let amount = Math.floor(minMax(1, 3))
                         for (let i = 0; i < amount; i++) {
                             let mob = new spawnMob.constructor(
                                 this.x, this.y, this.rarity-2,
                                 spawnMob.health, spawnMob.damage, spawnMob.size*0.7*sizeFactor
                             )
+                            mob.deathType = "none"
                             let force = 10
                             let angle = ((Math.PI*2)/amount)*i
                             mob.rarities = this.rarities
                             mob.velocity.x = force*Math.cos(angle)
                             mob.velocity.y = force*Math.sin(angle)
-                            mob.deathType = "none"
                             mob.innitMob()
                             mob.dropIDs = []
                             mobs.push(mob)
                         }
                     }
+                    break;
                 }
             }
         }
@@ -257,7 +261,7 @@ export class Mob {
         }
         this.angle = Math.PI * 2 * Math.random() - Math.PI
         this.mass *= Math.pow(4, this.rarity-1)
-        this.bubbleBurst.power *= 1+Math.max((1.5*(this.rarity-1)*(1.1**(this.rarity-1))), 1) * (this.pet ? 2.4*(this.rarity-1)*Math.pow(2.12, this.rarity-1) : 1)
+        this.bubbleBurst.power *= 1+Math.max((1.5*(this.rarity-1)*(1.1**(this.rarity-1))), 1) * (this.pet ? 2.4*(this.rarity-1)*Math.pow(2.32, this.rarity-1) : 1)
         if (this.pet) {
             this.size = this.originalSize * 1.05 * this.rarity
             if (this.name == "Bubble") {
@@ -276,7 +280,7 @@ export class Mob {
             this.damageTick--
         }
         if (this.damageTick <= 0 && this.damageTaken > 0) {
-            const damage = this.damageTaken
+            const damage = Math.min(this.damageTaken, this.oldHealth)
             this.damageTaken = 0
             damageNumbers.push(new DamageNumber(this.x, this.y, damage))
         }
@@ -530,7 +534,7 @@ export class Mob {
         this.poisonToTake = poison
     }
     drawRarity() {
-        this.damageNumber.damage = this.damageTaken
+        this.damageNumber.damage = Math.min(this.damageTaken, this.oldHealth)
         if (this.health < 0) {
             this.health = 0
         }

@@ -150,7 +150,7 @@ export class Petal {
         }
         this.extraSpeed *= (this.rarity+1)
         this.maxSummonTimer = this.summoner.timer
-        let exponential = 1.35
+        let exponential = 1.46
         let mainExponent = 2.6
         this.x = this.host.x
         this.y = this.host.y

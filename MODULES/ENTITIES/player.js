@@ -154,6 +154,9 @@ export class Player {
         if (!this.keyDown[71]) {
             this.showPetalRarity = false
         }
+        // if (this.x <= this.size && this.velocity.x < 0) {
+        //     this.velocity.x = 0
+        // }
 
         this.x += this.push.x
         this.y += this.push.y

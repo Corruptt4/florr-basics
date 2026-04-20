@@ -23,8 +23,7 @@
 - Decorator.js has the decoration, and function to make the decoration on the map.
 - mob.js is mob definition, petal.js is petal definition, player.js is player definition, drop.js is drop definition
 
-#### PHYSICS - Contains the QuadTree currently that makes collisions work! SPATIAL HASHING BEING ADDED!
-- COLLISION SYSTEM USED IS BUCKETS (for example, an entity has boundaries bigger than the entity, any other entity entering it and overlapping with it is detected and then distance for collisions are calculated)
+#### PHYSICS - Contains the QuadTree currently that makes collisions work! SPATIAL HASHING GOT ADDED!
 - COLLISIONS WORK IN 15Hz!
 - KEEP IN MIND, THIS NOW USES SPATIAL HASHING! NO QUAD TREE NOW!
 

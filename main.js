@@ -78,9 +78,11 @@ export var rarities = [
     ["Divinity", "rgb(100, 0, 255)"],
     ["Universal", "rgb(200, 105, 125)"],
     ["Megaversal", "rgb(172, 200, 199)"],
+    ["Multiversal", "rgb(102, 200, 35)"],
     ["Infinity", "rgb(255, 188, 100)"],
     ["Dimensional", "rgb(92, 100, 160)"],
-    ["Multidimensional", "rgb(170, 100, 200)"]
+    ["Multidimensional", "rgb(170, 100, 200)"],
+    ["Matrix", "rgb(100, 255, 100)"]
 ]
 
 
