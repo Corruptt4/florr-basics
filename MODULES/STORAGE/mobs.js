@@ -15,7 +15,99 @@ class BabyAnt extends Mob {
         this.mass = 20
     }
 }
+class Bee extends Mob {
+    constructor(x, y, rarity, health, damage, size) {
+        super(x, y, rarity, health, damage, size)
+        this.name = "Bee",
+        this.description = "It's a very chill one, just produces honey for the hive."
+        this.rarities = rarities
+        this.speed = 0.18
+        this.mass = 20
+        this.dropChances = [0.382]
+        this.petalIDs = ["Stinger"]
+        this.chasesMobs = true
+        this.chasesPlayers = false
+        this.color = "rgb(230, 230, 0)"
+    }
+    draw() {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.lineWidth = this.size/4
+        ctx.strokeStyle = "black"
+        ctx.fillStyle = "black"
+        ctx.lineJoin = "round"
+        ctx.moveTo(-this.size*1.3, this.size/2)
+        ctx.lineTo(-this.size*2, 0)
+        ctx.lineTo(-this.size*1.3, -this.size/2)
+        ctx.stroke()
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
 
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.lineWidth = this.size/2
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = darkenRGB(this.color, 20)
+        ctx.ellipse(0, 0, this.size*1.4, this.size, 0, 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.fill()
+        ctx.closePath()
+        ctx.clip()
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath()
+            ctx.fillStyle = "black"
+            ctx.fillRect(-this.size*1.4 + (this.size/1.1)*i, -this.size, this.size/2, this.size*2)
+            ctx.closePath()
+        }
+        ctx.restore()
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.lineWidth = this.size/4
+        ctx.strokeStyle = "black"
+        ctx.lineJoin = "round"
+        ctx.moveTo(this.size*1.2, this.size/3)
+        ctx.quadraticCurveTo(this.size*1.5, this.size/4, this.size*2.3, this.size/1.5)
+        ctx.quadraticCurveTo(this.size*1.5, this.size/4, this.size*1.2, this.size/3)
+        ctx.quadraticCurveTo(this.size*1.5, this.size/4, this.size*2.3, this.size/1.5)
+        ctx.stroke()
+        ctx.closePath()
+        ctx.beginPath()
+        ctx.fillStyle = "black"
+        ctx.arc(this.size*2.3, this.size/1.5, this.size/4, 0, Math.PI*2)
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+        
+
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.angle)
+        ctx.beginPath()
+        ctx.lineWidth = this.size/4
+        ctx.strokeStyle = "black"
+        ctx.lineJoin = "round"
+        ctx.moveTo(this.size*1.2,-this.size/3)
+        ctx.quadraticCurveTo(this.size*1.5, -this.size/4, this.size*2.3, -this.size/1.5)
+        ctx.quadraticCurveTo(this.size*1.5, -this.size/4, this.size*1.2, -this.size/3)
+        ctx.quadraticCurveTo(this.size*1.5, -this.size/4, this.size*2.3, -this.size/1.5)
+        ctx.stroke()
+        ctx.closePath()
+        ctx.beginPath()
+        ctx.fillStyle = "black"
+        ctx.arc(this.size*2.3, -this.size/1.5, this.size/4, 0, Math.PI*2)
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+    }
+}
 class SoldierAnt extends Mob {
     constructor(x, y, rarity, health, damage, size) {
         super(x, y, rarity, health, damage, size)
@@ -577,5 +669,6 @@ export let availableMobs = [
     new Bubble(0, 0, 1, 0.2, 3, 30),
     new QueenAnt(0, 0, 1, 500, 3, 50),
     new AntEgg(0, 0, 1, 350, 3, 40),
-    new AntHole(0, 0, 1, 1000, 3, 60)
+    new AntHole(0, 0, 1, 1000, 3, 60),
+    new Bee(0, 0, 1, 100, 9, 30)
 ]
