@@ -51,7 +51,7 @@ export class WaveMode {
         this.minutes = Math.floor(this.time/60)
     }
     createWave(wave) {
-        this.raritiesToSpawn[0] = Math.min(1+Math.floor((wave-1)*0.105), this.rarities.length)
+        this.raritiesToSpawn[0] = Math.min(Math.max(1+Math.floor((wave-1)*0.105), 1), this.rarities.length)
         this.raritiesToSpawn[1] = Math.max(this.raritiesToSpawn[0]-1, 1)
         this.raritiesToSpawn[2] = Math.min(this.raritiesToSpawn[0]+1, this.rarities.length)
         this.raritiesToSpawn[3] = Math.min(this.raritiesToSpawn[0]+2, this.rarities.length)
