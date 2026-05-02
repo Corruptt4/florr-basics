@@ -140,6 +140,11 @@ export class Mob {
             chance: 0
         }
 
+        this.projectile = {
+            shoot: true,
+            power: 5,
+            type: "Hornet Missile"
+        }
         this.deathSummon = null
         this.summonsOnDeath = false;
         this.summonWithHealth = false;
