@@ -304,7 +304,7 @@ export class Inventory {
                 );
                 this.shownPetals.push({
                     petal: petal,
-                    amount: 20,
+                    amount: 0,
                     rarity: rarities[k],
                     actualRarity: k
                 });

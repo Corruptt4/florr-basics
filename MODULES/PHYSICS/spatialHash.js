@@ -34,7 +34,7 @@ export class SpatialHash {
     constructor(gridSize, mapSize) {
         this.mapSize = mapSize
         this.gridSize = gridSize ?? 16
-        this.factor = mapSize/50
+        this.factor = 0
         this.collisions = []
         this.grid = []
     }
