@@ -243,10 +243,11 @@ window.addEventListener("wheel", (e) => {
     }
 })
 
-let wallPushableEntities = mobs.concat(summons).concat(player)
+let wallPushableEntities = mobs.concat(summons).concat(player).concat(petals)
 setInterval(() => {
-    wallPushableEntities = mobs.concat(summons).concat(player)
+    wallPushableEntities = mobs.concat(summons).concat(player).concat(petals)
     allEntities = mobs.concat(player).concat(entities).concat(summons).concat(drops)
+
     spatialHash.clearCellEntities()
     for (let entity of allEntities) {
         if (
@@ -522,15 +523,15 @@ function render() {
     decorator.makeGrid()
     decorator.makeBoundaries()
     // spatialHash.draw()
+    walls.forEach((wall) => {
+        wall.draw()
+    })
     drops.forEach((drop) => {
         drop.draw()
     })
     mobs.concat(summons).forEach((mob) => {
         mob.draw()
         mob.drawRarity()
-    })
-    walls.forEach((wall) => {
-        wall.draw()
     })
     player.draw()
     damageNumbers.forEach((num) => {
