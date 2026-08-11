@@ -12,6 +12,7 @@ import { SpatialHash } from "./MODULES/PHYSICS/spatialHash.js";
 import { WaveMode } from "./MODULES/GAME/waveHandler.js";
 import { MobBox } from "./MODULES/UI/mobBox.js";
 import { Drop } from "./MODULES/ENTITIES/drop.js";
+import { Wall } from "./MODULES/ENTITIES/wall.js";
 
 export const canvas = document.getElementById("canvas"),
                           ctx = canvas.getContext("2d");
@@ -40,10 +41,16 @@ export let mapSize = 2000,
                     decors = [],
                     mobBoxes = [],
                     petals = [],
+                    walls = [],
                     drops = [],
                     damageNumbers = [],
                     frictionMultiplier = 0.95
 export let sizeFactor = 1
+
+walls.push(
+    new Wall(320, 260, 640, 100),
+    new Wall(690, 210+155, 100, 310)
+)
 
 let inventoryPetalToSlot = []
 let sameMobBoxes = [] // only applies to same name boxes.
@@ -235,7 +242,10 @@ window.addEventListener("wheel", (e) => {
         inventory.toScrollTarget += e.deltaY
     }
 })
+
+let wallPushableEntities = mobs.concat(summons).concat(player)
 setInterval(() => {
+    wallPushableEntities = mobs.concat(summons).concat(player)
     allEntities = mobs.concat(player).concat(entities).concat(summons).concat(drops)
     spatialHash.clearCellEntities()
     for (let entity of allEntities) {
@@ -322,6 +332,53 @@ setInterval(() => {
         }
     })
 }, 1000/15)
+setInterval(() => {
+    walls.forEach((wall) => {
+        const left = wall.x - wall.w/2;
+        const right = wall.x + wall.w/2;
+        const top = wall.y - wall.h/2;
+        const bottom = wall.y + wall.h/2;
+
+        wallPushableEntities.forEach((e) => {
+            const closestX = Math.max(left, Math.min(e.x, right));
+            const closestY = Math.max(top, Math.min(e.y, bottom));
+            const dx = e.x - closestX;
+            const dy = e.y - closestY;
+            const distSq = dx*dx + dy*dy;
+            if (distSq >= e.size * e.size) return;
+            let nx, ny, penetration
+
+            if (distSq > 0) {
+                const dist = Math.sqrt(distSq);
+                nx = dx / dist;
+                ny = dy / dist;
+                penetration = e.size - dist;
+            } else {
+                let distLeft = e.x - left;
+                let distRight = right - e.x;
+                let distTop = e.y - top;
+                let distBottom = bottom - e.y;
+                let minDist = Math.min(distLeft, distRight, distTop, distBottom);
+
+                if (minDist === distLeft) { nx = -1; ny = 0; }
+                else if (minDist === distRight) { nx = 1; ny = 0; }
+                else if (minDist === distTop) { nx = 0; ny = -1; }
+                else { nx = 0; ny = 1; }
+
+                penetration = e.size + minDist;
+            }
+
+            e.x += nx * penetration;
+            e.y += ny * penetration;
+
+            let vN = e.velocity.x * nx + e.velocity.y * ny;
+            if (vN < 0) {
+                e.velocity.x -= vN * nx;
+                e.velocity.y -= vN * ny;
+            }
+        });
+    });
+}, 1000/60)
 setInterval(() => {
     wave.update()
 }, 1000/60)
@@ -471,6 +528,9 @@ function render() {
     mobs.concat(summons).forEach((mob) => {
         mob.draw()
         mob.drawRarity()
+    })
+    walls.forEach((wall) => {
+        wall.draw()
     })
     player.draw()
     damageNumbers.forEach((num) => {
